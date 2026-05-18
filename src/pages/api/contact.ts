@@ -22,6 +22,48 @@ function inquiryLabel(inquiry: string): string {
   return 'その他';
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function formatMultilineHtml(value?: string): string {
+  if (!value) return '未入力';
+  return escapeHtml(value).replace(/\n/g, '<br/>');
+}
+
+async function sendEmail(params: {
+  apiKey: string;
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+}): Promise<void> {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${params.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: params.from,
+      to: [params.to],
+      subject: params.subject,
+      html: params.html,
+      ...(params.replyTo ? { reply_to: params.replyTo } : {}),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = (await request.json()) as ContactPayload;
@@ -39,38 +81,57 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return json({ error: 'メール送信設定が不足しています' }, 500);
     }
 
-    const html = `
+    const safeName = escapeHtml(body.name);
+    const safeCompany = escapeHtml(body.company);
+    const safeEmail = escapeHtml(body.email);
+    const safePhone = body.phone ? escapeHtml(body.phone) : '未入力';
+    const safeInquiry = escapeHtml(inquiryLabel(String(body.inquiry)));
+    const safeMessage = formatMultilineHtml(body.message);
+
+    const notificationHtml = `
       <h2>お問い合わせを受信しました</h2>
-      <p><strong>ご氏名:</strong> ${body.name}</p>
-      <p><strong>会社名:</strong> ${body.company}</p>
-      <p><strong>メールアドレス:</strong> ${body.email}</p>
-      <p><strong>電話番号:</strong> ${body.phone || '未入力'}</p>
-      <p><strong>お問い合わせ内容:</strong> ${inquiryLabel(String(body.inquiry))}</p>
-      <p><strong>メッセージ:</strong><br/>${(body.message || '').replace(/\n/g, '<br/>')}</p>
+      <p><strong>ご氏名:</strong> ${safeName}</p>
+      <p><strong>会社名:</strong> ${safeCompany}</p>
+      <p><strong>メールアドレス:</strong> ${safeEmail}</p>
+      <p><strong>電話番号:</strong> ${safePhone}</p>
+      <p><strong>お問い合わせ内容:</strong> ${safeInquiry}</p>
+      <p><strong>メッセージ:</strong><br/>${safeMessage}</p>
     `;
 
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [toEmail],
-        subject: `【お問い合わせ】${body.company} / ${body.name}`,
-        reply_to: body.email,
-        html,
-      }),
+    const autoReplyHtml = `
+      <p>${safeName} 様</p>
+      <p>お問い合わせありがとうございます。以下の内容で受け付けました。</p>
+      <hr />
+      <p><strong>会社名:</strong> ${safeCompany}</p>
+      <p><strong>メールアドレス:</strong> ${safeEmail}</p>
+      <p><strong>電話番号:</strong> ${safePhone}</p>
+      <p><strong>お問い合わせ内容:</strong> ${safeInquiry}</p>
+      <p><strong>メッセージ:</strong><br/>${safeMessage}</p>
+      <hr />
+      <p>内容を確認のうえ、担当者よりご連絡いたします。</p>
+      <p>このメールは自動送信されています。心当たりがない場合は破棄してください。</p>
+    `;
+
+    await sendEmail({
+      apiKey,
+      from: fromEmail,
+      to: toEmail,
+      subject: `【お問い合わせ】${body.company} / ${body.name}`,
+      replyTo: body.email,
+      html: notificationHtml,
     });
 
-    if (!resendResponse.ok) {
-      const errorText = await resendResponse.text();
-      return json({ error: `メール送信に失敗しました: ${errorText}` }, 500);
-    }
+    await sendEmail({
+      apiKey,
+      from: fromEmail,
+      to: body.email,
+      subject: '【ペンギンタイムカード】お問い合わせありがとうございます',
+      html: autoReplyHtml,
+    });
 
     return json({ success: true, message: 'メッセージが送信されました' });
-  } catch {
-    return json({ error: 'サーバーエラーが発生しました' }, 500);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'サーバーエラーが発生しました';
+    return json({ error: `メール送信に失敗しました: ${message}` }, 500);
   }
 };
