@@ -1,0 +1,7 @@
+name = "penguin-timecard"
+compatibility_date = "2026-05-14"
+
+[vars]
+# 本番はCloudflare Pagesの環境変数画面で設定してください。
+# CONTACT_FROM_EMAIL = "Penguin Timecard <noreply@example.com>"
+# CONTACT_TO_EMAIL = "info@example.com"

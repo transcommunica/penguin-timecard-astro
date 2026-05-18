@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const title = 'お問い合わせ — ペンギンタイムカード';
+const description = 'ペンギンタイムカードへのお問い合わせページ';
+---
+
+<Layout title={title} description={description}>
+	<SiteHeader active="contact" />
+
+	<section class="contact-hero" data-screen-label="02 Contact Hero">
+		<div class="contact-hero-bg"></div>
+		<div class="container contact-hero-inner">
+			<span class="eyebrow">CONTACT</span>
+			<h1><span class="accent">お問い合わせ</span></h1>
+			<p class="lead">ご不明な点、導入前のご相談、法人利用のご相談などはこちらからお送りください。</p>
+		</div>
+	</section>
+
+	<ContactForm />
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	.contact-hero {
+		position: relative;
+		padding: 72px 0 40px;
+		overflow: hidden;
+	}
+
+	.contact-hero-bg {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(ellipse 70% 60% at 80% 20%, rgba(243, 154, 45, 0.14), transparent 60%),
+			radial-gradient(ellipse 60% 50% at 12% 80%, rgba(123, 200, 232, 0.16), transparent 60%);
+		pointer-events: none;
+	}
+
+	.contact-hero-inner {
+		position: relative;
+		text-align: center;
+	}
+
+	.contact-hero h1 {
+		font-size: clamp(38px, 5vw, 60px);
+		margin: 14px 0 18px;
+	}
+
+	.contact-hero h1 .accent {
+		color: var(--brand-deep);
+	}
+
+	.contact-hero .lead {
+		font-size: 18px;
+		color: var(--ink-2);
+		max-width: 720px;
+		margin: 0 auto;
+	}
+</style>

@@ -1,11 +1,711 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const title = 'ペンギンタイムカード — インストールしたその日から使える、やさしい勤怠管理';
+const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100';
+
+type WpPost = {
+	slug: string;
+	date: string;
+	title: { rendered: string };
+};
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const keepJapaneseLocaleText = (text: string) =>
+	String(text || '')
+		.replace(/\[:(?!ja\])[a-z-]+\][\s\S]*?(?=(\[:[a-z-]+\]|\[:\]|$))/gi, '')
+		.replace(/\[:ja\]/gi, '')
+		.replace(/\[:\]/g, '')
+		.trim();
+
+const formatNewsDate = (dateStr: string) => {
+	const d = new Date(dateStr);
+	if (Number.isNaN(d.getTime())) return dateStr;
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	return `${y}.${m}.${day}`;
+};
+
+const toNewsHref = (slug: string) => {
+	const raw = String(slug || '').trim();
+	if (!raw) return '/news/';
+	const safe = /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+	return `/news/${safe}/`;
+};
+
+const withNewsSourceParam = (href: string, source: string) => {
+	const url = new URL(href, Astro.url);
+	url.searchParams.set('from', source);
+	return `${url.pathname}${url.search}`;
+};
+
+const getNewsTag = (titleText: string) => {
+	if (/不具合|修正/.test(titleText)) {
+		return { label: '修正', cls: 't-fix' };
+	}
+	if (/新機能/.test(titleText)) {
+		return { label: '新機能', cls: 't-feature' };
+	}
+	return { label: '更新', cls: 't-update' };
+};
+
+const newsSlugMapByTitle: Record<string, string> = {
+	'純勤務時間の計算不具合について': 'net-worktime-calculation-bugfix',
+	'深夜割増時間などの時間帯集計に対応しました': 'late-night-premium-timeband-support',
+	'24時間営業に対応しました': 'support-24-hour-operation',
+	'アルコールチェック記録簿': 'alcohol-check-logbook',
+	'複数回休憩に対応しました': 'multiple-break-support',
+	'深夜勤務に対応しました': 'late-night-shift-support',
+	'AI顔認証機能（バージョン6）をリリースしました': 'ai-6',
+	'バージョン5.8.1をリリースしました': '5-8-1',
+	'バージョン5.7.0をリリースしました': '5-7-0',
+	'バージョン2.5をリリース': '2-5',
+};
+
+const toAsciiSlug = (input: string) =>
+	String(input || '')
+		.toLowerCase()
+		.replace(/&/g, ' and ')
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+		.replace(/-{2,}/g, '-');
+
+const canonicalNewsSlug = (rawSlug: string, title: string) => {
+	const mapped = newsSlugMapByTitle[title];
+	if (mapped) return mapped;
+	const raw = String(rawSlug || '').trim();
+	if (!raw) return '';
+	let decoded = raw;
+	try {
+		decoded = decodeURIComponent(raw);
+	} catch {
+		decoded = raw;
+	}
+	const fromDecoded = toAsciiSlug(decoded);
+	if (fromDecoded) return fromDecoded;
+	return /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+};
+
+const fetchWpPosts = async (): Promise<WpPost[]> => {
+	try {
+		const res = await fetch(WP_POSTS_ENDPOINT, { headers: { Accept: 'application/json' } });
+		if (!res.ok) return [];
+		const payload = await res.json() as unknown;
+		if (!Array.isArray(payload)) return [];
+		return payload as WpPost[];
+	} catch {
+		return [];
+	}
+};
+
+const contentNews = (await getCollection('news'))
+	.sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date))
+	.slice(0, 5)
+	.map((entry) => ({
+		slug: entry.data.slug,
+		title: keepJapaneseLocaleText(entry.data.title),
+		date: formatNewsDate(entry.data.date),
+		tag: getNewsTag(keepJapaneseLocaleText(entry.data.title)),
+	}));
+
+const topNews = contentNews.length > 0
+	? contentNews
+	: (await fetchWpPosts())
+		.sort((a, b) => +new Date(b.date) - +new Date(a.date))
+		.slice(0, 5)
+		.map((post) => {
+			const titleText = keepJapaneseLocaleText(stripHtml(post.title.rendered));
+			return {
+				slug: canonicalNewsSlug(post.slug, titleText),
+				title: titleText,
+				date: formatNewsDate(post.date),
+				tag: getNewsTag(titleText),
+			};
+		});
 ---
 
-<Layout>
-	<Welcome />
+<Layout title={title}>
+	<SiteHeader isHome={true} active="home" />
+
+	<section class="hero" data-screen-label="02 Hero">
+		<div class="hero-bg"></div>
+
+		<svg class="float f1 mascot" viewBox="0 0 100 100" aria-hidden="true">
+			<circle cx="50" cy="50" r="40" fill="#E0F4FB" />
+			<circle cx="50" cy="50" r="30" fill="#F8FCFE" />
+		</svg>
+		<svg class="float f2 mascot" viewBox="0 0 100 100" aria-hidden="true">
+			<circle cx="50" cy="50" r="40" fill="#FFE3BF" />
+			<circle cx="50" cy="50" r="30" fill="#FFF8EE" />
+		</svg>
+
+		<div class="container">
+			<div class="hero-grid">
+				<div class="hero-copy">
+					<span class="eyebrow">SMALL BUSINESS TIMECARD</span>
+					<h1>
+						むずかしくない<br/>
+						<span class="accent">タイムカード</span>を、<br/>
+						きょうから。
+					</h1>
+					<p class="lead">
+						クリニック、美容室、飲食店、事務所…<br/>
+						小さなお店・会社のための、やさしい勤怠管理アプリ。<br/>
+						ICカードも特別な機械もいりません。インストールしたその日から、もう使えます。
+					</p>
+					<div class="hero-cta">
+						<a class="btn btn-primary" href="https://m.tc-timecard.com/?page=register">
+							1ヶ月無料ではじめる
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+						</a>
+						<a class="btn btn-ghost" href="#how">使い方を見る</a>
+					</div>
+					<div class="hero-meta">
+						<div class="hero-meta-item">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+							ICカード不要
+						</div>
+						<div class="hero-meta-item">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+							機械の購入なし
+						</div>
+						<div class="hero-meta-item">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+							1ヶ月間ぜんぶ無料
+						</div>
+					</div>
+				</div>
+
+				<div class="demo-wrap">
+					<div class="demo-card" id="demoCard">
+						<div class="demo-clock">
+							<div class="demo-date" id="demoDate">- - -</div>
+							<div class="demo-time" id="demoTime">
+								<span id="hh">09</span><span class="sep">:</span><span id="mm">12</span><span class="sec">:<span id="ss">04</span></span>
+							</div>
+						</div>
+						<div class="demo-people" id="demoPeople"></div>
+						<div class="demo-status">
+							<span class="dot"></span>
+							<span>リアルタイム同期中</span>
+							<span style="margin-left:auto; font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--brand-deep);">
+								本日出勤 <b id="checkedCount">0</b> / 6
+							</span>
+						</div>
+					</div>
+
+					<img class="hero-penguin-big mascot" src="/assets/penguin.png" alt="ペンギン" />
+				</div>
+			</div>
+
+			<div class="stats reveal">
+				<div class="stat">
+					<div class="stat-num" data-count="0"><span data-target="1">0</span><span class="unit">日目</span></div>
+					<div class="stat-label">からすぐ使える</div>
+				</div>
+				<div class="stat">
+					<div class="stat-num"><span data-target="0">0</span><span class="unit">円</span></div>
+					<div class="stat-label">初月の利用料</div>
+				</div>
+				<div class="stat">
+					<div class="stat-num"><span data-target="100">0</span><span class="unit">%</span></div>
+					<div class="stat-label">あらゆる端末で動く</div>
+				</div>
+				<div class="stat">
+					<div class="stat-num"><span data-target="0">0</span><span class="unit">枚</span></div>
+					<div class="stat-label">ICカードを買う必要</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section steps-section" id="how" data-screen-label="03 Steps">
+		<div class="container">
+			<div class="section-head reveal">
+				<span class="eyebrow">HOW IT WORKS</span>
+				<h2>たった<span class="mark">3ステップ</span>で、もう運用開始</h2>
+				<p class="lead">最初の設定で迷うこと、ありません。アプリを開いて、名前をタップ。それだけです。</p>
+			</div>
+
+			<div class="steps">
+				<div class="step reveal">
+					<span class="step-num">1</span>
+					<div class="step-icon">
+						<svg viewBox="0 0 120 120" width="100" height="100" aria-hidden="true">
+							<rect x="22" y="16" width="76" height="92" rx="10" fill="#fff" stroke="#1F1A17" stroke-width="3"/>
+							<rect x="30" y="26" width="60" height="68" rx="4" fill="var(--brand-soft)"/>
+							<circle cx="60" cy="102" r="3" fill="#1F1A17"/>
+							<rect x="36" y="34" width="48" height="10" rx="3" fill="var(--brand)"/>
+							<rect x="36" y="50" width="22" height="8" rx="2" fill="#fff" stroke="#1F1A17" stroke-width="1.5"/>
+							<rect x="62" y="50" width="22" height="8" rx="2" fill="#fff" stroke="#1F1A17" stroke-width="1.5"/>
+							<rect x="36" y="64" width="22" height="8" rx="2" fill="#fff" stroke="#1F1A17" stroke-width="1.5"/>
+							<rect x="62" y="64" width="22" height="8" rx="2" fill="#fff" stroke="#1F1A17" stroke-width="1.5"/>
+							<path d="M14 110 L106 110" stroke="#1F1A17" stroke-width="3" stroke-linecap="round"/>
+						</svg>
+					</div>
+					<h3>入り口に端末を設置</h3>
+					<p>使わなくなったパソコンや、タブレットでOK。アプリをインストールして、お店の入り口に置くだけ。</p>
+				</div>
+
+				<div class="step reveal">
+					<span class="step-num">2</span>
+					<div class="step-icon">
+						<svg viewBox="0 0 120 120" width="100" height="100" aria-hidden="true">
+							<circle cx="60" cy="60" r="46" fill="var(--brand-soft)"/>
+							<circle cx="60" cy="60" r="32" fill="#fff" stroke="var(--brand)" stroke-width="3"/>
+							<text x="60" y="56" text-anchor="middle" font-size="14" font-weight="900" fill="#1F1A17">田中</text>
+							<text x="60" y="72" text-anchor="middle" font-size="9" font-weight="700" fill="#6B5E52">タップ</text>
+							<path d="M82 78 L76 84 L82 90 L88 84 Z" fill="var(--brand)"/>
+							<circle cx="84" cy="86" r="14" fill="none" stroke="var(--brand)" stroke-width="2" opacity="0.5">
+								<animate attributeName="r" from="6" to="20" dur="1.6s" repeatCount="indefinite"/>
+								<animate attributeName="opacity" from="0.7" to="0" dur="1.6s" repeatCount="indefinite"/>
+							</circle>
+						</svg>
+					</div>
+					<h3>名前をタップで打刻</h3>
+					<p>出勤・退勤は名前をタップするだけ。難しい操作はなく、誰でもすぐに使えます。</p>
+				</div>
+
+				<div class="step reveal">
+					<span class="step-num">3</span>
+					<div class="step-icon">
+						<svg viewBox="0 0 120 120" width="100" height="100" aria-hidden="true">
+							<rect x="20" y="32" width="80" height="56" rx="8" fill="#fff" stroke="#1F1A17" stroke-width="3"/>
+							<path d="M20 38 L60 66 L100 38" fill="none" stroke="#1F1A17" stroke-width="3" stroke-linejoin="round"/>
+							<circle cx="92" cy="32" r="14" fill="var(--leaf, #6FBF73)"/>
+							<path d="M85 32 L91 38 L100 28" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M30 96 L90 96" stroke="var(--brand)" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 6"/>
+						</svg>
+					</div>
+					<h3>勤務時間は自動で集計</h3>
+					<p>勤務時間も残業時間も、ぜんぶ自動で計算。結果はメールやWEB画面でいつでも確認できます。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section" id="features" data-screen-label="04 Features">
+		<div class="container">
+			<div class="section-head reveal">
+				<span class="eyebrow">KEY FEATURES</span>
+				<h2>選ばれている<span class="mark">3つの理由</span></h2>
+			</div>
+
+			<div class="features">
+				<div class="feature f-orange reveal">
+					<div class="feature-emoji-bg">x</div>
+					<div class="feature-icon">
+						<svg viewBox="0 0 80 80" width="60" height="60" aria-hidden="true">
+							<rect x="14" y="20" width="52" height="36" rx="6" fill="#fff" stroke="#1F1A17" stroke-width="3"/>
+							<circle cx="56" cy="38" r="6" fill="none" stroke="var(--brand)" stroke-width="2.5"/>
+							<circle cx="56" cy="38" r="2.5" fill="var(--brand)"/>
+							<rect x="20" y="28" width="22" height="4" rx="2" fill="#1F1A17"/>
+							<rect x="20" y="38" width="14" height="3" rx="1.5" fill="#6B5E52"/>
+							<line x1="10" y1="64" x2="70" y2="14" stroke="#E66B7A" stroke-width="5" stroke-linecap="round"/>
+						</svg>
+					</div>
+					<h3>ICカードや<br/>機械はいりません</h3>
+					<p>専用のリーダーを買ったり、社員証を発行したりしなくてOK。お手元のPCやタブレットがあれば、その日のうちに運用スタートです。</p>
+				</div>
+
+				<div class="feature f-sky reveal">
+					<div class="feature-icon">
+						<svg viewBox="0 0 80 80" width="60" height="60" aria-hidden="true">
+							<rect x="6" y="20" width="44" height="32" rx="3" fill="#fff" stroke="#1F1A17" stroke-width="3"/>
+							<rect x="14" y="46" width="28" height="3" fill="#1F1A17"/>
+							<rect x="48" y="32" width="22" height="34" rx="3" fill="#fff" stroke="#1F1A17" stroke-width="3"/>
+							<circle cx="59" cy="62" r="1.5" fill="#1F1A17"/>
+							<rect x="10" y="24" width="36" height="20" fill="var(--sky)"/>
+							<rect x="51" y="36" width="16" height="22" fill="var(--sky)"/>
+						</svg>
+					</div>
+					<h3>PC・iPhone・Android<br/>どんな端末でも</h3>
+					<p>パソコン、iPad、Androidスマホ -- あらゆる端末で動きます。使わなくなった古いパソコンを再活用するのも、賢いアイデアです。</p>
+				</div>
+
+				<div class="feature f-leaf reveal">
+					<div class="feature-icon">
+						<svg viewBox="0 0 80 80" width="60" height="60" aria-hidden="true">
+							<path d="M20 28 A 20 20 0 0 1 56 24" fill="none" stroke="var(--leaf, #6FBF73)" stroke-width="4" stroke-linecap="round"/>
+							<path d="M50 16 L58 24 L50 32" fill="none" stroke="var(--leaf, #6FBF73)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M60 52 A 20 20 0 0 1 24 56" fill="none" stroke="var(--leaf, #6FBF73)" stroke-width="4" stroke-linecap="round"/>
+							<path d="M30 64 L22 56 L30 48" fill="none" stroke="var(--leaf, #6FBF73)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+							<circle cx="40" cy="40" r="6" fill="var(--brand)"/>
+						</svg>
+					</div>
+					<h3>データはいつでも<br/>リアルタイム同期</h3>
+					<p>「あ、端末をお店に置いてきた」そんなときも大丈夫。自宅のスマホからでも、出勤状況や勤怠記録をすぐに確認できます。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section functions-section" id="functions" data-screen-label="05 Functions">
+		<div class="container">
+			<div class="section-head reveal">
+				<span class="eyebrow">CORE FUNCTIONS</span>
+				<h2>あなたが<span class="mark">何もしなくても</span>、ちゃんと計算</h2>
+				<p class="lead">面倒な締め日の集計作業から、解放されてください。</p>
+			</div>
+
+			<div class="func-rows">
+				<div class="func reveal">
+					<div class="func-content">
+						<span class="badge">FN.01 / 自動計算</span>
+						<h3>出勤・休憩・残業、ぜんぶ自動</h3>
+						<p>名前をタップしてもらうだけで、勤務時間の合計を自動的に計算。もちろん休憩時間や残業時間も。残業は「前残業」「後残業」に分けられるから、必要なものだけ使えます。</p>
+						<ul class="func-list">
+							<li>勤務時間の自動集計</li>
+							<li>休憩・残業を分けて記録</li>
+							<li>前残業/後残業に分割</li>
+						</ul>
+					</div>
+					<div class="func-visual">
+						<svg viewBox="0 0 320 240" width="100%" aria-hidden="true">
+							<rect x="20" y="20" width="280" height="200" rx="14" fill="#fff" stroke="#1F1A17" stroke-width="2"/>
+							<path d="M21 52H299V33A12 12 0 0 0 287 21H33A12 12 0 0 0 21 33V52Z" fill="var(--brand)"/>
+							<text x="36" y="40" font-family="Zen Maru Gothic" font-weight="900" font-size="14" fill="#fff">勤務時間 集計</text>
+							<text x="270" y="40" text-anchor="end" font-family="JetBrains Mono" font-weight="700" font-size="12" fill="#fff">2024.03</text>
+
+							<g font-family="JetBrains Mono" font-size="12" fill="#1F1A17">
+								<text x="40" y="74">田中</text>
+								<rect x="100" y="64" width="180" height="14" rx="3" fill="var(--cream-2, #FBEFDB)"/>
+								<rect x="100" y="64" width="160" height="14" rx="3" fill="var(--brand)" class="bar-anim" style="transform-origin:left">
+									<animate attributeName="width" from="0" to="160" dur="1.4s" begin="0.2s" fill="freeze"/>
+								</rect>
+								<text x="270" y="74" text-anchor="end" fill="#fff" font-weight="700">160h</text>
+
+								<text x="40" y="104">中村</text>
+								<rect x="100" y="94" width="180" height="14" rx="3" fill="var(--cream-2, #FBEFDB)"/>
+								<rect x="100" y="94" width="0" height="14" rx="3" fill="var(--brand-deep)">
+									<animate attributeName="width" from="0" to="140" dur="1.4s" begin="0.4s" fill="freeze"/>
+								</rect>
+								<text x="270" y="104" text-anchor="end" fill="#fff" font-weight="700">140h</text>
+
+								<text x="40" y="134">鈴木</text>
+								<rect x="100" y="124" width="180" height="14" rx="3" fill="var(--cream-2, #FBEFDB)"/>
+								<rect x="100" y="124" width="0" height="14" rx="3" fill="var(--sky, #7BC8E8)">
+									<animate attributeName="width" from="0" to="120" dur="1.4s" begin="0.6s" fill="freeze"/>
+								</rect>
+								<text x="270" y="134" text-anchor="end" fill="#1F1A17" font-weight="700">120h</text>
+
+								<text x="40" y="164">山田</text>
+								<rect x="100" y="154" width="180" height="14" rx="3" fill="var(--cream-2, #FBEFDB)"/>
+								<rect x="100" y="154" width="0" height="14" rx="3" fill="#6FBF73">
+									<animate attributeName="width" from="0" to="100" dur="1.4s" begin="0.8s" fill="freeze"/>
+								</rect>
+								<text x="270" y="164" text-anchor="end" fill="#1F1A17" font-weight="700">100h</text>
+							</g>
+
+							<line x1="40" y1="188" x2="280" y2="188" stroke="#EFE2CB" stroke-width="2"/>
+							<text x="40" y="208" font-family="Zen Maru Gothic" font-weight="900" font-size="13" fill="#1F1A17">合計</text>
+							<text x="280" y="208" text-anchor="end" font-family="JetBrains Mono" font-weight="900" font-size="14" fill="var(--brand-deep)">520時間</text>
+						</svg>
+					</div>
+				</div>
+
+				<div class="func reverse reveal">
+					<div class="func-content">
+						<span class="badge">FN.02 / 丸め計算</span>
+						<h3>「5分単位で切り捨て」も自由自在</h3>
+						<p>10分単位、15分単位、30分単位 -- 丸め計算は自由に設定できます。締め日には全部自動で計算済み。あなたは何もしなくて大丈夫です。</p>
+						<ul class="func-list">
+							<li>1分・5分・10分・15分・30分単位</li>
+							<li>切り捨て/切り上げを選択</li>
+							<li>出勤・退勤それぞれに設定可能</li>
+						</ul>
+					</div>
+					<div class="func-visual">
+						<svg viewBox="0 0 320 240" width="100%" aria-hidden="true">
+							<circle cx="160" cy="120" r="86" fill="#fff" stroke="#1F1A17" stroke-width="3"/>
+							<circle cx="160" cy="120" r="86" fill="none" stroke="var(--brand-soft)" stroke-width="14" stroke-dasharray="4 11" opacity="0.5"/>
+							<g font-family="JetBrains Mono" font-weight="700" font-size="13" fill="#1F1A17">
+								<text x="160" y="50" text-anchor="middle">12</text>
+								<text x="232" y="125" text-anchor="middle">3</text>
+								<text x="160" y="200" text-anchor="middle">6</text>
+								<text x="88" y="125" text-anchor="middle">9</text>
+							</g>
+							<line x1="160" y1="120" x2="160" y2="60" stroke="#1F1A17" stroke-width="4" stroke-linecap="round"/>
+							<line x1="160" y1="120" x2="210" y2="120" stroke="var(--brand)" stroke-width="6" stroke-linecap="round"/>
+							<circle cx="160" cy="120" r="6" fill="#1F1A17"/>
+
+							<rect x="20" y="20" width="84" height="34" rx="17" fill="var(--brand)"/>
+							<text x="62" y="42" text-anchor="middle" font-family="Zen Maru Gothic" font-weight="900" font-size="13" fill="#fff">5分単位</text>
+
+							<rect x="216" y="186" width="88" height="34" rx="17" fill="#fff" stroke="var(--brand)" stroke-width="2"/>
+							<text x="260" y="208" text-anchor="middle" font-family="Zen Maru Gothic" font-weight="900" font-size="13" fill="var(--brand-deep)">切り捨て</text>
+						</svg>
+					</div>
+				</div>
+
+				<div class="func reveal">
+					<div class="func-content">
+						<span class="badge">FN.03 / 雇用形態</span>
+						<h3>正社員にも、パートさんにも</h3>
+						<p>正社員、パート、派遣社員 -- 設定を自由にカスタマイズ。たとえば「正社員の締め日は20日、パートさんの締め日は月末」「正社員は休憩1時間で固定、パートはボタンを押して計算」など、それぞれの働き方に合わせられます。</p>
+						<ul class="func-list">
+							<li>雇用形態ごとの締め日</li>
+							<li>休憩の自動/手動を切り替え</li>
+							<li>標準勤務時間の個別設定</li>
+						</ul>
+					</div>
+					<div class="func-visual">
+						<svg viewBox="0 0 320 240" width="100%" aria-hidden="true">
+							<g font-family="Zen Maru Gothic" font-weight="900">
+								<rect x="22" y="30" width="200" height="60" rx="14" fill="#fff" stroke="#1F1A17" stroke-width="2"/>
+								<circle cx="56" cy="60" r="20" fill="var(--brand)"/>
+								<text x="56" y="65" text-anchor="middle" fill="#fff" font-size="16">田</text>
+								<text x="86" y="56" font-size="14" fill="#1F1A17">田中（正社員）</text>
+								<text x="86" y="76" font-size="9" fill="#6B5E52" font-weight="700">締め日 20日 / 休憩60分固定</text>
+
+								<rect x="68" y="100" width="200" height="60" rx="14" fill="#fff" stroke="#1F1A17" stroke-width="2"/>
+								<circle cx="102" cy="130" r="20" fill="var(--sky, #7BC8E8)"/>
+								<text x="102" y="135" text-anchor="middle" fill="#fff" font-size="16">中</text>
+								<text x="132" y="126" font-size="14" fill="#1F1A17">中村（パート）</text>
+								<text x="132" y="146" font-size="9" fill="#6B5E52" font-weight="700">締め日 月末 / 休憩 都度ボタン</text>
+
+								<rect x="22" y="170" width="200" height="60" rx="14" fill="#fff" stroke="#1F1A17" stroke-width="2"/>
+								<circle cx="56" cy="200" r="20" fill="#6FBF73"/>
+								<text x="56" y="205" text-anchor="middle" fill="#fff" font-size="16">鈴</text>
+								<text x="86" y="196" font-size="14" fill="#1F1A17">鈴木（派遣）</text>
+								<text x="86" y="216" font-size="9" fill="#6B5E52" font-weight="700">締め日 15日 / 標準8時間</text>
+							</g>
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section" id="more" data-screen-label="06 More">
+		<div class="container">
+			<div class="section-head reveal">
+				<span class="eyebrow">MORE</span>
+				<h2>もっと<span class="mark">こんなことも</span>できます</h2>
+			</div>
+
+			<div class="more">
+				<div class="more-card c1 reveal">
+					<div class="more-icon">
+						<svg viewBox="0 0 60 60" width="48" height="48" aria-hidden="true">
+							<rect x="6" y="20" width="20" height="34" rx="3" fill="var(--brand)"/>
+							<rect x="34" y="14" width="20" height="40" rx="3" fill="var(--brand-deep)"/>
+							<rect x="11" y="26" width="10" height="2" fill="#fff"/>
+							<rect x="11" y="32" width="10" height="2" fill="#fff"/>
+							<rect x="39" y="20" width="10" height="2" fill="#fff"/>
+							<rect x="39" y="26" width="10" height="2" fill="#fff"/>
+						</svg>
+					</div>
+					<h3>複数店舗の一括管理</h3>
+					<p>A支店・B支店でアプリを分けつつ、人事部の人は全店舗を一括管理。「田中さんは月曜A、火曜B」のような勤務にも対応できます。</p>
+				</div>
+
+				<div class="more-card c2 reveal">
+					<div class="more-icon">
+						<svg viewBox="0 0 60 60" width="48" height="48" aria-hidden="true">
+							<rect x="10" y="8" width="30" height="40" rx="3" fill="#fff" stroke="#1F1A17" stroke-width="2.5"/>
+							<text x="25" y="32" text-anchor="middle" font-family="Zen Maru Gothic" font-weight="900" font-size="11" fill="#E66B7A">PDF</text>
+							<rect x="22" y="14" width="30" height="40" rx="3" fill="#fff" stroke="#1F1A17" stroke-width="2.5"/>
+							<text x="37" y="38" text-anchor="middle" font-family="Zen Maru Gothic" font-weight="900" font-size="11" fill="#3E7A43">XLS</text>
+						</svg>
+					</div>
+					<h3>PDF / Excelで出力</h3>
+					<p>ボタン一つで登録メールアドレスにファイルが届きます。毎月、社労士さんに自動でメール送信、なんて使い方も可能です。</p>
+				</div>
+
+				<div class="more-card c3 reveal">
+					<div class="more-icon">
+						<svg viewBox="0 0 60 60" width="48" height="48" aria-hidden="true">
+							<rect x="8" y="10" width="44" height="42" rx="4" fill="#fff" stroke="#1F1A17" stroke-width="2.5"/>
+							<rect x="8" y="10" width="44" height="10" fill="var(--brand)"/>
+							<circle cx="22" cy="34" r="4" fill="var(--rose, #FF7E84)"/>
+							<circle cx="38" cy="34" r="4" fill="var(--brand)"/>
+							<circle cx="22" cy="44" r="4" fill="#1F1A17" opacity="0.2"/>
+							<circle cx="38" cy="44" r="4" fill="#1F1A17" opacity="0.2"/>
+						</svg>
+					</div>
+					<h3>休日出勤・曜日別の標準時間</h3>
+					<p>「平日9-17時、土曜は9-12時」など、曜日ごとに標準時間を設定。祝日や臨時シフトも、その都度ワンタップで切り替えられます。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section news-section" id="news" data-screen-label="07 News">
+		<div class="container">
+			<div class="section-head reveal" style="text-align:left; margin-bottom:56px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+				<div>
+					<span class="eyebrow">NEWS &amp; UPDATES</span>
+					<h2 style="margin-top:14px;">お知らせ</h2>
+				</div>
+				<a class="btn btn-ghost" href="/news/" style="padding:14px 24px; font-size:14px;">一覧を見る →</a>
+			</div>
+
+			<div class="news-list reveal">
+				{topNews.length > 0 ? topNews.map((news) => (
+					<a class="news-row" href={withNewsSourceParam(toNewsHref(news.slug), 'home')}>
+						<span class="news-date">{news.date}</span>
+						<span class={`news-tag ${news.tag.cls}`}>{news.tag.label}</span>
+						<span class="news-title">{news.title}</span>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+					</a>
+				)) : (
+					<p class="news-empty">現在お知らせはありません。</p>
+				)}
+			</div>
+		</div>
+	</section>
+
+	<PageCta
+		eyebrow="FREE TRIAL"
+		title="まずはWEBで、お試し！"
+		description="アプリをインストールしなくても大丈夫です。<br/>まずはこちらから、どんな感じかお試しいただけます。1ヶ月間無料、合わなければ何もしなくてOK。<br/>勝手に課金されることは、もちろんありません。安心してお試しください。"
+		buttonText="1ヶ月無料ではじめる"
+		buttonHref="https://m.tc-timecard.com/?page=register"
+		meta="クレジットカード登録不要 / いつでも解約OK"
+		screenLabel="08 CTA"
+	/>
+
+	<SiteFooter />
+
+	<script>
+		(function() {
+			const NAMES = [
+				{ name: '田中', color: '#F39A2D' },
+				{ name: '中村', color: '#7BC8E8' },
+				{ name: '鈴木', color: '#6FBF73' },
+				{ name: '山田', color: '#E66B7A' },
+				{ name: '高橋', color: '#9B7BD8' },
+				{ name: '渡辺', color: '#E2A93C' },
+			];
+			const peopleEl = document.getElementById('demoPeople');
+			if (peopleEl) {
+				NAMES.forEach((p, i) => {
+					const el = document.createElement('div');
+					el.className = 'demo-person';
+					el.dataset.idx = String(i);
+					el.innerHTML = `
+						<span class="avatar" style="background:${p.color}">${p.name[0]}</span>
+						<span class="who">${p.name}</span>
+						<span class="stamp">--:--</span>
+					`;
+					peopleEl.appendChild(el);
+				});
+			}
+
+			const hh = document.getElementById('hh');
+			const mm = document.getElementById('mm');
+			const ss = document.getElementById('ss');
+			const dateEl = document.getElementById('demoDate');
+			function pad(n: number) { return n < 10 ? '0' + n : '' + n; }
+			function tick() {
+				const d = new Date();
+				if (hh) hh.textContent = pad(d.getHours());
+				if (mm) mm.textContent = pad(d.getMinutes());
+				if (ss) ss.textContent = pad(d.getSeconds());
+				const wd = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+				if (dateEl) dateEl.textContent = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} (${wd})`;
+			}
+			tick();
+			setInterval(tick, 1000);
+
+			const counter = document.getElementById('checkedCount');
+			let stampOrder = [0, 1, 2, 3, 4, 5];
+			let cursor = 0;
+			function shuffle(a: number[]) {
+				for (let i = a.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[a[i], a[j]] = [a[j], a[i]];
+				}
+				return a;
+			}
+
+			function doStamp() {
+				if (!peopleEl || document.documentElement.classList.contains('reduce-motion')) return;
+				const allDone = peopleEl.querySelectorAll('.demo-person.checked').length === NAMES.length;
+				if (allDone) {
+					peopleEl.querySelectorAll('.demo-person').forEach((el) => el.classList.remove('checked'));
+					peopleEl.querySelectorAll('.demo-person .stamp').forEach((el) => {
+						el.textContent = '--:--';
+					});
+					if (counter) counter.textContent = '0';
+					cursor = 0;
+					stampOrder = shuffle([0, 1, 2, 3, 4, 5]);
+					return;
+				}
+				const idx = stampOrder[cursor++ % NAMES.length];
+				const target = peopleEl.querySelector(`.demo-person[data-idx="${idx}"]`) as HTMLElement | null;
+				if (!target || target.classList.contains('checked')) return;
+
+				const pulse = document.createElement('span');
+				pulse.className = 'tap-pulse';
+				const rect = target.getBoundingClientRect();
+				pulse.style.left = rect.width / 2 - 4 + 'px';
+				pulse.style.top = rect.height / 2 - 4 + 'px';
+				target.style.position = 'relative';
+				target.appendChild(pulse);
+				setTimeout(() => pulse.remove(), 800);
+
+				target.classList.add('checked');
+				const now = new Date();
+				const t = pad(now.getHours()) + ':' + pad(now.getMinutes());
+				const stampEl = target.querySelector('.stamp') as HTMLElement | null;
+				if (stampEl) stampEl.textContent = t;
+				if (counter) counter.textContent = String(peopleEl.querySelectorAll('.demo-person.checked').length);
+			}
+			setTimeout(() => {
+				stampOrder = shuffle([0, 1, 2, 3, 4, 5]);
+				setInterval(doStamp, 1700);
+			}, 800);
+
+			const countNums = document.querySelectorAll('[data-target]');
+			const countObserver = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => {
+					if (!entry.isIntersecting) return;
+					const el = entry.target as HTMLElement;
+					const target = parseInt(el.dataset.target || '0', 10) || 0;
+					const dur = 1400;
+					const start = performance.now();
+					function step(now: number) {
+						const t = Math.min(1, (now - start) / dur);
+						const eased = 1 - Math.pow(1 - t, 3);
+						el.textContent = String(Math.round(target * eased));
+						if (t < 1) requestAnimationFrame(step);
+					}
+					requestAnimationFrame(step);
+					countObserver.unobserve(el);
+				});
+			}, { threshold: 0.3 });
+			countNums.forEach((n) => countObserver.observe(n));
+
+			const revealObserver = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('in');
+						revealObserver.unobserve(entry.target);
+					}
+				});
+			}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+			document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+
+			const floats = document.querySelectorAll<HTMLElement>('.float');
+			const heroPenguin = document.querySelector<HTMLElement>('.hero-penguin-big');
+			window.addEventListener('scroll', () => {
+				if (document.documentElement.classList.contains('reduce-motion')) return;
+				const y = window.scrollY;
+				floats.forEach((el, i) => {
+					el.style.transform = `translateY(${y * (i % 2 ? -0.15 : 0.1)}px)`;
+				});
+				if (heroPenguin) {
+					heroPenguin.style.transform = `translateY(${y * -0.05}px)`;
+				}
+			}, { passive: true });
+		})();
+	</script>
 </Layout>

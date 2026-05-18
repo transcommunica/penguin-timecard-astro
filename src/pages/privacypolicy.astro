@@ -1,0 +1,186 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+const WP_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/335';
+
+type WpPage = {
+  title: { rendered: string };
+  content: { rendered: string };
+  yoast_head_json?: {
+    title?: string;
+    og_description?: string;
+  };
+};
+
+const fetchPage = async (): Promise<WpPage | null> => {
+  try {
+    const res = await fetch(WP_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return null;
+    const payload = await res.json() as unknown;
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+    return payload as WpPage;
+  } catch {
+    return null;
+  }
+};
+
+const wp = await fetchPage();
+
+const pageTitle = 'プライバシーポリシー';
+const pageDescription = wp?.yoast_head_json?.og_description
+  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
+  ?.replace(/\[\.\.\.\]/g, '')
+  ?.trim()
+  || 'ペンギンタイムカードのプライバシーポリシーページです。';
+const displayTitle = wp?.title?.rendered || 'プライバシーポリシー';
+const pageHtml = wp?.content?.rendered || '';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <SiteHeader />
+
+  <section class="page-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">プライバシーポリシー</span>
+      </div>
+      <div class="hero-inner">
+        <h1 set:html={displayTitle}></h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="container">
+      {wp ? (
+        <article class="page-body" set:html={pageHtml}></article>
+      ) : (
+        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
+      )}
+    </div>
+  </section>
+
+  <SiteFooter />
+</Layout>
+
+<style>
+  .page-hero {
+    padding: 30px 0 40px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .page-hero .container,
+  .page-section .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    padding: 12px 0 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a { color: var(--ink-2); }
+  .breadcrumb .sep { opacity: 0.5; }
+  .breadcrumb .here { color: var(--ink); }
+
+  .hero-inner h1 {
+    margin: 16px 0 0;
+    font-size: clamp(26px, 3.6vw, 40px);
+  }
+
+  .page-section {
+    padding: 40px 0 80px;
+  }
+
+  .page-body {
+    max-width: 1000px;
+    margin: 0 auto;
+    color: var(--ink);
+    line-height: 1.9;
+    font-size: 15px;
+  }
+
+  .page-body :global(h2) {
+    margin: 32px 0 12px;
+    font-size: clamp(20px, 2.8vw, 26px);
+    line-height: 1.4;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 8px;
+  }
+
+  .page-body :global(h3) {
+    margin: 22px 0 8px;
+    font-size: clamp(17px, 2vw, 20px);
+    line-height: 1.5;
+  }
+
+  .page-body :global(p) {
+    margin: 0 0 1em;
+  }
+
+  .page-body :global(ul),
+  .page-body :global(ol) {
+    margin: 0 0 1em 1.4em;
+  }
+
+  .page-body :global(a) {
+    color: var(--brand-deep);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .page-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--line);
+    margin: 1.2em 0;
+    font-size: 14px;
+  }
+
+  .page-body :global(th),
+  .page-body :global(td) {
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    vertical-align: top;
+  }
+
+  .page-body :global(th) {
+    background: rgba(0, 0, 0, 0.04);
+    font-weight: 700;
+    white-space: nowrap;
+    width: 30%;
+  }
+
+  .empty {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .page-section {
+      padding: 28px 0 56px;
+    }
+
+    .page-body :global(table) {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .page-body :global(th) {
+      white-space: normal;
+      width: auto;
+    }
+  }
+</style>

@@ -1,0 +1,1249 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+const WP_MANUAL_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages?parent=2887&per_page=100';
+
+type WpPage = {
+  id: number;
+  slug: string;
+  menu_order: number;
+  date: string;
+  modified: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+  content: { rendered: string };
+};
+
+type ManualMdFrontmatter = {
+  title: string;
+  description: string;
+  category: 'overview' | 'settings' | 'behavior' | 'billing';
+  itemCode: string;
+};
+
+type ManualMdModule = {
+  frontmatter: ManualMdFrontmatter;
+  Content: Awaited<ReturnType<typeof render>>['Content'];
+};
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const localizeWpUploads = (html: string) =>
+  html.replace(/https?:\/\/tc-timecard\.com\/wp-content\/uploads\//g, '/assets/manual/');
+
+const decodeEntities = (text: string) =>
+  text
+    .replaceAll('&nbsp;', ' ')
+    .replaceAll('&#8230;', '…')
+    .replaceAll('&hellip;', '…')
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#039;', "'");
+
+const tidyWpText = (html: string) => {
+  const normalized = decodeEntities(stripHtml(html))
+    .replace(/\[\s*…\s*\]\s*続きを読む\s*/gi, '')
+    .replace(/続きを読む\s*/gi, '')
+    .replace(/\s*\(続きを読む\)\s*/gi, '')
+    .replace(/\s*read\s+more\s*$/gi, '')
+    .replace(/(\.\.\.|…)\s*$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return normalized;
+};
+
+const getFirstParagraphHtml = (html: string) => {
+  const match = html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  return match ? match[1] : html;
+};
+
+const extractContentBlocks = (html: string) => {
+  const blockMatches = [...html.matchAll(/<(p|li|h2|h3)[^>]*>([\s\S]*?)<\/\1>/gi)];
+  const blocks = blockMatches
+    .map((match) => tidyWpText(match[2]))
+    .filter((text) => text.length > 0);
+
+  if (blocks.length > 0) {
+    return blocks;
+  }
+
+  const fallback = tidyWpText(html);
+  return fallback ? [fallback] : [];
+};
+
+const extractH2Topics = (contentHtml: string, pageTitle: string) => {
+  const titleNormalized = tidyWpText(pageTitle).replace(/\s+/g, '');
+
+  const h2Matches = [...contentHtml.matchAll(/<h2[^>]*>([\s\S]*?)<\/h2>/gi)];
+  const h2Topics = h2Matches
+    .map((match) => tidyWpText(match[1]))
+    .map((text) => text.replace(/^\d+[\.．、)）]?\s*/, '').trim())
+    .filter((text) => text.length >= 2)
+    .filter((text) => text.replace(/\s+/g, '') !== titleNormalized)
+    .filter((text, index, arr) => arr.indexOf(text) === index);
+
+  if (h2Topics.length >= 2) {
+    return h2Topics;
+  }
+
+  const allMatches = [...contentHtml.matchAll(/<(h2|h3)[^>]*>([\s\S]*?)<\/\1>/gi)];
+  return allMatches
+    .map((match) => tidyWpText(match[2]))
+    .map((text) => text.replace(/^\d+[\.．、)）]?\s*/, '').trim())
+    .filter((text) => text.length >= 2)
+    .filter((text) => text.replace(/\s+/g, '') !== titleNormalized)
+    .filter((text, index, arr) => arr.indexOf(text) === index);
+};
+
+const isMetadataLine = (text: string) =>
+  /^(所要時間|バージョン|更新日時|最終更新|作成日|January|February|March|April|May|June|July|August|September|October|November|December|\d{4}年\d{1,2}月|版|v\d+\.\d+)/.test(
+    text
+  );
+
+const isGenericTopic = (topic: string) => {
+  const generic = /^(注意点|注意|設定|方法|手順|やり方|確認|一覧|基本|詳細|その他)$/;
+  return generic.test(topic);
+};
+
+const buildCoreDescription = (_excerptHtml: string, contentHtml: string, pageTitle: string) => {
+  const topics = extractH2Topics(contentHtml, pageTitle);
+
+  // Spread sampling: first, mid, last
+  const spread: string[] = [];
+  if (topics.length >= 1) spread.push(topics[0]);
+  if (topics.length >= 3) spread.push(topics[Math.floor((topics.length - 1) / 2)]);
+  if (topics.length >= 2) spread.push(topics[topics.length - 1]);
+  const unique = spread.filter((t, i, a) => a.indexOf(t) === i);
+
+  if (unique.length >= 3) {
+    const topicList = unique.slice(0, 3).join('・');
+    return `${topicList}など、関連する操作・設定を確認できます`;
+  }
+
+  if (unique.length === 2) {
+    const [a, b] = unique;
+    return `${a}と${b}をまとめて確認できます`;
+  }
+
+  if (unique.length === 1) {
+    const topic = unique[0];
+    if (isGenericTopic(topic)) {
+      return `${pageTitle}の${topic}について詳しく確認できます`;
+    }
+    return `${topic}について詳しく確認できます`;
+  }
+
+  // No headings: scan paragraphs for descriptive content
+  const titleText = tidyWpText(pageTitle);
+  const pMatches = [...contentHtml.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)];
+  const validParas: string[] = [];
+  for (const [, inner] of pMatches) {
+    const raw = (() => {
+      const t = tidyWpText(inner);
+      const safe = titleText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return t.replace(new RegExp(`^${safe}\\s*`, 'i'), '').trim();
+    })();
+    
+    if (raw.length < 20) continue;
+    if (isMetadataLine(raw)) continue;
+    if (/^(まず[、,]|次に[、,]|\d+[.、)）])/.test(raw)) continue;
+    validParas.push(raw);
+  }
+
+  // Combine first 2-3 valid paragraphs for richer description
+  if (validParas.length >= 2) {
+    const combined = validParas.slice(0, 3).join('');
+    if (combined.length > 30) {
+      return combined;
+    }
+  }
+
+  // Use first longest valid paragraph
+  if (validParas.length > 0) {
+    const sorted = [...validParas].sort((a, b) => b.length - a.length);
+    for (const para of sorted) {
+      const jp = para.indexOf('。');
+      if (jp > 16) return para.slice(0, jp + 1);
+      if (para.length >= 20) return para;
+    }
+  }
+
+  return `「${pageTitle}」の設定手順と使い方をまとめています`;
+};
+
+const buildWpLead = (excerptHtml: string, contentHtml: string, pageTitle: string) => {
+  const core = buildCoreDescription(excerptHtml, contentHtml, pageTitle);
+  return `このページでは、${core}。`;
+};
+
+const fetchWpManualPages = async (): Promise<WpPage[]> => {
+  try {
+    const response = await fetch(WP_MANUAL_ENDPOINT, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = (await response.json()) as unknown;
+    if (!Array.isArray(payload)) {
+      return [];
+    }
+
+    return payload as WpPage[];
+  } catch {
+    return [];
+  }
+};
+
+const { slug } = Astro.params;
+const wpPages = (await fetchWpManualPages()).sort((a, b) => {
+  const leftOrder = typeof a.menu_order === 'number' ? a.menu_order : 0;
+  const rightOrder = typeof b.menu_order === 'number' ? b.menu_order : 0;
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
+  return new Date(a.date).getTime() - new Date(b.date).getTime();
+});
+const wpPage = slug ? wpPages.find((item) => item.slug === slug) : undefined;
+
+const entries = await getCollection('manual');
+const sortedEntries = [...entries].sort((a, b) => a.data.order - b.data.order);
+const entryBySlug = slug ? entries.find((item) => item.id.replace(/\.md$/, '') === slug) : undefined;
+
+const normalizeManualTitle = (text: string) =>
+  tidyWpText(text)
+    .replace(/（概要）/g, 'の概要')
+    .replace(/\(概要\)/g, 'の概要')
+    .replace(/\s+/g, '')
+    .trim();
+
+const wpSlugToLocalFile: Record<string, string> = {
+  'auto-overnight': 'auto-next-day',
+  'face-recognition-overview': 'face-auth-overview',
+  'face-recognition': 'face-auth',
+  'add-user': 'owner-account',
+  'add-staff': 'staff-account',
+  'display-input-only-account': 'limited-account',
+  'permission-edit-time': 'lock-edit-time',
+  'skip-work-detail': 'skip-detail-after-stamp',
+  'password-protection': 'admin-password',
+  'holiday-setting': 'holiday-settings',
+  'morning-overtime': 'early-overtime',
+  'closind-date': 'closing-day',
+  'rounding': 'rounding',
+  'unsubscribe': 'delete-account',
+  'cancel-subscription': 'cancel-subscription',
+  'subscribe': 'billing',
+  'basic-how-to-use': 'basic-usage',
+  'multiple-breaks': 'multi-break',
+  'shifts': 'shift-management',
+  'overnight24': 'open-24h',
+  'overnight1': 'midnight-operation',
+  'slack': 'slack-integration',
+  'category-pattern-setting': 'category-patterns',
+  'memo': 'memo-feature',
+  'screensaver': 'screensaver',
+};
+
+const manualSlugAliases: Record<string, string> = {
+  ...wpSlugToLocalFile,
+  'open-24-hours': 'open-24h',
+  'open-24-hour': 'open-24h',
+  '24-hour-operation': 'open-24h',
+  '24-hours-operation': 'open-24h',
+  '24hour-operation': 'open-24h',
+  '24h-operation': 'open-24h',
+  'multiple-break': 'multi-break',
+  'multiple-break-support': 'multi-break',
+  'late-night-operation': 'midnight-operation',
+  'night-shift-operation': 'midnight-operation',
+};
+
+const normalizeManualSlug = (value: string) => {
+  const raw = String(value || '').trim().replace(/^\/+|\/+$/g, '');
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    decoded = raw;
+  }
+  return decoded
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+const aliasMap = new Map<string, string>();
+const registerAlias = (from: string, to: string) => {
+  const fromNorm = normalizeManualSlug(from);
+  const toNorm = normalizeManualSlug(to);
+  if (!fromNorm || !toNorm) return;
+  aliasMap.set(fromNorm, toNorm);
+  aliasMap.set(fromNorm.replace(/-/g, ''), toNorm);
+};
+
+for (const entry of entries) {
+  const entrySlug = entry.id.replace(/\.md$/, '');
+  registerAlias(entrySlug, entrySlug);
+}
+for (const [from, to] of Object.entries(manualSlugAliases)) {
+  registerAlias(from, to);
+}
+
+const resolveManualSlug = (value: string | undefined) => {
+  const norm = normalizeManualSlug(String(value || ''));
+  if (!norm) return undefined;
+
+  const direct = aliasMap.get(norm) || aliasMap.get(norm.replace(/-/g, ''));
+  if (direct) return direct;
+
+  if (/24\s*hour|24h|24-hours|24-hour/.test(norm) && /(open|operation|overnight|business)/.test(norm)) {
+    return 'open-24h';
+  }
+
+  return norm;
+};
+
+const localMetaBySlug = new Map(
+  entries.map((item) => [
+    item.id.replace(/\.md$/, ''),
+    {
+      category: item.data.category,
+      itemCode: item.data.itemCode,
+    },
+  ]),
+);
+
+const localMetaByTitle = new Map(
+  entries.map((item) => [
+    normalizeManualTitle(item.data.title),
+    {
+      category: item.data.category,
+      itemCode: item.data.itemCode,
+    },
+  ]),
+);
+
+const manualMdModules = import.meta.glob('../../content/manual/*.md', { eager: true }) as Record<string, ManualMdModule>;
+const manualMdBySlug = new Map(
+  Object.entries(manualMdModules).map(([path, mod]) => [path.split('/').pop()?.replace(/\.md$/, '') ?? '', mod]),
+);
+const manualMdByTitle = new Map(
+  Object.values(manualMdModules).map((mod) => [normalizeManualTitle(mod.frontmatter.title), mod]),
+);
+
+const mappedSlug = resolveManualSlug(slug);
+const entryByMappedSlug = mappedSlug
+  ? entries.find((item) => item.id.replace(/\.md$/, '') === mappedSlug)
+  : undefined;
+const entryByWpTitle = wpPage
+  ? entries.find((item) => normalizeManualTitle(item.data.title) === normalizeManualTitle(stripHtml(wpPage.title.rendered)))
+  : undefined;
+const entry = entryBySlug ?? entryByMappedSlug ?? entryByWpTitle;
+
+const mdBySlug = slug ? manualMdBySlug.get(slug) : undefined;
+const mdByMappedSlug = mappedSlug ? manualMdBySlug.get(mappedSlug) : undefined;
+const mdByWpTitle = wpPage ? manualMdByTitle.get(normalizeManualTitle(stripHtml(wpPage.title.rendered))) : undefined;
+const mdModule = mdBySlug ?? mdByMappedSlug ?? mdByWpTitle;
+
+const isWpManual = Boolean(wpPage) && !Boolean(entry) && !Boolean(mdModule);
+
+if (!wpPage && !entry && !mdModule) {
+  return Astro.redirect('/manual/');
+}
+
+const currentIndex = isWpManual
+  ? wpPages.findIndex((item) => item.slug === wpPage?.slug)
+  : sortedEntries.findIndex((item) => item.id === entry?.id);
+
+const prevWpPage = isWpManual && currentIndex > 0 ? wpPages[currentIndex - 1] : undefined;
+const nextWpPage = isWpManual && currentIndex >= 0 && currentIndex < wpPages.length - 1 ? wpPages[currentIndex + 1] : undefined;
+
+const prevEntry = !isWpManual && currentIndex > 0 ? sortedEntries[currentIndex - 1] : undefined;
+const nextEntry = !isWpManual && currentIndex >= 0 && currentIndex < sortedEntries.length - 1 ? sortedEntries[currentIndex + 1] : undefined;
+
+let Content: Awaited<ReturnType<typeof render>>['Content'] | undefined;
+if (entry) {
+  const rendered = await render(entry);
+  Content = rendered.Content;
+} else if (mdModule) {
+  Content = mdModule.Content;
+}
+
+const categoryLabelMap = {
+  overview: '概要',
+  settings: '設定',
+  behavior: '動作関連',
+  billing: 'お支払い・解約',
+} as const;
+
+const categoryEnMap = {
+  overview: 'OVERVIEW',
+  settings: 'SETTINGS',
+  behavior: 'BEHAVIOR',
+  billing: 'BILLING',
+} as const;
+
+type ManualCategory = keyof typeof categoryLabelMap;
+
+const wpSlugToCategory: Record<string, ManualCategory> = {
+  'subscribe': 'billing',
+  'unsubscribe': 'billing',
+  'cancel-subscription': 'billing',
+  'permission-edit-time': 'behavior',
+  'password-protection': 'behavior',
+  'skip-work-detail': 'behavior',
+  'holiday-setting': 'behavior',
+  'memo': 'behavior',
+  'slack': 'behavior',
+  'screensaver': 'behavior',
+  'calc-by-period': 'overview',
+  'basic-how-to-use': 'overview',
+  'category-pattern-setting': 'settings',
+  'closind-date': 'settings',
+  'rounding': 'settings',
+  'morning-overtime': 'settings',
+  'face-recognition-overview': 'settings',
+  'face-recognition': 'settings',
+  'overnight24': 'settings',
+  'overnight1': 'settings',
+  'auto-overnight': 'settings',
+  'multiple-breaks': 'settings',
+  'shifts': 'settings',
+  'add-user': 'settings',
+  'add-staff': 'settings',
+  'display-input-only-account': 'settings',
+  'add-edit-staff-from-top': 'settings',
+};
+
+const wpSlugToItemCode: Record<string, string> = {
+  'calc-by-period': 'M.02',
+  'basic-how-to-use': 'M.01',
+  'category-pattern-setting': 'S.01',
+  'closind-date': 'S.02',
+  'rounding': 'S.03',
+  'morning-overtime': 'S.04',
+  'face-recognition-overview': 'S.05',
+  'face-recognition': 'S.06',
+  'overnight24': 'S.07',
+  'overnight1': 'S.08',
+  'auto-overnight': 'S.09',
+  'multiple-breaks': 'S.10',
+  'shifts': 'S.11',
+  'add-user': 'S.12',
+  'add-staff': 'S.13',
+  'display-input-only-account': 'S.14',
+  'permission-edit-time': 'B.01',
+  'password-protection': 'B.02',
+  'skip-work-detail': 'B.03',
+  'holiday-setting': 'B.04',
+  'memo': 'B.05',
+  'slack': 'B.06',
+  'screensaver': 'B.07',
+  'subscribe': 'P.01',
+  'unsubscribe': 'P.02',
+  'cancel-subscription': 'P.03',
+};
+
+const wpTitleText = wpPage ? stripHtml(wpPage.title.rendered) : '';
+const wpLocalFileKey = wpPage ? (wpSlugToLocalFile[wpPage.slug] ?? wpPage.slug) : '';
+const wpLocalMeta = wpPage
+  ? localMetaBySlug.get(wpLocalFileKey) ?? localMetaByTitle.get(normalizeManualTitle(wpTitleText))
+  : undefined;
+const wpFallbackCategory = wpPage ? wpSlugToCategory[wpPage.slug] : undefined;
+const resolvedCategory = entry?.data.category ?? mdModule?.frontmatter.category ?? wpLocalMeta?.category ?? wpFallbackCategory;
+
+const updatedDate = isWpManual && wpPage ? new Date(wpPage.modified) : new Date();
+const updatedText = new Intl.DateTimeFormat('ja-JP', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+  .format(updatedDate)
+  .replaceAll('/', '.');
+
+const categoryLabel = resolvedCategory ? categoryLabelMap[resolvedCategory] : 'マニュアル';
+const categoryEnLabel = resolvedCategory ? categoryEnMap[resolvedCategory] : 'WORDPRESS';
+
+const pageTitle = entry?.data.title ?? mdModule?.frontmatter.title ?? (wpPage ? stripHtml(wpPage.title.rendered) : '');
+const pageDescription = entry?.data.description
+  ?? mdModule?.frontmatter.description
+  ?? (wpPage ? buildWpLead(wpPage.excerpt?.rendered || '', wpPage.content?.rendered || '', pageTitle) : '');
+const itemCodeText =
+  entry?.data.itemCode ??
+  mdModule?.frontmatter.itemCode ??
+  wpLocalMeta?.itemCode ??
+  (wpPage ? wpSlugToItemCode[wpPage.slug] : undefined) ??
+  `WP.${String(wpPage?.id ?? '').padStart(4, '0')}`;
+const wpContentHtml = wpPage ? localizeWpUploads(wpPage.content.rendered) : '';
+
+const prevLink = isWpManual
+  ? prevWpPage
+    ? `/manual/${prevWpPage.slug}/`
+    : undefined
+  : prevEntry
+    ? `/manual/${prevEntry.id.replace(/\.md$/, '')}/`
+    : undefined;
+const prevTitle = isWpManual ? prevWpPage?.title.rendered : prevEntry?.data.title;
+
+const nextLink = isWpManual
+  ? nextWpPage
+    ? `/manual/${nextWpPage.slug}/`
+    : undefined
+  : nextEntry
+    ? `/manual/${nextEntry.id.replace(/\.md$/, '')}/`
+    : undefined;
+const nextTitle = isWpManual ? nextWpPage?.title.rendered : nextEntry?.data.title;
+
+const title = `${pageTitle} — マニュアル — ペンギンタイムカード`;
+const description = pageDescription;
+---
+
+<Layout title={title} description={description}>
+  <SiteHeader active="manual" />
+
+  <section class="manual-detail-page">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="パンくず">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <a href="/manual/">マニュアル</a>
+        <span class="sep">/</span>
+        <span class="here">{pageTitle}</span>
+      </nav>
+
+      <header class="doc-head">
+        <div class="meta">
+          <span class="num">{itemCodeText} / {categoryLabel}</span>
+          <span class="cat">{categoryEnLabel}</span>
+          <span class="updated">最終更新 {updatedText}</span>
+        </div>
+        <h1 set:html={isWpManual && wpPage ? wpPage.title.rendered : pageTitle}></h1>
+        <p class="lead">{pageDescription}</p>
+      </header>
+
+      <div class="doc-grid">
+        <article class="doc-body" id="docBody">
+          {isWpManual && wpPage ? <div class="wp-body" set:html={wpContentHtml}></div> : Content ? <Content /> : null}
+
+          {(prevLink || nextLink) && (
+            <nav class="doc-nav" aria-label="前後のページ">
+              {prevLink && prevTitle ? (
+                <a class="doc-nav-card prev" href={prevLink}>
+                  <span class="dir">← PREV</span>
+                  <span class="title" set:html={prevTitle}></span>
+                </a>
+              ) : (
+                <span></span>
+              )}
+
+              {nextLink && nextTitle ? (
+                <a class="doc-nav-card next" href={nextLink}>
+                  <span class="dir">NEXT →</span>
+                  <span class="title" set:html={nextTitle}></span>
+                </a>
+              ) : (
+                <span></span>
+              )}
+            </nav>
+          )}
+        </article>
+
+        <aside class="doc-toc" aria-label="このページの目次">
+          <div class="toc-head">ON THIS PAGE</div>
+          <ol id="tocList"></ol>
+
+          <div class="helpful">
+            <p>このページは役に立ちましたか？</p>
+            <div class="row">
+              <button type="button" data-vote="yes">👍 役に立った</button>
+              <button type="button" data-vote="no">👎 もう少し</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="back-section">
+        <a class="back-link" href="/manual/">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          マニュアル一覧に戻る
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter />
+
+  <script>
+    const slugify = (value: string) =>
+      value
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\u3040-\u30ff\u3400-\u9fbf\s-]/g, '')
+        .replace(/\s+/g, '-');
+
+    const docBody = document.getElementById('docBody');
+    const tocList = document.getElementById('tocList');
+
+    if (docBody && tocList) {
+      const headings = Array.from(docBody.querySelectorAll('h2, h3'));
+
+      headings.forEach((heading, index) => {
+        if (!heading.id) {
+          const seed = slugify(heading.textContent || 'section');
+          heading.id = seed ? `${seed}-${index + 1}` : `section-${index + 1}`;
+        }
+
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#${heading.id}`;
+        a.textContent = heading.textContent || '';
+        if (heading.tagName.toLowerCase() === 'h3') {
+          a.classList.add('toc-subitem');
+        }
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      const tocLinks = Array.from(tocList.querySelectorAll('a'));
+      const setActiveToc = (id: string) => {
+        tocLinks.forEach((a) => {
+          a.classList.toggle('active', a.getAttribute('href') === id);
+        });
+      };
+
+      if (tocLinks.length > 0) {
+        tocLinks[0].classList.add('active');
+      }
+      const sections = tocLinks
+        .map((a) => document.getElementById(a.getAttribute('href')?.replace('#', '') || ''))
+        .filter((item): item is HTMLElement => Boolean(item));
+
+      if (sections.length > 0) {
+        const obs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entryItem) => {
+              if (!entryItem.isIntersecting) {
+                return;
+              }
+
+              const id = `#${entryItem.target.id}`;
+              setActiveToc(id);
+            });
+          },
+          { rootMargin: '-30% 0px -60% 0px' },
+        );
+
+        sections.forEach((section) => obs.observe(section));
+
+        const updateActiveByScroll = () => {
+          const offset = 140;
+          const current = [...sections]
+            .reverse()
+            .find((section) => window.scrollY + offset >= section.offsetTop);
+          if (current instanceof HTMLElement) {
+            setActiveToc(`#${current.id}`);
+          }
+        };
+
+        window.addEventListener('scroll', updateActiveByScroll, { passive: true });
+        updateActiveByScroll();
+      }
+    }
+
+    document.querySelectorAll('.helpful button').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.helpful button').forEach((node) => node.classList.remove('picked'));
+        button.classList.add('picked');
+      });
+    });
+  </script>
+</Layout>
+
+<style>
+  .manual-detail-page {
+    padding: 24px 0 56px;
+  }
+
+  .breadcrumb {
+    padding: 22px 0 8px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a {
+    color: var(--ink-2);
+  }
+
+  .breadcrumb a:hover {
+    color: var(--brand-deep);
+  }
+
+  .breadcrumb .sep {
+    opacity: 0.5;
+  }
+
+  .breadcrumb .here {
+    color: var(--ink);
+  }
+
+  .doc-head {
+    padding: 24px 0 32px;
+    border-bottom: 2px dashed var(--line);
+    margin-bottom: 36px;
+  }
+
+  .doc-head .meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .doc-head .meta .num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--brand-deep);
+    background: var(--brand-soft);
+    padding: 5px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+  }
+
+  .doc-head .meta .cat {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-2);
+  }
+
+  .doc-head .meta .updated {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-2);
+    margin-left: auto;
+  }
+
+  .doc-head h1 {
+    font-size: clamp(34px, 4.8vw, 52px);
+    margin: 0 0 18px;
+    letter-spacing: -0.005em;
+  }
+
+  .doc-head .lead {
+    font-size: 17px;
+    color: var(--ink-2);
+    margin: 0;
+    max-width: 720px;
+  }
+
+  .doc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 60px;
+    align-items: start;
+  }
+
+  @media (max-width: 980px) {
+    .doc-grid {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+
+    .doc-toc {
+      display: none;
+    }
+  }
+
+  .doc-body {
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--ink);
+    min-width: 0;
+  }
+
+  .doc-body :global(h2) {
+    font-size: 28px;
+    margin: 60px 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--brand);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    scroll-margin-top: 90px;
+  }
+
+  .doc-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .doc-body {
+    counter-reset: manual-h2;
+  }
+
+  .doc-body :global(h2)::before {
+    counter-increment: manual-h2;
+    content: counter(manual-h2, decimal-leading-zero);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: white;
+    background: var(--brand);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    line-height: 1.2;
+    flex: none;
+  }
+
+  .doc-body :global(h3) {
+    font-size: 22px;
+    margin: 40px 0 14px;
+    color: var(--ink);
+    scroll-margin-top: 90px;
+  }
+
+  .doc-body :global(h3)::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: var(--brand);
+    margin-right: 12px;
+    vertical-align: middle;
+    transform: translateY(-2px);
+  }
+
+  .doc-body :global(h4) {
+    font-size: 18px;
+    margin: 28px 0 10px;
+  }
+
+  .doc-body :global(p) {
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+
+  .doc-body :global(strong) {
+    color: var(--brand-deep);
+    background: linear-gradient(transparent 60%, var(--brand-soft) 60%);
+    padding: 0 3px;
+    font-weight: 800;
+  }
+
+  .doc-body :global(ul),
+  .doc-body :global(ol) {
+    margin: 0 0 18px;
+    padding-left: 22px;
+  }
+
+  .doc-body :global(li) {
+    margin-bottom: 6px;
+  }
+
+  .doc-body :global(code) {
+    font-family: "JetBrains Mono", monospace;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 2px 6px;
+    font-size: 0.9em;
+  }
+
+  .doc-body :global(pre) {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    overflow: auto;
+    margin: 12px 0 22px;
+  }
+
+  .doc-body :global(blockquote) {
+    background: white;
+    border-left: 5px solid var(--sky);
+    border-radius: 0 14px 14px 0;
+    padding: 14px 18px;
+    margin: 16px 0 22px;
+    color: var(--ink);
+  }
+
+  .doc-body :global(hr) {
+    border: none;
+    border-top: 2px dashed var(--line);
+    margin: 32px 0;
+  }
+
+  .doc-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .doc-body :global(.wp-body figure) {
+    margin: 18px 0;
+  }
+
+  .doc-body :global(.wp-body img) {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .doc-body :global(.wp-body .wp-caption) {
+    max-width: 100%;
+  }
+
+  .doc-body :global(.wp-body .wp-caption-text) {
+    margin: 8px 0 0;
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .doc-body :global(th),
+  .doc-body :global(td) {
+    border-bottom: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+  }
+
+  .doc-body :global(th) {
+    background: var(--cream);
+    font-weight: 800;
+  }
+
+  .doc-body :global(.formula) {
+    background: var(--cream);
+    border: 1.5px dashed var(--brand);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin: 22px 0 28px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    line-height: 2.1;
+    color: var(--ink);
+    overflow-x: auto;
+  }
+
+  .doc-body :global(.formula .label) {
+    font-family: "Noto Sans JP", sans-serif;
+    font-weight: 800;
+    color: var(--brand-deep);
+    margin-right: 6px;
+  }
+
+  .doc-body :global(.formula .result) {
+    font-weight: 900;
+    color: var(--brand-deep);
+    background: var(--brand-soft);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .doc-body :global(.step-block) {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    padding: 28px;
+    margin: 22px 0 32px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .doc-body :global(.step-block .step-tag) {
+    position: absolute;
+    top: -14px;
+    left: 24px;
+    background: var(--brand);
+    color: white;
+    font-weight: 900;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    box-shadow: 0 4px 0 var(--brand-deep);
+    letter-spacing: 0.06em;
+  }
+
+  .doc-body :global(.img-placeholder) {
+    background: var(--cream-2);
+    border: 1.5px dashed var(--line);
+    border-radius: 14px;
+    padding: 0;
+    overflow: hidden;
+    margin: 14px 0;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+  }
+
+  .doc-body :global(.img-placeholder::before) {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent 0 14px, rgba(243, 154, 45, 0.05) 14px 28px);
+  }
+
+  .doc-body :global(.img-placeholder .label) {
+    position: relative;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--ink-2);
+    background: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    letter-spacing: 0.06em;
+  }
+
+  .doc-toc {
+    position: sticky;
+    top: 90px;
+    align-self: start;
+    width: 100%;
+  }
+
+  .doc-toc .toc-head {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--brand);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-toc .toc-head::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--brand);
+    border-radius: 2px;
+  }
+
+  .doc-toc :global(ol) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 2px solid var(--line);
+  }
+
+  .doc-toc :global(a) {
+    display: block;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6B5E52;
+    border-left: 3px solid transparent;
+    margin-left: -2px;
+    transition: color .2s, border-color .2s, background .2s;
+    border-radius: 0 10px 10px 0;
+    line-height: 1.45;
+  }
+
+  .doc-toc :global(a.toc-subitem) {
+    padding-left: 24px;
+    font-size: 13px;
+    color: #6B5E52;
+  }
+
+  .doc-toc :global(a:hover) {
+    color: var(--brand);
+    background: rgba(243, 154, 45, 0.08);
+  }
+
+  .doc-toc :global(a.active) {
+    color: var(--brand);
+    border-left-color: var(--brand);
+    background: rgba(243, 154, 45, 0.2);
+  }
+
+  .doc-toc .helpful {
+    margin-top: 30px;
+    padding: 18px;
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #e9d8bd;
+    box-shadow: none;
+  }
+
+  .doc-toc .helpful p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .doc-toc .helpful .row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .doc-toc .helpful button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--cream);
+    border: 1.5px solid var(--line);
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--ink);
+    transition: all .2s;
+  }
+
+  .doc-toc .helpful button:hover {
+    background: var(--brand-soft);
+    border-color: var(--brand);
+    color: var(--brand-deep);
+  }
+
+  .doc-toc .helpful button.picked {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand-deep);
+  }
+
+  .doc-nav {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 2px dashed var(--line);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .doc-nav {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .doc-nav-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    padding: 18px 22px;
+    box-shadow: 0 5px 0 var(--line);
+    transition: transform .2s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .doc-nav-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .doc-nav-card.next {
+    text-align: right;
+  }
+
+  .doc-nav-card .dir {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--brand-deep);
+    letter-spacing: 0.1em;
+  }
+
+  .doc-nav-card .title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .back-section {
+    text-align: center;
+    padding: 40px 0 20px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ink);
+    box-shadow: 0 5px 0 var(--line);
+    transition: transform .2s;
+  }
+
+  .back-link:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 640px) {
+    .manual-detail-page {
+      padding-top: 16px;
+    }
+
+    .doc-head .meta .updated {
+      margin-left: 0;
+    }
+
+    .doc-head h1 {
+      font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .doc-body :global(h2) {
+      font-size: 24px;
+    }
+
+    .doc-body :global(h3) {
+      font-size: 20px;
+    }
+
+    .doc-body :global(.wp-body figure),
+    .doc-body :global(.wp-body .wp-caption) {
+      margin-left: -24px;
+      margin-right: -24px;
+      max-width: calc(100% + 48px);
+    }
+
+    .doc-body :global(.wp-body img) {
+      width: 100%;
+      max-width: none;
+      border-radius: 0;
+    }
+
+    .doc-body :global(.wp-body .wp-caption-text) {
+      padding: 0 12px;
+    }
+  }
+</style>

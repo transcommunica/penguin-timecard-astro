@@ -1,0 +1,107 @@
+---
+interface Props {
+  isHome?: boolean;
+  active?: 'home' | 'rate' | 'manual' | 'contact';
+}
+
+const { isHome = false, active = 'home' } = Astro.props;
+const root = isHome ? '' : '/';
+---
+
+<header class="nav" data-screen-label="01 Nav">
+  <div class="container nav-inner">
+    <a class="brand" href={isHome ? '#' : '/'}>
+      <span class="brand-mark">
+        <img src="/assets/penguin.png" alt="" width="38" height="38" style="object-fit: contain;" />
+      </span>
+      <span>ペンギンタイムカード</span>
+    </a>
+    <nav class="nav-links">
+      <a href={`${root}#features`}>特徴</a>
+      <a href={`${root}#functions`}>機能</a>
+      <a href={`${root}#more`}>応用機能</a>
+      <a href={`${root}#news`}>お知らせ</a>
+      <a href="/rate-plan/" style={active === 'rate' ? 'color: var(--brand-deep);' : undefined}>料金</a>
+      <a href="/manual/" style={active === 'manual' ? 'color: var(--brand-deep);' : undefined}>マニュアル</a>
+      <a href="/contact-us/" style={active === 'contact' ? 'color: var(--brand-deep);' : undefined}>お問い合わせ</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="https://m.tc-timecard.com/?page=login">ログイン</a>
+      <a class="btn btn-primary" href="https://m.tc-timecard.com/?page=register">無料で試す</a>
+      <details class="mobile-nav">
+        <summary class="mobile-nav-toggle" aria-label="メニューを開く">
+          <span></span>
+          <span></span>
+          <span></span>
+        </summary>
+        <div class="mobile-nav-menu">
+          <div class="mobile-nav-links">
+            <a href={`${root}#features`}>特徴</a>
+            <a href={`${root}#functions`}>機能</a>
+            <a href={`${root}#more`}>応用機能</a>
+            <a href={`${root}#news`}>お知らせ</a>
+            <a href="/rate-plan/">料金</a>
+            <a href="/manual/">マニュアル</a>
+            <a href="/contact-us/">お問い合わせ</a>
+          </div>
+          <div class="mobile-nav-footer">
+            <a class="btn btn-ghost mobile-nav-login" href="https://m.tc-timecard.com/?page=login">ログイン</a>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
+
+<script>
+  (() => {
+    const OVERLAY_ID = 'mobile-nav-global-overlay';
+    let globalOverlay = document.getElementById(OVERLAY_ID);
+    if (!(globalOverlay instanceof HTMLButtonElement)) {
+      const overlay = document.createElement('button');
+      overlay.id = OVERLAY_ID;
+      overlay.type = 'button';
+      overlay.className = 'mobile-nav-global-overlay';
+      overlay.setAttribute('aria-label', 'メニューを閉じる');
+      document.body.appendChild(overlay);
+      globalOverlay = overlay;
+    }
+
+    const navElement = document.querySelector('.nav');
+    const setHeaderOffset = () => {
+      if (!(navElement instanceof HTMLElement)) return;
+      const h = Math.ceil(navElement.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--mobile-nav-header-height', `${h}px`);
+    };
+    setHeaderOffset();
+    window.addEventListener('resize', setHeaderOffset, { passive: true });
+
+    const mobileNavs = document.querySelectorAll('.mobile-nav');
+    const closeAll = () => {
+      mobileNavs.forEach((nav) => nav.removeAttribute('open'));
+      document.body.classList.remove('mobile-nav-open');
+    };
+
+    if (globalOverlay instanceof HTMLButtonElement) {
+      globalOverlay.addEventListener('click', closeAll);
+    }
+
+    mobileNavs.forEach((nav) => {
+      const links = nav.querySelectorAll('.mobile-nav-menu a');
+
+      nav.addEventListener('toggle', () => {
+        setHeaderOffset();
+        if (nav.hasAttribute('open')) {
+          document.body.classList.add('mobile-nav-open');
+        } else {
+          const anyOpen = Array.from(mobileNavs).some((item) => item.hasAttribute('open'));
+          if (!anyOpen) document.body.classList.remove('mobile-nav-open');
+        }
+      });
+
+      links.forEach((link) => {
+        link.addEventListener('click', closeAll);
+      });
+    });
+  })();
+</script>

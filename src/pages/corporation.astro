@@ -1,0 +1,242 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
+
+const WP_CORPORATION_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/3431';
+
+type WpPage = {
+  title: { rendered: string };
+  content: { rendered: string };
+  yoast_head_json?: {
+    title?: string;
+    og_description?: string;
+  };
+};
+
+const fetchCorporationPage = async (): Promise<WpPage | null> => {
+  try {
+    const res = await fetch(WP_CORPORATION_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return null;
+    const payload = await res.json() as unknown;
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+    return payload as WpPage;
+  } catch {
+    return null;
+  }
+};
+
+const wp = await fetchCorporationPage();
+
+const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || '法人の方';
+const pageDescription = wp?.yoast_head_json?.og_description
+  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
+  ?.replace(/\[\.\.\.\]/g, '')
+  ?.trim()
+  || 'ペンギンタイムカード 法人の方向けページです。';
+const displayTitle = wp?.title?.rendered || '法人の方';
+const pageHtml = (wp?.content?.rendered || '')
+  .replace(/https:\/\/tc-timecard\.com\/contact-us\/?/g, '/contact-us/')
+  .replace(/<h3(\s[^>]*)?>/gi, '<h2$1>')
+  .replace(/<\/h3>/gi, '</h2>')
+  .replace(/<h4(\s[^>]*)?>/gi, '<h3$1>')
+  .replace(/<\/h4>/gi, '</h3>')
+  .replace(/<h5(\s[^>]*)?>/gi, '<h3$1>')
+  .replace(/<\/h5>/gi, '</h3>');
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <SiteHeader />
+
+  <section class="corporation-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">法人の方</span>
+      </div>
+      <div class="hero-inner">
+        <span class="eyebrow">CORPORATION</span>
+        <h1 set:html={displayTitle}></h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="corporation-section">
+    <div class="container">
+      {wp ? (
+        <article class="corp-body" set:html={pageHtml}></article>
+      ) : (
+        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
+      )}
+    </div>
+  </section>
+
+  <PageCta
+    eyebrow="CONTACT"
+    title="導入のご相談は、お気軽に"
+    description="利用人数や運用に合わせた導入方法をご案内します。法人利用に関するご質問もお問い合わせフォームからご連絡ください。"
+    buttonText="お問い合わせフォーム"
+    buttonHref="/contact-us/"
+    meta="必要な情報をまとめてご案内します"
+  />
+
+  <SiteFooter />
+</Layout>
+
+<script>
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+</script>
+
+<style>
+  .corporation-hero {
+    padding: 30px 0 44px;
+    background:
+      radial-gradient(ellipse 60% 40% at 84% 22%, rgba(123, 200, 232, 0.15), transparent 65%),
+      radial-gradient(ellipse 42% 32% at 6% 86%, rgba(111, 191, 115, 0.10), transparent 65%);
+  }
+
+  .corporation-hero .container,
+  .corporation-section .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    padding: 12px 0 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a { color: var(--ink-2); }
+  .breadcrumb .sep { opacity: 0.5; }
+  .breadcrumb .here { color: var(--ink); }
+
+  .hero-inner .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    color: var(--sky);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .hero-inner h1 {
+    margin: 0;
+    font-size: clamp(32px, 4.8vw, 52px);
+  }
+
+  .corporation-section {
+    padding: 36px 0 72px;
+  }
+
+  .corp-body {
+    max-width: 1000px;
+    margin: 0 auto;
+    color: var(--ink);
+    line-height: 1.9;
+    font-size: 15px;
+  }
+
+  .corp-body :global(h2) {
+    margin: 34px 0 14px;
+    font-size: clamp(22px, 3.2vw, 30px);
+    line-height: 1.35;
+    color: var(--ink);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 8px;
+  }
+
+  .corp-body :global(h3) {
+    margin: 24px 0 10px;
+    font-size: clamp(18px, 2.3vw, 22px);
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .corp-body :global(p) {
+    margin: 0 0 1em;
+  }
+
+  .corp-body :global(ul),
+  .corp-body :global(ol) {
+    margin: 0 0 1em 1.4em;
+  }
+
+  .corp-body :global(a) {
+    color: var(--brand-deep);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .corp-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid rgba(58, 138, 176, 0.55);
+    margin: 1.2em 0;
+  }
+
+  .corp-body :global(.wp-block-table) {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .corp-body :global(.wp-block-flexible-table-block-table) {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .corp-body :global(th),
+  .corp-body :global(td) {
+    border: 1px solid rgba(58, 138, 176, 0.45);
+    padding: 10px 12px;
+    vertical-align: top;
+  }
+
+  .corp-body :global(th) {
+    background: rgba(123, 200, 232, 0.12);
+    font-weight: 700;
+  }
+
+  .empty {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .corporation-section {
+      padding: 28px 0 56px;
+    }
+
+    .corp-body :global(table) {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      min-width: 100%;
+    }
+
+    .corp-body :global(thead),
+    .corp-body :global(tbody),
+    .corp-body :global(tr) {
+      white-space: nowrap;
+    }
+  }
+</style>

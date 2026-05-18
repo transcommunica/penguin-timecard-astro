@@ -1,0 +1,285 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
+
+const WP_DOWNLOAD_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/2382';
+
+type WpPage = {
+  title: { rendered: string };
+  content: { rendered: string };
+  yoast_head_json?: {
+    title?: string;
+    og_description?: string;
+  };
+};
+
+const fetchDownloadPage = async (): Promise<WpPage | null> => {
+  try {
+    const res = await fetch(WP_DOWNLOAD_ENDPOINT, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) return null;
+    const payload = await res.json() as unknown;
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+    return payload as WpPage;
+  } catch {
+    return null;
+  }
+};
+
+const wp = await fetchDownloadPage();
+
+const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || 'ダウンロード';
+const pageDescription = wp?.yoast_head_json?.og_description
+  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
+  ?.trim()
+  || 'ペンギンタイムカードのアプリダウンロードページです。';
+
+const displayTitle = wp?.title?.rendered || 'ダウンロード';
+
+const platforms = [
+  {
+    id: 'windows',
+    label: 'Windows',
+    sub: 'デスクトップアプリ',
+    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/windows-1.jpg',
+    href: 'https://tc-timecard.com/wp-content/uploads/windows/%E3%83%9A%E3%83%B3%E3%82%AE%E3%83%B3%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%AB%E3%83%BC%E3%83%89_1.4.1.0.exe',
+    cta: 'ダウンロード（.exe）',
+    badge: 'Windows',
+  },
+  {
+    id: 'ipad-iphone',
+    label: 'iPad / iPhone',
+    sub: 'iOS アプリ',
+    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/appstore.jpg',
+    href: 'https://apps.apple.com/jp/app/id1568440167',
+    cta: 'App Store で入手',
+    badge: 'iOS',
+  },
+  {
+    id: 'android',
+    label: 'Android',
+    sub: 'Android アプリ',
+    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/googleplay.jpg',
+    href: 'https://play.google.com/store/apps/details?id=com.transcommunica.TimeCardCloud',
+    cta: 'Google Play で入手',
+    badge: 'Android',
+  },
+  {
+    id: 'web',
+    label: 'WEB ブラウザ',
+    sub: 'インストール不要',
+    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/web-1.jpg',
+    href: 'https://m.tc-timecard.com/#/',
+    cta: 'ブラウザで開く',
+    badge: 'WEB',
+  },
+];
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <SiteHeader />
+
+  <section class="download-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">ダウンロード</span>
+      </div>
+      <div class="hero-inner">
+        <span class="eyebrow">DOWNLOAD</span>
+        <h1 set:html={displayTitle}></h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="download-grid-section">
+    <div class="container">
+      <div class="platform-grid">
+        {platforms.map((p) => (
+          <div class="platform-card" id={p.id}>
+            <div class="card-img-wrap">
+              <img src={p.img} alt={p.label} loading="lazy" />
+            </div>
+            <div class="card-body">
+              <span class="badge">{p.badge}</span>
+              <h2>{p.label}</h2>
+              <p class="sub">{p.sub}</p>
+              <a class="btn-dl" href={p.href} target="_blank" rel="noopener noreferrer">
+                {p.cta}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <PageCta
+    eyebrow="CONTACT"
+    title="解決しないときは、お気軽に"
+    description="マニュアルを読んでも分からないことがあれば、お問い合わせフォームからご相談ください。担当者から、できるだけ早くお返事します。"
+    buttonText="お問い合わせフォーム"
+    buttonHref="/contact-us/"
+    meta="よくある質問もぜひご覧ください"
+  />
+  <SiteFooter />
+</Layout>
+
+<script>
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+</script>
+
+<style>
+  .download-hero {
+    padding: 30px 0 44px;
+    background:
+      radial-gradient(ellipse 60% 40% at 86% 20%, rgba(243, 154, 45, 0.12), transparent 65%),
+      radial-gradient(ellipse 45% 35% at 8% 88%, rgba(123, 200, 232, 0.15), transparent 65%);
+  }
+
+  .breadcrumb {
+    padding: 12px 0 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a { color: var(--ink-2); }
+  .breadcrumb .sep { opacity: 0.5; }
+  .breadcrumb .here { color: var(--ink); }
+
+  .hero-inner .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    color: var(--brand);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .hero-inner h1 {
+    margin: 0;
+    font-size: clamp(32px, 4.8vw, 52px);
+  }
+
+  .download-grid-section {
+    padding: 40px 0 72px;
+  }
+
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 1024px) {
+    .platform-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px) {
+    .platform-grid { grid-template-columns: 1fr; }
+  }
+
+  .platform-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 8px 0 var(--line);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .2s;
+  }
+
+  .platform-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .card-img-wrap {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #fff;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 8px;
+  }
+
+  .card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .card-body .badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--brand-deep);
+    background: var(--brand-soft);
+    border-radius: 999px;
+    padding: 3px 10px;
+    align-self: flex-start;
+  }
+
+  .card-body h2 {
+    margin: 4px 0 0;
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .card-body .sub {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-2);
+    flex: 1;
+  }
+
+  .btn-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    background: var(--brand);
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    transition: opacity .2s, transform .15s;
+    align-self: center;
+  }
+
+  .btn-dl:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+</style>

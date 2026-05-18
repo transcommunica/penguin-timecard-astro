@@ -1,0 +1,26 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonHref: string;
+  meta: string;
+  screenLabel?: string;
+}
+
+const { eyebrow, title, description, buttonText, buttonHref, meta, screenLabel = 'CTA' } = Astro.props;
+---
+
+<section class="section cta-section" data-screen-label={screenLabel}>
+  <div class="container cta-inner reveal">
+    <span class="eyebrow">{eyebrow}</span>
+    <h2 set:html={title}></h2>
+    <p set:html={description}></p>
+    <a class="btn btn-primary" href={buttonHref}>
+      {buttonText}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+    </a>
+    <div class="cta-meta">{meta}</div>
+  </div>
+</section>

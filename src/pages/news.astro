@@ -1,0 +1,305 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100';
+
+type WpPost = {
+  slug: string;
+  date: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+};
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const localizeWpUploads = (html: string) =>
+  String(html || '').replace(/https?:\/\/tc-timecard\.com\/wp-content\/uploads\//g, '/assets/news/');
+
+const keepJapaneseLocaleText = (text: string) =>
+  String(text || '')
+    .replace(/\[:(?!ja\])[a-z-]+\][\s\S]*?(?=(\[:[a-z-]+\]|\[:\]|$))/gi, '')
+    .replace(/\[:ja\]/gi, '')
+    .replace(/\[:\]/g, '')
+    .trim();
+
+const fetchWpPosts = async (): Promise<WpPost[]> => {
+  try {
+    const res = await fetch(WP_POSTS_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const payload = await res.json() as unknown;
+    if (!Array.isArray(payload)) return [];
+    return payload as WpPost[];
+  } catch {
+    return [];
+  }
+};
+
+const cleanExcerptHtml = (html: string) =>
+  localizeWpUploads(keepJapaneseLocaleText(String(html || '')))
+    .replace(/<p>\s*<a[^>]*>\s*続きを読む[\s\S]*?<\/a>\s*<\/p>/gi, '')
+    .replace(/<a[^>]*>\s*続きを読む[\s\S]*?<\/a>/gi, '')
+    .trim();
+
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}.${m}.${day}`;
+};
+
+const newsSlugMapByTitle: Record<string, string> = {
+  '純勤務時間の計算不具合について': 'net-worktime-calculation-bugfix',
+  '深夜割増時間などの時間帯集計に対応しました': 'late-night-premium-timeband-support',
+  '24時間営業に対応しました': 'support-24-hour-operation',
+  'アルコールチェック記録簿': 'alcohol-check-logbook',
+  '複数回休憩に対応しました': 'multiple-break-support',
+  '深夜勤務に対応しました': 'late-night-shift-support',
+  'AI顔認証機能（バージョン6）をリリースしました': 'ai-6',
+  'バージョン5.8.1をリリースしました': '5-8-1',
+  'バージョン5.7.0をリリースしました': '5-7-0',
+  'バージョン2.5をリリース': '2-5',
+};
+
+const toAsciiSlug = (input: string) =>
+  String(input || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+
+const canonicalNewsSlug = (rawSlug: string, title: string) => {
+  const mapped = newsSlugMapByTitle[title];
+  if (mapped) return mapped;
+  const raw = String(rawSlug || '').trim();
+  if (!raw) return '';
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    decoded = raw;
+  }
+  const fromDecoded = toAsciiSlug(decoded);
+  if (fromDecoded) return fromDecoded;
+  return /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+};
+
+const toNewsHref = (slug: string) => {
+  const raw = String(slug || '').trim();
+  if (!raw) return '/news/';
+  const safe = /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+  return `/news/${safe}/`;
+};
+
+const currentPageParam = 1;
+const postsPerPage = 10;
+
+const withSourceParam = (href: string, source: string, page: number) => {
+  const url = new URL(href, Astro.url);
+  url.searchParams.set('from', source);
+  if (source === 'news') {
+    url.searchParams.set('page', String(page));
+  }
+  return `${url.pathname}${url.search}`;
+};
+
+const contentPosts = (await getCollection('news')).sort(
+  (a, b) => +new Date(b.data.date) - +new Date(a.data.date)
+);
+const wpPosts = contentPosts.length === 0 ? await fetchWpPosts() : [];
+
+const posts = contentPosts.length > 0
+  ? contentPosts.map((post) => ({
+      slug: canonicalNewsSlug(post.data.slug, post.data.title),
+      date: post.data.date,
+      title: keepJapaneseLocaleText(post.data.title),
+      excerptHtml: cleanExcerptHtml(post.data.excerptHtml),
+    }))
+  : wpPosts
+      .sort((a, b) => +new Date(b.date) - +new Date(a.date))
+      .map((post) => ({
+        slug: canonicalNewsSlug(post.slug, keepJapaneseLocaleText(stripHtml(post.title.rendered))),
+        date: post.date,
+        title: keepJapaneseLocaleText(post.title.rendered),
+        excerptHtml: cleanExcerptHtml(post.excerpt.rendered),
+      }));
+
+const totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage));
+const currentPage = Math.min(Math.max(Number.isFinite(currentPageParam) ? Math.trunc(currentPageParam) : 1, 1), totalPages);
+const paginatedPosts = posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+const createPageHref = (page: number) => (page <= 1 ? '/news/' : `/news/${page}/`);
+
+const pageTitle = 'お知らせ';
+const pageDescription = 'ペンギンタイムカードのお知らせ一覧です。';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <SiteHeader />
+
+  <section class="section news-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">NEWS</span>
+        <h1>お知らせ</h1>
+        <p class="lead">アップデート情報や不具合修正、機能追加のお知らせを掲載しています。</p>
+      </div>
+
+      {posts.length > 0 ? (
+        <div class="news-list">
+          {paginatedPosts.map((post) => (
+            <a class="news-row news-row-page" href={withSourceParam(toNewsHref(post.slug), 'news', currentPage)}>
+              <span class="news-date">{formatDate(post.date)}</span>
+              <span class="news-tag t-update">お知らせ</span>
+              <span class="news-title-wrap">
+                <span class="news-title" set:html={post.title}></span>
+                <span class="news-excerpt" set:html={post.excerptHtml}></span>
+              </span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="empty">投稿を取得できませんでした。時間を置いて再度お試しください。</p>
+      )}
+
+      {totalPages > 1 && (
+        <nav class="pagination" aria-label="お知らせページネーション">
+          <a class={`pagination-link pagination-nav ${currentPage === 1 ? 'is-disabled' : ''}`} href={createPageHref(currentPage - 1)} aria-disabled={currentPage === 1}>
+            前へ
+          </a>
+          <div class="pagination-pages">
+            {Array.from({ length: totalPages }, (_, index) => {
+              const page = index + 1;
+              return (
+                <a class={`pagination-link ${page === currentPage ? 'is-current' : ''}`} href={createPageHref(page)} aria-current={page === currentPage ? 'page' : undefined}>
+                  {page}
+                </a>
+              );
+            })}
+          </div>
+          <a class={`pagination-link pagination-nav ${currentPage === totalPages ? 'is-disabled' : ''}`} href={createPageHref(currentPage + 1)} aria-disabled={currentPage === totalPages}>
+            次へ
+          </a>
+        </nav>
+      )}
+    </div>
+  </section>
+
+  <SiteFooter />
+</Layout>
+
+<style>
+  .news-section {
+    padding-top: 36px;
+  }
+
+  .section-head h1 {
+    margin: 10px 0 14px;
+    font-size: clamp(34px, 4.8vw, 52px);
+  }
+
+  .news-row-page {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .news-title-wrap {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .news-excerpt {
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .news-excerpt :global(p) {
+    margin: 0;
+  }
+
+  .empty {
+    color: var(--ink-2);
+    font-size: 15px;
+    margin-top: 16px;
+  }
+
+  .pagination {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination-link {
+    min-width: 44px;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--ink);
+    background: #fff;
+    font-weight: 700;
+  }
+
+  .pagination-link.is-current {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+
+  .pagination-link.is-disabled {
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  @media (max-width: 720px) {
+    .news-row-page {
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .news-row-page .news-date {
+      grid-column: 1;
+    }
+
+    .news-row-page .news-tag {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .news-row-page .news-title-wrap {
+      grid-column: 1 / -1;
+    }
+
+    .news-row-page > svg {
+      display: none;
+    }
+  }
+</style>

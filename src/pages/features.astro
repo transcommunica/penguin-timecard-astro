@@ -1,0 +1,681 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+const WP_FEATURES_PARENT_ID = 1311;
+const WP_FEATURES_ENDPOINT = `https://tc-timecard.com/wp-json/wp/v2/pages?parent=${WP_FEATURES_PARENT_ID}&per_page=100`;
+const WP_FEATURES_PARENT_ENDPOINT = `https://tc-timecard.com/wp-json/wp/v2/pages/${WP_FEATURES_PARENT_ID}`;
+
+type WpFeaturePage = {
+  id: number;
+  slug: string;
+  menu_order: number;
+  date: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+  content: { rendered: string };
+};
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+// WP本文内の目次ブロックを除去
+const stripWpToc = (html: string) =>
+  html
+    // ez-toc / table-of-contents 系プラグイン
+    .replace(/<div[^>]*(?:id|class)=["'][^"']*(?:ez-toc|table.of.contents|toc-container|wp-toc|TableOfContents)[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+    // WP block editor native TOC
+    .replace(/<nav[^>]*class=["'][^"']*wp-block-table-of-contents[^"']*["'][^>]*>[\s\S]*?<\/nav>/gi, '')
+    // 汎用「目次」見出し + 直後リスト（h2/h3 + ul/ol で構成される簡易 TOC）
+    .replace(/<h[23][^>]*>\s*(?:目次|Table of Contents|Contents)\s*<\/h[23]>\s*<(?:ul|ol)[^>]*>[\s\S]*?<\/(?:ul|ol)>/gi, '')
+    .trim();
+
+const decodeEntities = (text: string) =>
+  text
+    .replaceAll('&nbsp;', ' ')
+    .replaceAll('&#8230;', '…')
+    .replaceAll('&hellip;', '…')
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#039;', "'")
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
+
+const tidyText = (html: string) =>
+  decodeEntities(stripHtml(html))
+    .replace(/\[\s*…\s*\]\s*続きを読む\s*/gi, '')
+    .replace(/続きを読む\s*/gi, '')
+    .replace(/\s*\(続きを読む\)\s*/gi, '')
+    .replace(/\s*read\s+more\s*$/gi, '')
+    .replace(/(\.\.\.|…)\s*$/g, '')
+    .trim();
+
+const getFirstSentence = (text: string) => {
+  const normalized = text.trim();
+  if (!normalized) return '';
+  const jp = normalized.indexOf('。');
+  if (jp >= 0) return normalized.slice(0, jp + 1);
+  const en = normalized.search(/[.!?！？]/);
+  if (en >= 0) return normalized.slice(0, en + 1);
+  return normalized;
+};
+
+const fetchFeaturePages = async (): Promise<WpFeaturePage[]> => {
+  try {
+    const response = await fetch(WP_FEATURES_ENDPOINT, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = (await response.json()) as unknown;
+    if (!Array.isArray(payload)) {
+      return [];
+    }
+
+    return payload as WpFeaturePage[];
+  } catch {
+    return [];
+  }
+};
+
+const fetchFeatureParentPage = async (): Promise<WpFeaturePage | null> => {
+  try {
+    const response = await fetch(WP_FEATURES_PARENT_ENDPOINT, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as unknown;
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      return null;
+    }
+
+    return payload as WpFeaturePage;
+  } catch {
+    return null;
+  }
+};
+
+const pages = (await fetchFeaturePages()).sort((a, b) => {
+  const leftOrder = typeof a.menu_order === 'number' ? a.menu_order : 0;
+  const rightOrder = typeof b.menu_order === 'number' ? b.menu_order : 0;
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+  return new Date(a.date).getTime() - new Date(b.date).getTime();
+});
+
+const parentPage = pages.length === 0 ? await fetchFeatureParentPage() : null;
+const sourcePages = pages.length > 0 ? pages : parentPage ? [parentPage] : [];
+const isParentFallback = pages.length === 0 && parentPage !== null;
+
+const pageItems = sourcePages.map((item, index) => {
+  const title = tidyText(item.title?.rendered || '');
+  const excerpt = tidyText(item.excerpt?.rendered || '');
+  const description = getFirstSentence(excerpt) || '詳細をご覧ください。';
+  return {
+    ...item,
+    no: String(index + 1).padStart(2, '0'),
+    displayTitle: title,
+    displayDescription: description,
+    sectionId: `feature-${item.slug}`,
+  };
+});
+
+const title = '機能一覧 — ペンギンタイムカード';
+const description = 'ペンギンタイムカードの機能一覧ページ';
+---
+
+<Layout title={title} description={description}>
+  <SiteHeader />
+
+  <section class="features-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">機能</span>
+      </div>
+
+      <div class="hero-inner">
+        <span class="eyebrow">FEATURES</span>
+        <h1>機能</h1>
+        <!-- <p class="lead">WordPressの固定ページから取得した機能説明をカテゴリ順で掲載しています。</p> -->
+      </div>
+    </div>
+  </section>
+
+  {!isParentFallback && (
+    <section class="features-index">
+      <div class="container">
+        <div class="feature-grid">
+          {pageItems.map((item) => (
+            <a class="feature-card" href={`#${item.sectionId}`}>
+              <div class="row">
+                <span class="num">F.{item.no}</span>
+              </div>
+              <h2>{item.displayTitle}</h2>
+              <p>{item.displayDescription}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {pageItems.length === 0 && (
+    <section class="features-index">
+      <div class="container">
+        <div class="empty">機能ページを取得できませんでした。時間を置いて再度お試しください。</div>
+      </div>
+    </section>
+  )}
+
+  {pageItems.length > 0 && (
+    <section class="features-content">
+      <div class="container features-doc-grid">
+        <article class="feature-main" id="featureMain">
+          {pageItems.map((item) => (
+            <section class="feature-section" id={item.sectionId} data-toc-title={item.displayTitle}>
+              {!isParentFallback && (
+                <div class="feature-head">
+                  <span class="chip">F.{item.no}</span>
+                  <h2 set:html={item.title.rendered}></h2>
+                </div>
+              )}
+              <div class="feature-body" set:html={stripWpToc(item.content.rendered)}></div>
+            </section>
+          ))}
+        </article>
+
+        <aside class="doc-toc" aria-label="このページの目次">
+          <div class="toc-head">ON THIS PAGE</div>
+          <ol id="tocList"></ol>
+        </aside>
+      </div>
+    </section>
+  )}
+
+  <SiteFooter />
+
+  <script>
+    const slugify = (value: string) =>
+      value
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\u3040-\u30ff\u3400-\u9fbf\s-]/g, '')
+        .replace(/\s+/g, '-');
+
+    const featureMain = document.getElementById('featureMain');
+    const tocList = document.getElementById('tocList');
+
+    if (featureMain && tocList) {
+      const headings = Array.from(featureMain.querySelectorAll('h2, h3'));
+      const appendTocItem = (id: string, text: string, isSubitem = false) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.textContent = text;
+        if (isSubitem) {
+          a.classList.add('toc-subitem');
+        }
+        li.appendChild(a);
+        tocList.appendChild(li);
+      };
+
+      const h2Only = Array.from(featureMain.querySelectorAll('h2'));
+      const targetHeadings = h2Only.length > 0 ? h2Only : headings;
+
+      if (targetHeadings.length > 0) {
+        targetHeadings.forEach((heading, index) => {
+          if (!heading.id) {
+            const seed = slugify(heading.textContent || 'section');
+            heading.id = seed ? `${seed}-${index + 1}` : `section-${index + 1}`;
+          }
+          appendTocItem(heading.id, heading.textContent || '', false);
+        });
+      } else {
+        const sectionNodes = Array.from(featureMain.querySelectorAll<HTMLElement>('.feature-section[id]'));
+        sectionNodes.forEach((section, index) => {
+          if (!section.id) {
+            section.id = `section-${index + 1}`;
+          }
+          const label = section.dataset.tocTitle?.trim() || `セクション ${index + 1}`;
+          appendTocItem(section.id, label, false);
+        });
+      }
+
+      const tocLinks = Array.from(tocList.querySelectorAll('a'));
+      const setActiveToc = (id: string) => {
+        tocLinks.forEach((a) => {
+          a.classList.toggle('active', a.getAttribute('href') === id);
+        });
+      };
+
+      if (tocLinks.length > 0) {
+        tocLinks[0].classList.add('active');
+      }
+
+      const sections = tocLinks
+        .map((a) => document.getElementById(a.getAttribute('href')?.replace('#', '') || ''))
+        .filter((item): item is HTMLElement => Boolean(item));
+
+      if (sections.length > 0) {
+        const obs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entryItem) => {
+              if (!entryItem.isIntersecting) {
+                return;
+              }
+
+              const id = `#${entryItem.target.id}`;
+              setActiveToc(id);
+            });
+          },
+          { rootMargin: '-30% 0px -60% 0px' },
+        );
+
+        sections.forEach((section) => obs.observe(section));
+
+        const updateActiveByScroll = () => {
+          const offset = 140;
+          const current = [...sections]
+            .reverse()
+            .find((section) => window.scrollY + offset >= section.offsetTop);
+          if (current instanceof HTMLElement) {
+            setActiveToc(`#${current.id}`);
+          }
+        };
+
+        window.addEventListener('scroll', updateActiveByScroll, { passive: true });
+        updateActiveByScroll();
+      }
+    }
+  </script>
+</Layout>
+
+<style>
+  .features-hero {
+    padding: 30px 0 44px;
+    background:
+      radial-gradient(ellipse 60% 40% at 86% 20%, rgba(243, 154, 45, 0.12), transparent 65%),
+      radial-gradient(ellipse 45% 35% at 8% 88%, rgba(123, 200, 232, 0.15), transparent 65%);
+  }
+
+  .breadcrumb {
+    padding: 12px 0 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a { color: var(--ink-2); }
+  .breadcrumb .sep { opacity: 0.5; }
+  .breadcrumb .here { color: var(--ink); }
+
+  .hero-inner h1 {
+    margin: 10px 0 14px;
+    font-size: clamp(32px, 4.8vw, 52px);
+  }
+
+  .hero-inner .lead {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 17px;
+  }
+
+  .features-index {
+    padding: 20px 0 24px;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 940px) {
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+
+  .feature-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 6px 0 var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform .2s;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .feature-card .num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--brand-deep);
+    background: var(--brand-soft);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  .feature-card h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+
+  .feature-card p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .feature-section {
+    padding: 36px 0;
+  }
+
+  .feature-section + .feature-section {
+    border-top: 1px dashed var(--line);
+  }
+
+  .feature-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .feature-head .chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--brand-deep);
+    background: var(--brand-soft);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  .feature-head h2 {
+    margin: 0;
+    font-size: clamp(24px, 3.2vw, 34px);
+  }
+
+  .features-content {
+    padding: 12px 0 46px;
+  }
+
+  .features-doc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .feature-main {
+    min-width: 0;
+  }
+
+  @media (max-width: 980px) {
+    .features-doc-grid {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+
+    .doc-toc {
+      display: none;
+    }
+  }
+
+  .feature-body {
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.85;
+    counter-reset: manual-h2;
+  }
+
+  .feature-body :global(h2) {
+    font-size: 28px;
+    margin: 60px 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--brand);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    scroll-margin-top: 90px;
+  }
+
+  .feature-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .feature-body :global(h2)::before {
+    counter-increment: manual-h2;
+    content: counter(manual-h2, decimal-leading-zero);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: white;
+    background: var(--brand);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    line-height: 1.2;
+    flex: none;
+  }
+
+  .feature-body :global(h3) {
+    font-size: 22px;
+    margin: 40px 0 14px;
+    color: var(--ink);
+    scroll-margin-top: 90px;
+  }
+
+  .feature-body :global(h3)::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: var(--brand);
+    margin-right: 12px;
+    vertical-align: middle;
+    transform: translateY(-2px);
+  }
+
+  .feature-body :global(h4) {
+    font-size: 18px;
+    margin: 28px 0 10px;
+  }
+
+  .feature-body :global(p) {
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+
+  .feature-body :global(strong) {
+    color: var(--brand-deep);
+    background: linear-gradient(transparent 60%, var(--brand-soft) 60%);
+    padding: 0 3px;
+    font-weight: 800;
+  }
+
+  .feature-body :global(ul),
+  .feature-body :global(ol) {
+    margin: 0 0 18px;
+    padding-left: 22px;
+  }
+
+  .feature-body :global(li) {
+    margin-bottom: 6px;
+  }
+
+  .feature-body :global(blockquote) {
+    background: white;
+    border-left: 5px solid var(--sky);
+    border-radius: 0 14px 14px 0;
+    padding: 14px 18px;
+    margin: 16px 0 22px;
+    color: var(--ink);
+  }
+
+  .feature-body :global(hr) {
+    border: none;
+    border-top: 2px dashed var(--line);
+    margin: 32px 0;
+  }
+
+  .feature-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .feature-body :global(th),
+  .feature-body :global(td) {
+    border-bottom: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+  }
+
+  .feature-body :global(th) {
+    background: var(--cream);
+    font-weight: 800;
+  }
+
+  .feature-body :global(img) {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .feature-body :global(figure) {
+    margin: 18px 0;
+  }
+
+  .feature-body :global(figcaption),
+  .feature-body :global(.wp-caption-text) {
+    margin: 8px 0 0;
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .feature-body :global(.wp-caption) {
+    max-width: 100%;
+  }
+
+  .feature-body :global(iframe) {
+    max-width: 100%;
+    width: 100%;
+    min-height: 320px;
+    border: 0;
+    border-radius: 12px;
+  }
+
+  .doc-toc {
+    position: sticky;
+    top: 90px;
+    align-self: start;
+    width: 100%;
+    max-height: calc(100vh - 130px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+
+  .doc-toc .toc-head {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--brand);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-toc .toc-head::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--brand);
+    border-radius: 2px;
+  }
+
+  .doc-toc :global(ol) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 2px solid var(--line);
+  }
+
+  .doc-toc :global(a) {
+    display: block;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6B5E52;
+    border-left: 3px solid transparent;
+    margin-left: -2px;
+    transition: color .2s, border-color .2s, background .2s;
+    border-radius: 0 10px 10px 0;
+    line-height: 1.45;
+  }
+
+  .doc-toc :global(a.toc-subitem) {
+    padding-left: 24px;
+    font-size: 13px;
+    color: #6B5E52;
+  }
+
+  .doc-toc :global(a:hover) {
+    color: var(--brand);
+    background: rgba(243, 154, 45, 0.08);
+  }
+
+  .doc-toc :global(a.active) {
+    color: var(--brand);
+    border-left-color: var(--brand);
+    background: rgba(243, 154, 45, 0.2);
+  }
+
+  .empty {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+    color: var(--ink-2);
+  }
+</style>

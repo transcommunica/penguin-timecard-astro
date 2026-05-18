@@ -1,0 +1,384 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
+
+const WP_FAQ_BLUE_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/36';
+
+type WpPage = {
+  title: { rendered: string };
+  content: { rendered: string };
+  yoast_head_json?: {
+    title?: string;
+    og_description?: string;
+  };
+};
+
+type FaqItem = {
+  id: string;
+  question: string;
+  answerText: string;
+};
+
+const fetchFaqPage = async (): Promise<WpPage | null> => {
+  try {
+    const res = await fetch(WP_FAQ_BLUE_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return null;
+    const payload = await res.json() as unknown;
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+    return payload as WpPage;
+  } catch {
+    return null;
+  }
+};
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+// ブルー版: .card-title/.card-body 形式をパース
+const parseBlueFaqItems = (html: string): FaqItem[] => {
+  const items: FaqItem[] = [];
+  const qRegex = /<div class="card card-title"[\s\S]*?data-toggle="collapse"\s+href="#([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/div>/g;
+  const aRegex = /<div class="collapse answer"\s+id="([^"]+)"[\s\S]*?<div class="card card-body">\s*([\s\S]*?)\s*<\/div>/g;
+
+  const answers = new Map<string, string>();
+  let aMatch: RegExpExecArray | null;
+  while ((aMatch = aRegex.exec(html)) !== null) {
+    answers.set(aMatch[1], stripHtml(aMatch[2]));
+  }
+
+  let qMatch: RegExpExecArray | null;
+  let index = 0;
+  while ((qMatch = qRegex.exec(html)) !== null) {
+    index++;
+    const id = qMatch[1];
+    const question = stripHtml(qMatch[2]);
+    const answerText = answers.get(id) || '';
+    if (question) {
+      items.push({ id, question, answerText });
+    }
+  }
+  return items;
+};
+
+const wp = await fetchFaqPage();
+
+const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || 'よくある質問';
+const pageDescription = wp?.yoast_head_json?.og_description
+  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
+  ?.replace(/\[\.\.\.\]/g, '')
+  ?.trim()
+  || 'ペンギンタイムカード（ブルー版）のよくある質問ページです。';
+const displayTitle = wp?.title?.rendered || 'よくある質問';
+
+const faqItems = wp ? parseBlueFaqItems(wp.content.rendered) : [];
+
+// JSON-LD 構造化データ
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answerText,
+    },
+  })),
+};
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <SiteHeader />
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+  <section class="faq-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">よくある質問</span>
+      </div>
+      <div class="hero-inner">
+        <span class="eyebrow">FAQ</span>
+        <h1 set:html={displayTitle}></h1>
+        <p class="lead">{faqItems.length}件の質問と回答を掲載しています。</p>
+      </div>
+      <div class="version-notice">
+        こちらはブルー版のFAQです。
+        オレンジ版のFAQは<a href="/new-faq/">こちら</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq-section">
+    <div class="container">
+      {faqItems.length > 0 ? (
+        <dl class="faq-list">
+          {faqItems.map((item, index) => (
+            <div class="faq-item" id={item.id}>
+              <dt class="faq-q">
+                <button
+                  type="button"
+                  class="faq-toggle"
+                  aria-expanded="false"
+                  aria-controls={`ans-${item.id}`}
+                >
+                  <span class="q-badge">Q{String(index + 1).padStart(2, '0')}</span>
+                  <span class="q-text">{item.question}</span>
+                  <span class="q-icon" aria-hidden="true"></span>
+                </button>
+              </dt>
+              <dd class="faq-a" id={`ans-${item.id}`} hidden>
+                <div class="faq-a-inner">{item.answerText}</div>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
+      )}
+    </div>
+  </section>
+
+  <PageCta
+    eyebrow="CONTACT"
+    title="解決しないときは、お気軽に"
+    description="よくある質問で解決しない場合は、お問い合わせフォームからご相談ください。担当者から、できるだけ早くお返事します。"
+    buttonText="お問い合わせフォーム"
+    buttonHref="/contact-us/"
+    meta="マニュアルもぜひご覧ください"
+  />
+  <SiteFooter />
+</Layout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.faq-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      const answerId = btn.getAttribute('aria-controls');
+      const answer = answerId ? document.getElementById(answerId) : null;
+      btn.setAttribute('aria-expanded', String(!expanded));
+      btn.closest('.faq-item')?.classList.toggle('open', !expanded);
+      if (answer) {
+        answer.hidden = expanded;
+      }
+    });
+  });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+</script>
+
+<style>
+  .faq-hero {
+    padding: 30px 0 44px;
+    background:
+      radial-gradient(ellipse 60% 40% at 86% 20%, rgba(123, 200, 232, 0.15), transparent 65%),
+      radial-gradient(ellipse 45% 35% at 8% 88%, rgba(111, 191, 115, 0.12), transparent 65%);
+  }
+
+  .faq-hero .container,
+  .faq-section .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    padding: 12px 0 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a { color: var(--ink-2); }
+  .breadcrumb .sep { opacity: 0.5; }
+  .breadcrumb .here { color: var(--ink); }
+
+  .hero-inner .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    color: var(--sky);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .hero-inner h1 {
+    margin: 0 0 12px;
+    font-size: clamp(32px, 4.8vw, 52px);
+  }
+
+  .hero-inner .lead {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 16px;
+  }
+
+  .version-notice {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--ink-2);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: inline-block;
+  }
+
+  .version-notice a {
+    color: var(--brand-deep);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .faq-section {
+    padding: 40px 0 72px;
+  }
+
+  .faq-list {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .faq-item {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 0 var(--line);
+    transition: box-shadow .2s;
+  }
+
+  .faq-item.open {
+    box-shadow: 0 6px 0 rgba(123, 200, 232, 0.4);
+    border-color: var(--sky);
+  }
+
+  .faq-q { margin: 0; }
+
+  .faq-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    text-align: left;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .faq-toggle:hover {
+    background: rgba(123, 200, 232, 0.06);
+  }
+
+  .q-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: #3a8ab0;
+    background: rgba(123, 200, 232, 0.18);
+    border-radius: 999px;
+    padding: 3px 10px;
+    flex: none;
+    letter-spacing: 0.06em;
+  }
+
+  .faq-item.open .q-badge {
+    background: var(--sky);
+    color: #fff;
+  }
+
+  .q-text { flex: 1; }
+
+  .q-icon {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    position: relative;
+    transition: border-color .2s, background .2s;
+  }
+
+  .q-icon::before, .q-icon::after {
+    content: "";
+    position: absolute;
+    background: var(--ink-2);
+    border-radius: 2px;
+    transition: transform .25s, opacity .2s;
+  }
+
+  .q-icon::before {
+    width: 10px; height: 2px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .q-icon::after {
+    width: 2px; height: 10px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .faq-item.open .q-icon {
+    border-color: var(--sky);
+    background: var(--sky);
+  }
+
+  .faq-item.open .q-icon::before,
+  .faq-item.open .q-icon::after {
+    background: #fff;
+  }
+
+  .faq-item.open .q-icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+    opacity: 0;
+  }
+
+  .faq-a {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .faq-a-inner {
+    padding: 18px 20px 20px calc(20px + 14px + 44px);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+
+  .empty {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .faq-toggle { gap: 10px; font-size: 15px; }
+    .faq-a-inner { padding: 14px 16px 16px 16px; }
+  }
+</style>
