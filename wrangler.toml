@@ -1,8 +1,6 @@
 name = "penguin-timecard-astro"
 compatibility_date = "2026-05-19"
-
-[assets]
-directory = "./dist"
+pages_build_output_dir = "./dist"
 
 [vars]
 CONTACT_FROM_EMAIL = "noreply@example.com"
