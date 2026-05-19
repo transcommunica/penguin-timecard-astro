@@ -202,11 +202,56 @@ const fetchWpManualPages = async (): Promise<WpPage[]> => {
 
 export async function getStaticPaths() {
   const entries = await getCollection('manual');
-  return entries.map((item) => ({
+  const canonicalPaths = entries.map((item) => ({
     params: {
       slug: item.id.replace(/\.md$/, ''),
     },
   }));
+
+  // Static output only generates routes returned here, so include legacy WP slugs.
+  const legacyAliasToLocalSlug: Record<string, string> = {
+    'auto-overnight': 'auto-next-day',
+    'face-recognition-overview': 'face-auth-overview',
+    'face-recognition': 'face-auth',
+    'add-user': 'owner-account',
+    'add-staff': 'staff-account',
+    'display-input-only-account': 'limited-account',
+    'permission-edit-time': 'lock-edit-time',
+    'skip-work-detail': 'skip-detail-after-stamp',
+    'password-protection': 'admin-password',
+    'holiday-setting': 'holiday-settings',
+    'morning-overtime': 'early-overtime',
+    'closind-date': 'closing-day',
+    'unsubscribe': 'delete-account',
+    'cancel-subscription': 'cancel-subscription',
+    'subscribe': 'billing',
+    'basic-how-to-use': 'basic-usage',
+    'multiple-breaks': 'multi-break',
+    'shifts': 'shift-management',
+    'overnight24': 'open-24h',
+    'overnight1': 'midnight-operation',
+    'slack': 'slack-integration',
+    'category-pattern-setting': 'category-patterns',
+    'memo': 'memo-feature',
+    'screensaver': 'screensaver',
+    'open-24-hours': 'open-24h',
+    'open-24-hour': 'open-24h',
+    '24-hour-operation': 'open-24h',
+    '24-hours-operation': 'open-24h',
+    '24hour-operation': 'open-24h',
+    '24h-operation': 'open-24h',
+    'multiple-break': 'multi-break',
+    'multiple-break-support': 'multi-break',
+    'late-night-operation': 'midnight-operation',
+    'night-shift-operation': 'midnight-operation',
+  };
+
+  const localSlugSet = new Set(canonicalPaths.map((path) => path.params.slug));
+  const aliasPaths = Object.entries(legacyAliasToLocalSlug)
+    .filter(([alias, localSlug]) => alias !== localSlug && localSlugSet.has(localSlug))
+    .map(([alias]) => ({ params: { slug: alias } }));
+
+  return [...canonicalPaths, ...aliasPaths];
 }
 
 const { slug } = Astro.params;
