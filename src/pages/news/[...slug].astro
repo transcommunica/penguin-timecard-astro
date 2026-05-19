@@ -97,6 +97,72 @@ const canonicalNewsSlug = (rawSlug: string, title: string) => {
   return /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
 };
 
+export async function getStaticPaths() {
+  const postsPerPage = 10;
+  const entries = await getCollection('news');
+  const mapByTitle: Record<string, string> = {
+    '純勤務時間の計算不具合について': 'net-worktime-calculation-bugfix',
+    '深夜割増時間などの時間帯集計に対応しました': 'late-night-premium-timeband-support',
+    '24時間営業に対応しました': 'support-24-hour-operation',
+    'アルコールチェック記録簿': 'alcohol-check-logbook',
+    '複数回休憩に対応しました': 'multiple-break-support',
+    '深夜勤務に対応しました': 'late-night-shift-support',
+    'AI顔認証機能（バージョン6）をリリースしました': 'ai-6',
+    'バージョン5.8.1をリリースしました': '5-8-1',
+    'バージョン5.7.0をリリースしました': '5-7-0',
+    'バージョン2.5をリリース': '2-5',
+  };
+
+  const toAscii = (input: string) =>
+    String(input || '')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-');
+
+  const canonical = (rawSlug: string, title: string) => {
+    const mapped = mapByTitle[title];
+    if (mapped) return mapped;
+    const raw = String(rawSlug || '').trim();
+    if (!raw) return '';
+    let decoded = raw;
+    try {
+      decoded = decodeURIComponent(raw);
+    } catch {
+      decoded = raw;
+    }
+    const fromDecoded = toAscii(decoded);
+    if (fromDecoded) return fromDecoded;
+    return /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+  };
+
+  const detailSlugs = Array.from(
+    new Set(
+      entries
+        .map((entry) => {
+          const fileSlug = String(entry.id || '')
+            .split('/')
+            .pop()
+            ?.replace(/\.(md|mdx)$/i, '')
+            .trim() || '';
+          return canonical(entry.data.slug || fileSlug, entry.data.title || '');
+        })
+        .filter(Boolean),
+    ),
+  );
+
+  const totalPages = Math.max(1, Math.ceil(detailSlugs.length / postsPerPage));
+  const pagePaths = Array.from({ length: Math.max(0, totalPages - 1) }, (_, idx) => ({
+    params: { slug: String(idx + 2) },
+  }));
+
+  return [
+    ...detailSlugs.map((slug) => ({ params: { slug } })),
+    ...pagePaths,
+  ];
+}
+
 const toNewsHref = (slug: string) => {
   const raw = String(slug || '').trim();
   if (!raw) return '/news/';
@@ -674,6 +740,14 @@ if (isPageRoute) {
   .news-detail-body :global(th) {
     background: rgba(0, 0, 0, 0.04);
     font-weight: 700;
+  }
+
+  .news-detail-body :global(iframe) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 
   @media (max-width: 720px) {

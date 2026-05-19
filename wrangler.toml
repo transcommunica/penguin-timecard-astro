@@ -1,12 +1,7 @@
-name = "penguin-timecard"
-compatibility_date = "2026-05-14"
+name = "penguin-timecard-astro"
+compatibility_date = "2026-05-19"
+pages_build_output_dir = "./dist"
 
 [vars]
-# 本番はCloudflare Pagesの環境変数画面で設定してください。
-CONTACT_FROM_EMAIL = "Penguin Timecard <noreply@example.com>"
-CONTACT_TO_EMAIL = "info@example.com"
-
-# RESEND_API_KEY は .env ファイルで設定してください
-[env.production.vars]
-CONTACT_FROM_EMAIL = "Penguin Timecard <noreply@example.com>"
+CONTACT_FROM_EMAIL = "noreply@example.com"
 CONTACT_TO_EMAIL = "info@example.com"

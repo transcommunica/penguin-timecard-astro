@@ -3,49 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
-
-const WP_DOWNLOAD_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/2382';
-
-type WpPage = {
-  title: { rendered: string };
-  content: { rendered: string };
-  yoast_head_json?: {
-    title?: string;
-    og_description?: string;
-  };
-};
-
-const fetchDownloadPage = async (): Promise<WpPage | null> => {
-  try {
-    const res = await fetch(WP_DOWNLOAD_ENDPOINT, {
-      headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) return null;
-    const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
-    return payload as WpPage;
-  } catch {
-    return null;
-  }
-};
-
-const wp = await fetchDownloadPage();
-
-const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || 'ダウンロード';
-const pageDescription = wp?.yoast_head_json?.og_description
-  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
-  ?.trim()
-  || 'ペンギンタイムカードのアプリダウンロードページです。';
-
-const displayTitle = wp?.title?.rendered || 'ダウンロード';
+const pageTitle = 'ダウンロード';
+const pageDescription = 'ペンギンタイムカードのアプリダウンロードページです。';
+const displayTitle = 'ダウンロード';
 
 const platforms = [
   {
     id: 'windows',
     label: 'Windows',
     sub: 'デスクトップアプリ',
-    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/windows-1.jpg',
-    href: 'https://tc-timecard.com/wp-content/uploads/windows/%E3%83%9A%E3%83%B3%E3%82%AE%E3%83%B3%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%AB%E3%83%BC%E3%83%89_1.4.1.0.exe',
+    img: '/assets/download/windows-1.jpg',
+    href: '/assets/download/windows/penguin-timecard-1.4.1.0.exe',
     cta: 'ダウンロード（.exe）',
     badge: 'Windows',
   },
@@ -53,7 +21,7 @@ const platforms = [
     id: 'ipad-iphone',
     label: 'iPad / iPhone',
     sub: 'iOS アプリ',
-    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/appstore.jpg',
+    img: '/assets/download/appstore.jpg',
     href: 'https://apps.apple.com/jp/app/id1568440167',
     cta: 'App Store で入手',
     badge: 'iOS',
@@ -62,7 +30,7 @@ const platforms = [
     id: 'android',
     label: 'Android',
     sub: 'Android アプリ',
-    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/googleplay.jpg',
+    img: '/assets/download/googleplay.jpg',
     href: 'https://play.google.com/store/apps/details?id=com.transcommunica.TimeCardCloud',
     cta: 'Google Play で入手',
     badge: 'Android',
@@ -71,7 +39,7 @@ const platforms = [
     id: 'web',
     label: 'WEB ブラウザ',
     sub: 'インストール不要',
-    img: 'https://tc-timecard.com/wp-content/uploads/2022/01/web-1.jpg',
+    img: '/assets/download/web-1.jpg',
     href: 'https://m.tc-timecard.com/#/',
     cta: 'ブラウザで開く',
     badge: 'WEB',

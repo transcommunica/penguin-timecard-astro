@@ -200,6 +200,15 @@ const fetchWpManualPages = async (): Promise<WpPage[]> => {
   }
 };
 
+export async function getStaticPaths() {
+  const entries = await getCollection('manual');
+  return entries.map((item) => ({
+    params: {
+      slug: item.id.replace(/\.md$/, ''),
+    },
+  }));
+}
+
 const { slug } = Astro.params;
 const wpPages = (await fetchWpManualPages()).sort((a, b) => {
   const leftOrder = typeof a.menu_order === 'number' ? a.menu_order : 0;
@@ -922,6 +931,14 @@ const description = pageDescription;
     margin: 8px 0 0;
     color: var(--ink-2);
     font-size: 13px;
+  }
+
+  .doc-body :global(iframe) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 
   .doc-body :global(th),
