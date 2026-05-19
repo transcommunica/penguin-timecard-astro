@@ -1,3 +1,7 @@
 name = "penguin-timecard-astro"
 compatibility_date = "2026-05-19"
 pages_build_output_dir = "./dist"
+
+[vars]
+CONTACT_FROM_EMAIL = "onboarding@resend.dev"
+CONTACT_TO_EMAIL = "kakisako.h@transcommunica.com"
