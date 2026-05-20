@@ -3,5 +3,5 @@ compatibility_date = "2026-05-19"
 pages_build_output_dir = "./dist"
 
 [vars]
-CONTACT_FROM_EMAIL = "onboarding@resend.dev"
-CONTACT_TO_EMAIL = "kakisako.h@transcommunica.com"
+CONTACT_FROM_EMAIL = "Penguin Timecard <noreply@send.tc-timecard.com>"
+CONTACT_TO_EMAIL = "timecard@transcommunica.com,kakisako.h@transcommunica.com"
