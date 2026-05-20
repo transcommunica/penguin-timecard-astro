@@ -22,56 +22,58 @@ seoDescription: "丸め処理の考え方と、ペンギンタイムカードア
 <h3>4. 計算方法</h3>
 <p>丸め処理の時間と種類によって、以下のように計算されます。</p>
 <p>例）定時退社18:00で、18:23に退社した</p>
+<div class="table-scroll">
 <table class="table1 table">
 <tbody>
-<tr style="height: 24px;">
-<td style="width: 81.8833px; height: 24px;">打刻</td>
-<td style="width: 82.6667px; height: 24px;">丸め時間</td>
-<td style="width: 82.65px; height: 24px;">丸め種類</td>
-<td style="width: 83.8px; height: 24px;">丸め結果</td>
+<tr>
+<td>打刻</td>
+<td>丸め時間</td>
+<td>丸め種類</td>
+<td>丸め結果</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 81.8833px; height: 216px;" rowspan="9">18:23</td>
-<td style="width: 82.6667px; height: 72px;" rowspan="3">5分</td>
-<td style="width: 82.65px; height: 24px;">切り捨て</td>
-<td style="width: 83.8px; height: 24px;">18:20</td>
+<tr>
+<td rowspan="9">18:23</td>
+<td rowspan="3">5分</td>
+<td>切り捨て</td>
+<td>18:20</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.65px; height: 24px;">切り上げ</td>
-<td style="width: 83.8px; height: 24px;">18:25</td>
+<tr>
+<td>切り上げ</td>
+<td>18:25</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.65px; height: 24px;">四捨五入</td>
-<td style="width: 83.8px; height: 24px;">18:25</td>
+<tr>
+<td>四捨五入</td>
+<td>18:25</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.6667px; height: 72px;" rowspan="3">10分</td>
-<td style="width: 82.65px; height: 24px;">切り捨て</td>
-<td style="width: 83.8px; height: 24px;">18:20</td>
+<tr>
+<td rowspan="3">10分</td>
+<td>切り捨て</td>
+<td>18:20</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.65px; height: 24px;">切り上げ</td>
-<td style="width: 83.8px; height: 24px;">18:30</td>
+<tr>
+<td>切り上げ</td>
+<td>18:30</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.65px; height: 24px;">四捨五入</td>
-<td style="width: 83.8px; height: 24px;">18:20</td>
+<tr>
+<td>四捨五入</td>
+<td>18:20</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.6667px; height: 72px;" rowspan="3">15分</td>
-<td style="width: 82.65px; height: 24px;">切り捨て</td>
-<td style="width: 83.8px; height: 24px;">18:15</td>
+<tr>
+<td rowspan="3">15分</td>
+<td>切り捨て</td>
+<td>18:15</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.65px; height: 24px;">切り上げ</td>
-<td style="width: 83.8px; height: 24px;">18:30</td>
+<tr>
+<td>切り上げ</td>
+<td>18:30</td>
 </tr>
-<tr style="height: 24px;">
-<td style="width: 82.65px; height: 24px;">四捨五入</td>
-<td style="width: 83.8px; height: 24px;">18:30</td>
+<tr>
+<td>四捨五入</td>
+<td>18:30</td>
 </tr>
 </tbody>
 </table>
+</div>
 <h3>5. 主な設定例</h3>
 <p>上記の設定は、<br />
 出勤時<br />

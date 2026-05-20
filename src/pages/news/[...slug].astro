@@ -742,6 +742,39 @@ if (isPageRoute) {
     font-weight: 700;
   }
 
+  .news-detail-body :global(.table-scroll) {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    margin: 1.2em 0;
+  }
+
+  .news-detail-body :global(.table-scroll .tc-table),
+  .news-detail-body :global(.table-scroll .table1) {
+    margin: 0;
+    width: max-content !important;
+    min-width: max-content;
+    table-layout: auto;
+  }
+
+  .news-detail-body :global(.table-scroll .tc-table th),
+  .news-detail-body :global(.table-scroll .tc-table td),
+  .news-detail-body :global(.table-scroll .table1 th),
+  .news-detail-body :global(.table-scroll .table1 td) {
+    white-space: nowrap;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .news-detail-body :global(.table-scroll .tc-table th:first-child),
+  .news-detail-body :global(.table-scroll .tc-table td:first-child),
+  .news-detail-body :global(.table-scroll .table1 th:first-child),
+  .news-detail-body :global(.table-scroll .table1 td:first-child) {
+    width: auto !important;
+  }
+
   .news-detail-body :global(iframe) {
     display: block;
     width: 100%;
@@ -783,6 +816,26 @@ if (isPageRoute) {
       display: block;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+    }
+
+    .news-detail-body :global(.table-scroll .tc-table),
+    .news-detail-body :global(.table-scroll .table1) {
+      display: table !important;
+      height: auto !important;
+    }
+
+    .news-detail-body :global(.table-scroll .tc-table tr),
+    .news-detail-body :global(.table-scroll .tc-table th),
+    .news-detail-body :global(.table-scroll .tc-table td),
+    .news-detail-body :global(.table-scroll .table1 tr),
+    .news-detail-body :global(.table-scroll .table1 th),
+    .news-detail-body :global(.table-scroll .table1 td) {
+      height: auto !important;
+    }
+
+    .news-detail-body :global(.table-scroll .tc-table),
+    .news-detail-body :global(.table-scroll .table1) {
+      min-width: max-content;
     }
   }
 </style>

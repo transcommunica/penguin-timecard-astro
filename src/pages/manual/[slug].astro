@@ -712,6 +712,16 @@ const description = pageDescription;
       }
     }
 
+    // Wrap tables in scroll containers
+    document.querySelectorAll('#docBody table').forEach((table) => {
+      if (!table.parentElement?.classList.contains('table-scroll-wrap')) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-scroll-wrap';
+        table.parentNode?.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      }
+    });
+
     document.querySelectorAll('.helpful button').forEach((button) => {
       button.addEventListener('click', () => {
         document.querySelectorAll('.helpful button').forEach((node) => node.classList.remove('picked'));
@@ -943,15 +953,23 @@ const description = pageDescription;
     margin: 32px 0;
   }
 
-  .doc-body :global(table) {
+  .doc-body :global(.table-scroll-wrap) {
     width: 100%;
-    border-collapse: collapse;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
     margin: 14px 0 22px;
-    overflow: hidden;
+  }
+
+  .doc-body :global(table) {
+    border-collapse: collapse;
+    margin: 0;
     border-radius: 12px;
     border: 1px solid var(--line);
-    display: block;
-    overflow-x: auto;
+  }
+
+  .doc-body :global(table th),
+  .doc-body :global(table td) {
     white-space: nowrap;
   }
 
@@ -988,7 +1006,7 @@ const description = pageDescription;
 
   .doc-body :global(th),
   .doc-body :global(td) {
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line);
     padding: 10px 12px;
     text-align: left;
   }
