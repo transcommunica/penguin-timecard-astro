@@ -581,6 +581,44 @@ body.mobile-nav-open .nav::after {
   mask: var(--m);
 }
 
+/* ============== HOW VIDEO ============== */
+.how-video-section {
+  padding-top: 44px;
+  padding-bottom: 0;
+}
+.how-video-wrap {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  max-width: 700px;
+  margin: 0 auto;
+}
+.how-video-embed {
+  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  line-height: 0;
+  background: #000;
+}
+.how-video-embed iframe {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+@media (max-width: 720px) {
+  .how-video-section {
+    padding-top: 28px;
+  }
+
+  .how-video-wrap {
+    border-radius: 18px;
+    padding: 10px;
+  }
+}
+
 /* ============== STEPS ============== */
 .steps-section {
   background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);

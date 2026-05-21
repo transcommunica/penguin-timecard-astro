@@ -55,6 +55,14 @@ const tidyWpText = (html: string) => {
   return normalized;
 };
 
+const cleanManualDescription = (text: string) =>
+  String(text || '')
+    .replace(/\[\s*…\s*\]/g, ' ')
+    .replace(/続きを読む(?:…|\.\.\.)?\s*from\s.*$/i, '')
+    .replace(/よくある質問[\s\S]*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const getFirstParagraphHtml = (html: string) => {
   const match = html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
   return match ? match[1] : html;
@@ -527,9 +535,11 @@ const categoryLabel = resolvedCategory ? categoryLabelMap[resolvedCategory] : '�
 const categoryEnLabel = resolvedCategory ? categoryEnMap[resolvedCategory] : 'WORDPRESS';
 
 const pageTitle = entry?.data.title ?? mdModule?.frontmatter.title ?? (wpPage ? stripHtml(wpPage.title.rendered) : '');
-const pageDescription = entry?.data.description
+const pageDescription = cleanManualDescription(
+  entry?.data.description
   ?? mdModule?.frontmatter.description
-  ?? (wpPage ? buildWpLead(wpPage.excerpt?.rendered || '', wpPage.content?.rendered || '', pageTitle) : '');
+  ?? (wpPage ? buildWpLead(wpPage.excerpt?.rendered || '', wpPage.content?.rendered || '', pageTitle) : ''),
+);
 const itemCodeText =
   entry?.data.itemCode ??
   mdModule?.frontmatter.itemCode ??

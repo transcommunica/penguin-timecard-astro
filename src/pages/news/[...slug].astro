@@ -4,7 +4,28 @@ import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 
-const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100';
+const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100&_embed';
+const WP_CATEGORIES_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/categories?per_page=100';
+
+type NewsTag = {
+  label: string;
+  cls: 't-fix' | 't-feature' | 't-update';
+};
+
+type WpTerm = {
+  id?: number;
+  parent?: number;
+  taxonomy?: string;
+  name?: string;
+  slug?: string;
+};
+
+type WpCategory = {
+  id: number;
+  parent: number;
+  name: string;
+  slug: string;
+};
 
 type WpPost = {
   slug: string;
@@ -12,6 +33,10 @@ type WpPost = {
   title: { rendered: string };
   excerpt: { rendered: string };
   content: { rendered: string };
+  categories?: number[];
+  _embedded?: {
+    'wp:term'?: WpTerm[][];
+  };
   yoast_head_json?: {
     title?: string;
     og_description?: string;
@@ -31,6 +56,11 @@ type MarkdownNewsPost = {
 };
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const normalizeNewsTitle = (text: string) =>
+  keepJapaneseLocaleText(stripHtml(String(text || '')))
+    .replace(/[\s\u3000]+/g, '')
+    .toLowerCase();
 
 const localizeWpUploads = (html: string) =>
   String(html || '').replace(/https?:\/\/tc-timecard\.com\/wp-content\/uploads\//g, '/assets/news/');
@@ -54,11 +84,74 @@ const fetchWpPosts = async (): Promise<WpPost[]> => {
   }
 };
 
+const fetchWpCategories = async (): Promise<WpCategory[]> => {
+  try {
+    const res = await fetch(WP_CATEGORIES_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const payload = await res.json() as unknown;
+    if (!Array.isArray(payload)) return [];
+    return payload as WpCategory[];
+  } catch {
+    return [];
+  }
+};
+
 const cleanExcerptHtml = (html: string) =>
   localizeWpUploads(keepJapaneseLocaleText(String(html || '')))
     .replace(/<p>\s*<a[^>]*>\s*続きを読む[\s\S]*?<\/a>\s*<\/p>/gi, '')
     .replace(/<a[^>]*>\s*続きを読む[\s\S]*?<\/a>/gi, '')
     .trim();
+
+const getNewsTagByText = (text: string): NewsTag => {
+  if (/不具合|修正/.test(text)) return { label: '修正', cls: 't-fix' };
+  if (/新機能|リリース/.test(text)) return { label: '新機能', cls: 't-feature' };
+  return { label: '更新', cls: 't-update' };
+};
+
+const getPrimaryWpCategoryTerm = (post: WpPost, categoryById: Map<number, WpCategory>): WpCategory | undefined => {
+  const categoryIds = post.categories || [];
+  if (!Array.isArray(categoryIds) || categoryIds.length === 0) return undefined;
+  const primaryId = categoryIds[0];
+  const cat = categoryById.get(primaryId);
+  if (cat && cat.slug !== 'uncategorized') return cat;
+  return cat;
+};
+
+const getParentCategoryLabel = (
+  category: WpCategory | undefined,
+  categoryById: Map<number, WpCategory>,
+): string | undefined => {
+  if (!category) return undefined;
+  const parentId = Number(category.parent || 0);
+  if (parentId <= 0) return undefined;
+  const parent = categoryById.get(parentId);
+  const label = keepJapaneseLocaleText(String(parent?.name || '')).trim();
+  return label || undefined;
+};
+
+const getNewsTagFromWpPostForList = (
+  post: WpPost,
+  fallbackText: string,
+  categoryById: Map<number, WpCategory>,
+): NewsTag => {
+  const primaryCategory = getPrimaryWpCategoryTerm(post, categoryById);
+  const parentLabel = getParentCategoryLabel(primaryCategory, categoryById);
+  const ownLabel = keepJapaneseLocaleText(String(primaryCategory?.name || '')).trim();
+  const categoryLabel = parentLabel || ownLabel;
+  if (!categoryLabel) return getNewsTagByText(fallbackText);
+  if (/不具合|修正/.test(categoryLabel)) return { label: categoryLabel, cls: 't-fix' };
+  if (/新機能|リリース/.test(categoryLabel)) return { label: categoryLabel, cls: 't-feature' };
+  return { label: categoryLabel, cls: 't-update' };
+};
+
+const getNewsTagFromWpPostForDetail = (post: WpPost, fallbackText: string, categoryById: Map<number, WpCategory>): NewsTag => {
+  const primaryCategory = getPrimaryWpCategoryTerm(post, categoryById);
+  const categoryLabel = keepJapaneseLocaleText(String(primaryCategory?.name || '')).trim();
+  if (!categoryLabel) return getNewsTagByText(fallbackText);
+  if (/不具合|修正/.test(categoryLabel)) return { label: categoryLabel, cls: 't-fix' };
+  if (/新機能|リリース/.test(categoryLabel)) return { label: categoryLabel, cls: 't-feature' };
+  return { label: categoryLabel, cls: 't-update' };
+};
 
 const newsSlugMapByTitle: Record<string, string> = {
   '純勤務時間の計算不具合について': 'net-worktime-calculation-bugfix',
@@ -249,12 +342,6 @@ const formatDate = (dateStr: string) => {
   return `${y}.${m}.${day}`;
 };
 
-const getNewsCategory = (titleText: string) => {
-  if (/不具合|修正/.test(titleText)) return { label: '修正', cls: 't-fix' };
-  if (/新機能/.test(titleText)) return { label: '新機能', cls: 't-feature' };
-  return { label: '更新', cls: 't-update' };
-};
-
 const routeParam = String(Astro.params.slug || '').trim();
 const segments = routeParam.split('/').filter(Boolean);
 
@@ -295,19 +382,31 @@ const markdownNewsPosts = (await Promise.all(
 const contentPosts = (await getCollection('news')).sort(
   (a, b) => +new Date(b.data.date) - +new Date(a.data.date)
 );
+const wpPosts = await fetchWpPosts();
+const wpCategories = await fetchWpCategories();
+const wpCategoryById = new Map(wpCategories.map((cat) => [cat.id, cat] as const));
+const wpPostByCanonicalSlug = new Map(
+  wpPosts.map((post) => {
+    const titleText = keepJapaneseLocaleText(stripHtml(post.title.rendered));
+    return [canonicalNewsSlug(post.slug, titleText), post] as const;
+  })
+);
+const wpPostByNormalizedTitle = new Map(
+  wpPosts.map((post) => [normalizeNewsTitle(post.title.rendered), post] as const)
+);
 
 let renderListPage = false;
 let layoutTitle = 'お知らせ';
 let layoutDescription = 'ペンギンタイムカードのお知らせ一覧です。';
 let currentPage = 1;
 let totalPages = 1;
-let paginatedPosts: Array<{ slug: string; date: string; title: string; excerptHtml: string }> = [];
+let paginatedPosts: Array<{ slug: string; date: string; title: string; excerptHtml: string; tag: NewsTag }> = [];
 
 let postDate = '';
 let postTitle = '';
 let postContentHtml = '';
 let Content: Awaited<ReturnType<typeof render>>['Content'] | null = null;
-let newsCategory = { label: '更新', cls: 't-update' };
+let newsCategory: NewsTag = { label: '更新', cls: 't-update' };
 let backHref = '/news/';
 let backLabel = '一覧に戻る';
 
@@ -318,13 +417,21 @@ if (isPageRoute) {
   }
 
   const hasMarkdownPosts = markdownNewsPosts.length > 0;
-  const wpPosts = !hasMarkdownPosts && contentPosts.length === 0 ? await fetchWpPosts() : [];
   const posts = hasMarkdownPosts
     ? markdownNewsPosts.map((post) => ({
         slug: post.slug,
         date: post.date,
         title: post.title,
         excerptHtml: post.excerptHtml,
+        tag: (() => {
+          const wpPost =
+            wpPostByCanonicalSlug.get(post.slug)
+            || wpPostByNormalizedTitle.get(normalizeNewsTitle(post.title));
+          if (wpPost) {
+            return getNewsTagFromWpPostForList(wpPost, post.title, wpCategoryById);
+          }
+          return getNewsTagByText(post.title);
+        })(),
       }))
     : contentPosts.length > 0
       ? contentPosts.map((post) => ({
@@ -332,6 +439,16 @@ if (isPageRoute) {
         date: post.data.date,
         title: keepJapaneseLocaleText(post.data.title),
         excerptHtml: cleanExcerptHtml(post.data.excerptHtml),
+        tag: (() => {
+          const contentSlug = canonicalNewsSlug(post.data.slug, post.data.title);
+          const wpPost =
+            wpPostByCanonicalSlug.get(contentSlug)
+            || wpPostByNormalizedTitle.get(normalizeNewsTitle(post.data.title));
+          if (wpPost) {
+            return getNewsTagFromWpPostForList(wpPost, keepJapaneseLocaleText(post.data.title), wpCategoryById);
+          }
+          return getNewsTagByText(keepJapaneseLocaleText(post.data.title));
+        })(),
       }))
       : wpPosts
           .sort((a, b) => +new Date(b.date) - +new Date(a.date))
@@ -340,6 +457,7 @@ if (isPageRoute) {
             date: post.date,
             title: keepJapaneseLocaleText(post.title.rendered),
             excerptHtml: cleanExcerptHtml(post.excerpt.rendered),
+            tag: getNewsTagFromWpPostForList(post, keepJapaneseLocaleText(stripHtml(post.title.rendered)), wpCategoryById),
           }));
 
   totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage));
@@ -359,7 +477,6 @@ if (isPageRoute) {
     return isSameNewsSlug(slug, entry.data.slug, entry.data.title, entry.id);
   });
 
-  const wpPosts = markdownPost || contentPost ? [] : await fetchWpPosts();
   const wpPost = markdownPost || contentPost
     ? undefined
     : wpPosts.find((entry) => {
@@ -398,7 +515,21 @@ if (isPageRoute) {
   postContentHtml = isMarkdownSource || isContentSource
     ? ''
     : localizeWpUploads(keepJapaneseLocaleText(wpPost?.content?.rendered || ''));
-  newsCategory = getNewsCategory(stripHtml(postTitle));
+
+  if (wpPost) {
+    newsCategory = getNewsTagFromWpPostForDetail(wpPost, stripHtml(postTitle), wpCategoryById);
+  } else {
+    const sourceSlug = isMarkdownSource
+      ? markdownPost?.slug || ''
+      : canonicalNewsSlug(contentPost?.data.slug || '', contentPost?.data.title || '');
+    const relatedWpPost = sourceSlug
+      ? (wpPostByCanonicalSlug.get(sourceSlug)
+        || wpPostByNormalizedTitle.get(normalizeNewsTitle(postTitle)))
+      : wpPostByNormalizedTitle.get(normalizeNewsTitle(postTitle));
+    newsCategory = relatedWpPost
+      ? getNewsTagFromWpPostForDetail(relatedWpPost, stripHtml(postTitle), wpCategoryById)
+      : getNewsTagByText(stripHtml(postTitle));
+  }
 
   const source = Astro.url.searchParams.get('from');
   const sourcePageParam = Number(Astro.url.searchParams.get('page') || '1');
@@ -425,7 +556,7 @@ if (isPageRoute) {
             {paginatedPosts.map((post) => (
               <a class="news-row news-row-page" href={withSourceParam(toNewsHref(post.slug), 'news', currentPage)}>
                 <span class="news-date">{formatDate(post.date)}</span>
-                <span class="news-tag t-update">お知らせ</span>
+                <span class={`news-tag ${post.tag.cls}`}>{post.tag.label}</span>
                 <span class="news-title-wrap">
                   <span class="news-title" set:html={post.title}></span>
                   <span class="news-excerpt" set:html={post.excerptHtml}></span>

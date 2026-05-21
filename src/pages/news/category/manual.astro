@@ -1,0 +1,287 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import SiteHeader from '../../../components/SiteHeader.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
+
+const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100&_embed';
+const WP_CATEGORIES_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/categories?per_page=100';
+
+type WpTerm = {
+  id?: number;
+  parent?: number;
+  taxonomy?: string;
+  name?: string;
+  slug?: string;
+};
+
+type WpCategory = {
+  id: number;
+  parent: number;
+  name: string;
+  slug: string;
+};
+
+type WpPost = {
+  slug: string;
+  date: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+  categories?: number[];
+  _embedded?: {
+    'wp:term'?: WpTerm[][];
+  };
+};
+
+type NewsTag = {
+  label: string;
+  cls: 't-fix' | 't-feature' | 't-update';
+};
+
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const localizeWpUploads = (html: string) =>
+  String(html || '').replace(/https?:\/\/tc-timecard\.com\/wp-content\/uploads\//g, '/assets/news/');
+
+const keepJapaneseLocaleText = (text: string) =>
+  String(text || '')
+    .replace(/\[:(?!ja\])[a-z-]+\][\s\S]*?(?=(\[:[a-z-]+\]|\[:\]|$))/gi, '')
+    .replace(/\[:ja\]/gi, '')
+    .replace(/\[:\]/g, '')
+    .trim();
+
+const cleanExcerptHtml = (html: string) =>
+  localizeWpUploads(keepJapaneseLocaleText(String(html || '')))
+    .replace(/<p>\s*<a[^>]*>\s*続きを読む[\s\S]*?<\/a>\s*<\/p>/gi, '')
+    .replace(/<a[^>]*>\s*続きを読む[\s\S]*?<\/a>/gi, '')
+    .trim();
+
+const toAsciiSlug = (input: string) =>
+  String(input || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+
+const newsSlugMapByTitle: Record<string, string> = {
+  '純勤務時間の計算不具合について': 'net-worktime-calculation-bugfix',
+  '深夜割増時間などの時間帯集計に対応しました': 'late-night-premium-timeband-support',
+  '24時間営業に対応しました': 'support-24-hour-operation',
+  'アルコールチェック記録簿': 'alcohol-check-logbook',
+  '複数回休憩に対応しました': 'multiple-break-support',
+  '深夜勤務に対応しました': 'late-night-shift-support',
+  'AI顔認証機能（バージョン6）をリリースしました': 'ai-6',
+  'バージョン5.8.1をリリースしました': '5-8-1',
+  'バージョン5.7.0をリリースしました': '5-7-0',
+  'バージョン2.5をリリース': '2-5',
+};
+
+const canonicalNewsSlug = (rawSlug: string, title: string) => {
+  const mapped = newsSlugMapByTitle[title];
+  if (mapped) return mapped;
+  const raw = String(rawSlug || '').trim();
+  if (!raw) return '';
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    decoded = raw;
+  }
+  const fromDecoded = toAsciiSlug(decoded);
+  if (fromDecoded) return fromDecoded;
+  return /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+};
+
+const toNewsHref = (slug: string) => {
+  const raw = String(slug || '').trim();
+  if (!raw) return '/news/';
+  const safe = /%[0-9A-Fa-f]{2}/.test(raw) ? raw : encodeURIComponent(raw);
+  return `/news/${safe}/`;
+};
+
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}.${m}.${day}`;
+};
+
+const getTagByText = (text: string): NewsTag => {
+  if (/不具合|修正/.test(text)) return { label: '修正', cls: 't-fix' };
+  if (/新機能|リリース/.test(text)) return { label: '新機能', cls: 't-feature' };
+  return { label: '更新', cls: 't-update' };
+};
+
+const fetchWpPosts = async (): Promise<WpPost[]> => {
+  try {
+    const res = await fetch(WP_POSTS_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const payload = await res.json() as unknown;
+    if (!Array.isArray(payload)) return [];
+    return payload as WpPost[];
+  } catch {
+    return [];
+  }
+};
+
+const fetchWpCategories = async (): Promise<WpCategory[]> => {
+  try {
+    const res = await fetch(WP_CATEGORIES_ENDPOINT, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const payload = await res.json() as unknown;
+    if (!Array.isArray(payload)) return [];
+    return payload as WpCategory[];
+  } catch {
+    return [];
+  }
+};
+
+const categories = await fetchWpCategories();
+const categoryById = new Map(categories.map((cat) => [cat.id, cat] as const));
+const manualRoot = categories.find((cat) => cat.slug === 'manual');
+
+const collectDescendantCategoryIds = (rootId: number): Set<number> => {
+  const ids = new Set<number>([rootId]);
+  let updated = true;
+  while (updated) {
+    updated = false;
+    for (const cat of categories) {
+      if (!ids.has(cat.id) && ids.has(cat.parent)) {
+        ids.add(cat.id);
+        updated = true;
+      }
+    }
+  }
+  return ids;
+};
+
+const manualCategoryIds = manualRoot ? collectDescendantCategoryIds(manualRoot.id) : new Set<number>();
+
+const belongsToManualCategory = (post: WpPost): boolean => {
+  const catIds = Array.isArray(post.categories) ? post.categories : [];
+  return catIds.some((id) => manualCategoryIds.has(Number(id)));
+};
+
+const getManualTag = (): NewsTag => ({ label: '使い方', cls: 't-update' });
+
+const posts = (await fetchWpPosts())
+  .filter((post) => belongsToManualCategory(post))
+  .sort((a, b) => +new Date(b.date) - +new Date(a.date))
+  .map((post) => {
+    const titleText = keepJapaneseLocaleText(stripHtml(post.title.rendered));
+    return {
+      slug: canonicalNewsSlug(post.slug, titleText),
+      date: post.date,
+      title: titleText,
+      excerptHtml: cleanExcerptHtml(post.excerpt.rendered),
+      tag: getManualTag(),
+    };
+  });
+
+const pageTitle = 'ブルー版マニュアル（使い方）';
+const pageDescription = 'ブルー版の使い方カテゴリに属するお知らせ一覧です。';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <SiteHeader />
+
+  <section class="section news-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">BLUE MANUAL</span>
+        <h1>使い方（ブルー版）</h1>
+        <p class="lead">ブルー版マニュアルに関連するお知らせをまとめています。</p>
+      </div>
+
+      {posts.length > 0 ? (
+        <div class="news-list">
+          {posts.map((post) => (
+            <a class="news-row news-row-page" href={toNewsHref(post.slug)}>
+              <span class="news-date">{formatDate(post.date)}</span>
+              <span class={`news-tag ${post.tag.cls}`}>{post.tag.label}</span>
+              <span class="news-title-wrap">
+                <span class="news-title" set:html={post.title}></span>
+                <span class="news-excerpt" set:html={post.excerptHtml}></span>
+              </span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="empty">使い方カテゴリの投稿を取得できませんでした。</p>
+      )}
+    </div>
+  </section>
+
+  <SiteFooter />
+</Layout>
+
+<style>
+  .news-section {
+    padding-top: 36px;
+  }
+
+  .section-head h1 {
+    margin: 10px 0 14px;
+    font-size: clamp(34px, 4.8vw, 52px);
+  }
+
+  .news-row-page {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .news-title-wrap {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .news-excerpt {
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .news-excerpt :global(p) {
+    margin: 0;
+  }
+
+  .empty {
+    color: var(--ink-2);
+    font-size: 15px;
+    margin-top: 16px;
+  }
+
+  @media (max-width: 720px) {
+    .news-row-page {
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .news-row-page .news-date {
+      grid-column: 1;
+    }
+
+    .news-row-page .news-tag {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .news-row-page .news-title-wrap {
+      grid-column: 1 / -1;
+    }
+
+    .news-row-page > svg {
+      display: none;
+    }
+  }
+</style>
