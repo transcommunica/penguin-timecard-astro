@@ -15,8 +15,7 @@ order: 301
 
 #### 手順
 
-- こちらのリンクからログインします
-https://m.tc-timecard.com/?page=payment
+- [こちらのリンク](https://m.tc-timecard.com/?page=payment)からログインします
 - 「プラン更新・お支払い」を開きます
 - クレジットカードボタンをクリックします
 メール未認証の方は認証してください。

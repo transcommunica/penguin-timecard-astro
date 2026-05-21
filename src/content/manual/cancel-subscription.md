@@ -15,8 +15,7 @@ order: 303
 
 #### 手順
 
-- こちらのリンクからログインします
-https://m.tc-timecard.com/?page=payment
+- [こちらのリンク](https://m.tc-timecard.com/?page=payment)からログインします
 
 - 「お支払い」を開きます
 
@@ -28,9 +27,7 @@ https://m.tc-timecard.com/?page=payment
 
 - 以上で解約手続きは完了しています
 
-Appleにてお支払いの方は、下記リンクからもお手続きいただけます。
-
-https://support.apple.com/ja-jp/HT202039
+Appleにてお支払いの方は、[下記リンク](https://support.apple.com/ja-jp/HT202039)からもお手続きいただけます。
 
 #### 解約について
 

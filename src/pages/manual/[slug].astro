@@ -913,6 +913,17 @@ const description = pageDescription;
     color: var(--ink);
   }
 
+  .doc-body :global(a) {
+    color: color-mix(in srgb, var(--brand) 78%, white);
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .doc-body :global(a:hover) {
+    color: var(--brand);
+  }
+
   .doc-body :global(strong) {
     color: var(--brand-deep);
     background: linear-gradient(transparent 60%, var(--brand-soft) 60%);
