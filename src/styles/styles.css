@@ -17,6 +17,13 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+
+/* App webview mode: ?noheader=1 hides the site chrome so the page looks
+   like plain content when embedded in the mobile app. */
+html.noheader .nav,
+html.noheader .footer {
+  display: none !important;
+}
 body {
   background: var(--cream);
   color: var(--ink);
