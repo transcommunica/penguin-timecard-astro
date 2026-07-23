@@ -17,6 +17,15 @@ const { title = 'ペンギンタイムカード — インストールしたそ�
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<script is:inline>
+			(function () {
+				try {
+					if (new URLSearchParams(window.location.search).get('noheader') === '1') {
+						document.documentElement.classList.add('noheader');
+					}
+				} catch (e) {}
+			})();
+		</script>
 		<link rel="icon" href="/favicon.ico" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
