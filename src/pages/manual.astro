@@ -192,7 +192,7 @@ type WpPage = {
 	content: { rendered: string };
 };
 
-type ManualCategory = 'overview' | 'settings' | 'behavior' | 'billing';
+type ManualCategory = 'core' | 'overview' | 'settings' | 'behavior' | 'billing';
 
 type ManualListItem = {
 	slug: string;
@@ -231,13 +231,15 @@ const title = 'マニュアル — ペンギンタイムカード';
 const description = 'ペンギンタイムカードの使い方、機能説明などのマニュアル';
 
 const categoryMeta = [
-  { key: 'overview', num: '01', en: 'OVERVIEW', ja: '概要' },
-  { key: 'settings', num: '02', en: 'SETTINGS', ja: '設定' },
-  { key: 'behavior', num: '03', en: 'BEHAVIOR', ja: '動作関連' },
-  { key: 'billing', num: '04', en: 'BILLING', ja: 'お支払い・解約' },
+  { key: 'core', num: '01', en: 'CORE SETTINGS', ja: '重要な基本設定' },
+  { key: 'overview', num: '02', en: 'OVERVIEW', ja: '概要' },
+  { key: 'settings', num: '03', en: 'SETTINGS', ja: '設定' },
+  { key: 'behavior', num: '04', en: 'BEHAVIOR', ja: '動作関連' },
+  { key: 'billing', num: '05', en: 'BILLING', ja: 'お支払い・解約' },
 ] as const;
 
 const categoryCodePrefixMap: Record<ManualCategory, string> = {
+	core: 'C',
 	overview: 'M',
 	settings: 'S',
 	behavior: 'B',

@@ -1,28 +1,57 @@
 ---
 title: "カテゴリー、勤務パターン設定"
-description: "正社員・パートなど、雇用形態ごとに勤務パターンを設定する方法です。"
-category: "settings"
-itemCode: "S.01"
-keywords: ["カテゴリー", "勤務パターン"]
-isNew: false
-popular: false
-order: 101
+description: "正社員・パートなど、働き方ごとに勤怠の計算ルールをまとめる、ペンギンタイムカードの基本設定です。"
+category: "core"
+itemCode: "C.01"
+keywords: ["カテゴリー", "勤務パターン", "基本設定", "働き方"]
+isNew: true
+popular: true
+order: 1
 ---
 
 ## カテゴリー、勤務パターン設定
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/p2ubfRzJRew" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+「カテゴリー」は、正社員・パート・派遣といったスタッフの働き方ごとに、勤怠の計算ルールをまとめて設定する、ペンギンタイムカードの一番の土台になる設定です。ここで決めた内容をもとに、残業や勤務時間の計算、丸め処理、締め日、夜間営業の扱いなど、他の多くの設定が動きます。まずはカテゴリーの考え方を理解してから、必要な設定を個別のマニュアルで詳しく確認するのがおすすめです。
 
-- カテゴリーを選択、 または＋ボタンをクリックします
-- カテゴリー名を入力します
-- 曜日をクリックします
-- 勤務パターンを選択します 　
-新規作成の場合は＋ボタンをクリックします
-- 勤務パターンを作成します
-- いま作成した勤務パターンを選択します
-- 他の曜日も勤務パターンを選択します
-- 締め日など必要な項目を入力し保存します
-- 作成したカテゴリーはスタッフに割り当てて使います
+### カテゴリーとは
+
+スタッフには、時給で働くパートもいれば、月給で残業代の計算が必要な正社員もいます。働き方によって「何を基準に給与計算するか」が違うため、ペンギンタイムカードでは、スタッフを「カテゴリー」という単位でグループ分けし、カテゴリーごとに勤怠のルールを設定します（働き方ごとの計算の考え方は「[残業時間・勤務時間](/manual/worksummary/)」で詳しく解説しています）。
+
+1つのカテゴリーでは、主に次のような内容を設定します。
+
+- **標準勤務時間・勤務パターン**：曜日ごとの基本の勤務時間と休憩時間。残業や勤務時間の計算の基準になります（詳しくは「[残業時間・勤務時間](/manual/worksummary/)」）
+- **締め日**：給与計算の対象期間の区切り。正社員は月末締め、パートは20日締めのように、カテゴリーごとに分けられます（詳しくは「[締め日](/manual/closing-day/)」）
+- **丸め設定**：打刻時刻を切り捨て・切り上げ・四捨五入で調整する設定（詳しくは「[丸め処理（端数処理）](/manual/rounding/)」）
+- **早出残業（前残業）**：始業前に出勤した場合の残業の扱い（詳しくは「[早出残業（前残業）](/manual/early-overtime/)」）
+- **24時間営業・深夜営業**：日付をまたぐ営業形態向けの設定（詳しくは「[24時間営業](/manual/open-24h/)」「[深夜営業](/manual/midnight-operation/)」）
+- **自動翌日計算**：日付をまたいだ勤務を自動で翌日扱いにする設定（詳しくは「[自動翌日計算](/manual/auto-next-day/)」）
+- **複数回休憩**：1日に複数回の休憩がある場合の設定（詳しくは「[複数回休憩](/manual/multi-break/)」）
+
+つまりカテゴリーは、これらの設定をまとめる「親」のような存在です。多くの設定はカテゴリー単位で行うため、まずはカテゴリーの基本的な作り方から見ていきましょう。
+
+### カテゴリーを新規作成する
+
+「カテゴリー」画面を開くと、既存のカテゴリー一覧が表示されます。＋ボタンで新規作成、鉛筆アイコンで既存カテゴリーの編集ができます。
+
+![manual-image](/assets/manual/2026/07/category-list-intro.png)
+
+まず「基本情報」で、カテゴリー名と締め日を設定します。
+
+![manual-image](/assets/manual/2026/07/category-edit-basic.png)
+
+次に「標準勤務時間」で、曜日ごとに勤務パターンを割り当てます。曜日の行をタップすると、勤務パターンの選択画面が開きます。
+
+![manual-image](/assets/manual/2026/07/category-pattern-picker.png)
+
+ちょうどよい勤務パターンがない場合は、その場で新しい勤務パターンを作成できます。出勤・退勤・休憩開始・休憩終了の時刻を設定して保存します。
+
+![manual-image](/assets/manual/2026/07/workpattern-new.png)
+
+すべての曜日に勤務パターンを設定し、締め日など必要な項目を入力したら保存します。作成したカテゴリーは、スタッフの登録・編集画面で割り当てて使用します。
+
+### 動画で見る
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/p2ubfRzJRew" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
 
 ### 各設定のヘルプ機能について（2026年7月更新）
 
