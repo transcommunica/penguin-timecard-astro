@@ -6,7 +6,7 @@ const manual = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    category: z.enum(['overview', 'settings', 'behavior', 'billing']),
+    category: z.enum(['core', 'overview', 'settings', 'behavior', 'billing']),
     itemCode: z.string(),
     keywords: z.array(z.string()).default([]),
     isNew: z.boolean().default(false),
