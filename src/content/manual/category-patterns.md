@@ -2,11 +2,11 @@
 title: "カテゴリー、勤務パターン設定"
 description: "正社員・パートなど、働き方ごとに勤怠の計算ルールをまとめる、ペンギンタイムカードの基本設定です。"
 category: "core"
-itemCode: "C.01"
+itemCode: "C.02"
 keywords: ["カテゴリー", "勤務パターン", "基本設定", "働き方"]
 isNew: true
 popular: true
-order: 1
+order: 2
 ---
 
 ## カテゴリー、勤務パターン設定

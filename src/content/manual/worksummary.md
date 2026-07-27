@@ -2,11 +2,11 @@
 title: "残業時間・勤務時間"
 description: "正社員・パート・派遣 -- 働き方ごとに、残業や勤務時間がどう計算されるかを解説します。"
 category: "core"
-itemCode: "C.02"
+itemCode: "C.01"
 keywords: ["残業", "勤務時間", "計算", "正社員", "パート"]
 isNew: false
 popular: true
-order: 2
+order: 1
 ---
 
 ## 残業時間と勤務時間の対象
