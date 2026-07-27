@@ -108,4 +108,4 @@ order: 1
 
 ![manual-image](/assets/manual/2026/07/workpattern-help-dialog.png)
 
-くわしくは「残業時間・勤務時間」マニュアルもあわせてご覧ください。
+くわしくは「[残業時間・勤務時間](/manual/worksummary/)」マニュアルもあわせてご覧ください。
