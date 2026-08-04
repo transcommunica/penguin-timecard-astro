@@ -52,3 +52,26 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxx
 CONTACT_FROM_EMAIL=noreply@example.com
 CONTACT_TO_EMAIL=info@example.com,ops@example.com
 ```
+
+## Instagram投稿 中継API（@penguin_time_web）
+
+- Instagram Graph APIへの投稿を代行するエンドポイントです。長期アクセストークンはこのリポジトリには一切含まれず、Cloudflare Pages側のシークレットとしてのみ保持されます（**本リポジトリはpublicのため**）。
+- 実処理は Cloudflare Pages Functions の以下が担当します。
+  - [functions/api/ig-create.ts](functions/api/ig-create.ts) — メディアコンテナ作成
+  - [functions/api/ig-publish.ts](functions/api/ig-publish.ts) — 投稿の公開
+  - [functions/api/ig-check.ts](functions/api/ig-check.ts) — 投稿状態の確認（読み取り専用）
+- 呼び出しには `x-api-key` ヘッダーで `RELAY_API_KEY` の値を渡す必要があります。
+- 運用手順の詳細は `.claude/skills/penguin-instagram-post/SKILL.md` を参照してください。
+
+### Cloudflare Pages 側で必要な設定
+
+Environment Variables（**Production と Preview の両方**に設定してください）:
+
+- `IG_ACCESS_TOKEN`
+	- Instagram/Facebookページの長期アクセストークン
+	- Encrypt（シークレット）指定
+- `IG_USER_ID`
+	- 投稿先のInstagramビジネスアカウントID
+- `RELAY_API_KEY`
+	- 上記2エンドポイントを呼び出す際の合言葉（ランダムな文字列）
+	- Encrypt推奨
