@@ -3,7 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
-const WP_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/335';
+// 旧 WordPress は old.tc-timecard.com へ移設済み。
+// tc-timecard.com は本サイト（Astro）が配信しているため、旧ホストを参照する。
+const WP_ENDPOINT = 'https://old.tc-timecard.com/wp-json/wp/v2/pages/335';
 
 type WpPage = {
   title: { rendered: string };
@@ -17,11 +19,24 @@ type WpPage = {
 const fetchPage = async (): Promise<WpPage | null> => {
   try {
     const res = await fetch(WP_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[privacypolicy] ${WP_ENDPOINT} returned HTTP ${res.status}`);
+      return null;
+    }
+    // 移設などでエンドポイントが HTML を返すことがあるため、JSON かどうかを確認する。
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('json')) {
+      console.warn(`[privacypolicy] ${WP_ENDPOINT} returned "${contentType}" instead of JSON`);
+      return null;
+    }
     const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      console.warn(`[privacypolicy] ${WP_ENDPOINT} returned an unexpected JSON shape`);
+      return null;
+    }
     return payload as WpPage;
-  } catch {
+  } catch (error) {
+    console.warn(`[privacypolicy] failed to fetch ${WP_ENDPOINT}:`, error);
     return null;
   }
 };
