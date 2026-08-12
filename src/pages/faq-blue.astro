@@ -4,69 +4,110 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
 
-const WP_FAQ_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/2893';
-
-type WpPage = {
-  title: { rendered: string };
-  content: { rendered: string };
-  yoast_head_json?: {
-    title?: string;
-    og_description?: string;
-  };
-};
-
 type FaqItem = {
   id: string;
   question: string;
   answerHtml: string;
-  answerText: string;
-};
-
-const fetchFaqPage = async (): Promise<WpPage | null> => {
-  try {
-    const res = await fetch(WP_FAQ_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
-    const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
-    return payload as WpPage;
-  } catch {
-    return null;
-  }
 };
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-const parseFaqItems = (html: string): FaqItem[] => {
-  const sectionRegex = /<div class="schema-faq-section"[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/div>\s*(?=<div|<\/div>|$)/g;
-  const items: FaqItem[] = [];
-  let match: RegExpExecArray | null;
+const pageTitle = 'よくある質問';
+const pageDescription = 'ペンギンタイムカード（ブルー版）のよくある質問ページです。';
 
-  while ((match = sectionRegex.exec(html)) !== null) {
-    const id = match[1];
-    const inner = match[2];
-    const question = stripHtml(
-      inner.match(/<strong class="schema-faq-question">([\s\S]*?)<\/strong>/)?.[1] || ''
-    );
-    const answerHtml = inner.match(/<p class="schema-faq-answer">([\s\S]*?)<\/p>/)?.[1] || '';
-    const answerText = stripHtml(answerHtml);
-    if (question) {
-      items.push({ id, question, answerHtml, answerText });
-    }
-  }
-  return items;
-};
-
-const wp = await fetchFaqPage();
-
-const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || 'よくある質問';
-const pageDescription = wp?.yoast_head_json?.og_description
-  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
-  ?.replace(/\[\.\.\.\]/g, '')
-  ?.trim()
-  || 'ペンギンタイムカードのよくある質問ページです。';
-const displayTitle = 'よくある質問';
-
-const faqItems = wp ? parseFaqItems(wp.content.rendered) : [];
+// 質問と回答（旧サイトの掲載順）
+const faqItems: FaqItem[] = [
+  {
+    id: 'faq1',
+    question: '何が必要ですか？',
+    answerHtml: 'iPhone/iPadのみです。あとはインターネット環境があれば開始できます。',
+  },
+  {
+    id: 'faq2',
+    question: 'インターネットが切れても使えますか？',
+    answerHtml: 'はい、使えます。ただし、更新期日を過ぎるとアカウント認証エラーとなります。その際は、再度インターネットに接続してください。',
+  },
+  {
+    id: 'faq3',
+    question: '他の労務管理システムと連係できますか？',
+    answerHtml: '現時点で連係機能はありません。必要な場合は、CSVファイルをメールで送信し、労務管理システムに取り込んでください。',
+  },
+  {
+    id: 'faq4',
+    question: '丸め処理はありますか？',
+    answerHtml: 'はい、あります。10分単位、5分単位など、丸め計算設定ができます。「従業員タイプ」メニューから、該当の従業員タイプをタップして設定してください。',
+  },
+  {
+    id: 'faq5',
+    question: '何人まで利用できますか？',
+    answerHtml: '15名まで2,200円（税込）、その後人数によって金額が変わります。大規模な施設でのご利用をご希望の方は<a href="/contact-us/">お問い合わせください</a>。ご相談に応じます。',
+  },
+  {
+    id: 'faq6',
+    question: '自動バックアップ機能とは？',
+    answerHtml: '１日１回、データをサーバーに自動保存する機能です。万が一、iPhone/iPadが壊れてしまった場合などに、データを復元することができます。',
+  },
+  {
+    id: 'faq7',
+    question: 'メール送信機能とは？',
+    answerHtml: 'ひと月の出退勤データをメールで送信できます。結果はPDFとCSV（エクセル）で送信されます。',
+  },
+  {
+    id: 'faq8',
+    question: '休憩管理もできますか ？',
+    answerHtml: 'はい、できます。設定すると、休憩入り、休憩出ボタンが表示されます。正社員のように休憩時間が固定されている場合（例：１時間）は、ボタンを表示せず、自動計算することもできます。',
+  },
+  {
+    id: 'faq9',
+    question: '社労士へ送信できますか ？',
+    answerHtml: 'はい、できます。メールの宛先に社労士様のメールアドレスを入れ、送信ボタンを押してください。',
+  },
+  {
+    id: 'faq10',
+    question: '正社員、パートで管理方法を分けたいのですが 。',
+    answerHtml: '「正社員」「パート」など、従業員のタイプを設定できます。タイプごとに異なる「勤務時間」「休憩の管理有無」「丸め計算方法」などを設定できます。',
+  },
+  {
+    id: 'faq11',
+    question: '深夜残業は計算されますか？',
+    answerHtml: '残業時間は自動計算されますが、金額計算はできません。また、通常残業と深夜残業の区別はできません。',
+  },
+  {
+    id: 'faq12',
+    question: '日付をまたいで働いた場合はどうなりますか？',
+    answerHtml: '日付をまたいだ時間計算には対応しておりません。',
+  },
+  {
+    id: 'faq13',
+    question: '修正はできますか？',
+    answerHtml: 'はい、できます。ただし、修正箇所は赤文字になります。管理者画面から見ると、タップした時間と修正時間の両方を確認できます。',
+  },
+  {
+    id: 'faq14',
+    question: 'ICカードなどは必要ですか ？',
+    answerHtml: 'いいえ、不要です。シンプルなアプリを追求しており、iPhone/iPad以外の機械は不要です。',
+  },
+  {
+    id: 'faq15',
+    question: 'アプリを削除してもデータは残りますか？',
+    answerHtml: 'いいえ、残りません。アプリを削除してしまうと、出退勤データも削除されてしまいますので、十分注意してください。データ喪失を防ぐために、自動バックアップをおすすめします。',
+  },
+  {
+    id: 'faq16',
+    question: 'iPhone/iPadが壊れたらどうなりますか ？',
+    answerHtml: 'iPhone/iPadが壊れ、アプリにアクセスできなくなると、データも見れなくなってしまいます。 データ喪失を防ぐために、自動バックアップをおすすめします。',
+  },
+  {
+    id: 'faq17',
+    question: '新しいiPhone/iPadに変えたらどうしますか？',
+    answerHtml: 'データをサーバーにバックアップし、新しいiPhone/iPadに復元できます。',
+  },
+  {
+    id: 'faq18',
+    question: 'どのiPhone/iPadに対応していますか？',
+    answerHtml: '現在はiOS10.0以上のiPad, iPhoneに対応していますが、Apple社の制約により古いiOSへは徐々に対応できなくなっていきます。できるだけ新しい端末をおすすめします。',
+  },
+];
 
 // JSON-LD 構造化データ
 const jsonLd = {
@@ -77,7 +118,7 @@ const jsonLd = {
     name: item.question,
     acceptedAnswer: {
       '@type': 'Answer',
-      text: item.answerText,
+      text: stripHtml(item.answerHtml),
     },
   })),
 };
@@ -97,43 +138,39 @@ const jsonLd = {
       </div>
       <div class="hero-inner">
         <span class="eyebrow">FAQ</span>
-        <h1 set:html={displayTitle}></h1>
+        <h1>よくある質問</h1>
         <p class="lead">{faqItems.length}件の質問と回答を掲載しています。</p>
       </div>
       <div class="version-notice">
-        こちらはオレンジ版のFAQです。
-        ブルー版のFAQは<a href="/faq/">こちら</a>
+        こちらはブルー版のFAQです。
+        オレンジ版のFAQは<a href="/faq/">こちら</a>
       </div>
     </div>
   </section>
 
   <section class="faq-section">
     <div class="container">
-      {faqItems.length > 0 ? (
-        <dl class="faq-list">
-          {faqItems.map((item, index) => (
-            <div class="faq-item" id={item.id}>
-              <dt class="faq-q">
-                <button
-                  type="button"
-                  class="faq-toggle"
-                  aria-expanded="false"
-                  aria-controls={`ans-${item.id}`}
-                >
-                  <span class="q-badge">Q{String(index + 1).padStart(2, '0')}</span>
-                  <span class="q-text">{item.question}</span>
-                  <span class="q-icon" aria-hidden="true"></span>
-                </button>
-              </dt>
-              <dd class="faq-a" id={`ans-${item.id}`} hidden>
-                <div class="faq-a-inner" set:html={item.answerHtml}></div>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
-      )}
+      <dl class="faq-list">
+        {faqItems.map((item, index) => (
+          <div class="faq-item" id={item.id}>
+            <dt class="faq-q">
+              <button
+                type="button"
+                class="faq-toggle"
+                aria-expanded="false"
+                aria-controls={`ans-${item.id}`}
+              >
+                <span class="q-badge">Q{String(index + 1).padStart(2, '0')}</span>
+                <span class="q-text">{item.question}</span>
+                <span class="q-icon" aria-hidden="true"></span>
+              </button>
+            </dt>
+            <dd class="faq-a" id={`ans-${item.id}`} hidden>
+              <div class="faq-a-inner" set:html={item.answerHtml}></div>
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   </section>
 
@@ -384,11 +421,6 @@ const jsonLd = {
 
   .faq-a-inner :global(p) {
     margin: 0;
-  }
-
-  .empty {
-    color: var(--ink-2);
-    font-size: 15px;
   }
 
   @media (max-width: 640px) {
