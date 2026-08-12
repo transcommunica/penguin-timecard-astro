@@ -3,54 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
-// 旧 WordPress は old.tc-timecard.com へ移設済み。
-// tc-timecard.com は本サイト（Astro）が配信しているため、旧ホストを参照する。
-const WP_ENDPOINT = 'https://old.tc-timecard.com/wp-json/wp/v2/pages/335';
-
-type WpPage = {
-  title: { rendered: string };
-  content: { rendered: string };
-  yoast_head_json?: {
-    title?: string;
-    og_description?: string;
-  };
-};
-
-const fetchPage = async (): Promise<WpPage | null> => {
-  try {
-    const res = await fetch(WP_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) {
-      console.warn(`[privacypolicy] ${WP_ENDPOINT} returned HTTP ${res.status}`);
-      return null;
-    }
-    // 移設などでエンドポイントが HTML を返すことがあるため、JSON かどうかを確認する。
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('json')) {
-      console.warn(`[privacypolicy] ${WP_ENDPOINT} returned "${contentType}" instead of JSON`);
-      return null;
-    }
-    const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-      console.warn(`[privacypolicy] ${WP_ENDPOINT} returned an unexpected JSON shape`);
-      return null;
-    }
-    return payload as WpPage;
-  } catch (error) {
-    console.warn(`[privacypolicy] failed to fetch ${WP_ENDPOINT}:`, error);
-    return null;
-  }
-};
-
-const wp = await fetchPage();
-
 const pageTitle = 'プライバシーポリシー';
-const pageDescription = wp?.yoast_head_json?.og_description
-  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
-  ?.replace(/\[\.\.\.\]/g, '')
-  ?.trim()
-  || 'ペンギンタイムカードのプライバシーポリシーページです。';
-const displayTitle = wp?.title?.rendered || 'プライバシーポリシー';
-const pageHtml = wp?.content?.rendered || '';
+const pageDescription =
+  '株式会社トランスコミュニカによる、ペンギンタイムカードの個人情報の取り扱いについてのご案内です。';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
@@ -64,18 +19,77 @@ const pageHtml = wp?.content?.rendered || '';
         <span class="here">プライバシーポリシー</span>
       </div>
       <div class="hero-inner">
-        <h1 set:html={displayTitle}></h1>
+        <h1>
+          PRIVACY POLICY
+          <span class="h1-sub">（個人情報取り扱いについて）</span>
+        </h1>
       </div>
     </div>
   </section>
 
   <section class="page-section">
     <div class="container">
-      {wp ? (
-        <article class="page-body" set:html={pageHtml}></article>
-      ) : (
-        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
-      )}
+      <article class="page-body">
+        <p>
+          株式会社トランスコミュニカでは、個人情報の保護に関する法令を遵守するとともに、以下のポリシーに基づき
+          、お客様の個人情報を取り扱います。
+        </p>
+
+        <h2>1.個人情報とは</h2>
+        <p>
+          個人に関する情報で、氏名、住所、電話番号、メールアドレスなど個人を特定できる情報、またはその可能性のある情報の事です。また、他の情報との組み合わせによって個人が特定できる情報も含みます（業種等）。
+        </p>
+
+        <h2>2.個人情報の収集について</h2>
+        <p>
+          通常、ペンギンタイムカードでは、お客様の事業所名、メールアドレス等の入力をお願いしております。それらの情報の利用目的につきましては、「3.個人情報の利用目的について」を、管理につきましては、「4.個人情報の管理について」をご参照下さい。
+        </p>
+
+        <h2>3.個人情報の利用目的について</h2>
+        <p>当システムは個人情報を以下の目的で利用させていただきます。</p>
+        <ul>
+          <li>お問い合わせ時の所有者確認等。</li>
+        </ul>
+
+        <h2>4.個人情報の管理について</h2>
+        <p>当システムは以下の体制で個人情報を管理します。</p>
+        <ul>
+          <li>
+            個人情報の利用を業務上必要な者だけに制限し、個人情報が含まれる内容の管理を徹底致します。
+            但し、お客様へサービスを提供する等の業務遂行上、個人情報の一部を外部の委託先へ提供する場合があります。その場合、業務委託先が適切に個人情報を取り扱うように管理いたします。
+          </li>
+          <li>不要になった個人情報は、随時削除していきます。</li>
+        </ul>
+
+        <h2>5.個人情報の開示について</h2>
+        <p>
+          当システムは、お客様の同意がない限り、個人情報を第三者に開示することはありません。ただし、以下の事例に該当する場合はその限りではありません。
+        </p>
+        <ul>
+          <li>官庁、裁判所、検察官、警察、弁護士会、またはそれらに準じる権限を有する機関から要請があった場合。</li>
+          <li>法令に特別の規定がある場合。</li>
+          <li>法令や当サイトのご利用規約</li>
+          <li>
+            注意事項に反する行動から、当サイトの権利、財産またはサービスを保護または防禦する必要があり、本人の同意を得ることができない場合。
+          </li>
+        </ul>
+
+        <h2>6. 顔認証機能について</h2>
+        <p>
+          顔認証機能を利用する場合、最初に顔写真を登録します。写真は、アプリから起動された端末のカメラにて撮影するか、撮影済みの写真をカメラロールから選択します。顔写真は機械学習のためのサーバーに送信され、機械学習プログラムによって特徴量というデータを作成し、特徴量データがサーバーに保存されます。写真データは、アプリ端末内およびサーバー、その他いずれの場所にも一切保存されることはなく、システム管理者および第三者の誰にも閲覧されることはありません。
+        </p>
+        <p>
+          顔認証の際には、アプリから起動されたカメラにて顔写真を撮影します。その顔写真を機械学習プログラムのあるサーバーに送信し、判定結果をアプリに表示します。写真データはアプリ端末内およびサーバー、その他いずれの場所にも一切保存されることはなく、システム管理者および第三者の誰にも閲覧されることはありません。
+        </p>
+
+        <h2>7.適用範囲</h2>
+        <p>
+          以上のプライバシーポリシーに関する適用範囲は、当システム内において適用されます。原則としてペンギンタイムカードアプリおよびhttps://tc-timecard.comを含むページが当システム内となります。
+        </p>
+        <p>
+          当システムでは、お客様の個人情報を大切にお取扱いしながら、今後も質の高いサービスをご提供しお客様にご満足いただけるよう努力してまいります。当サイトのお客様の個人情報のお取扱いについてご賛同いただきますよう、よろしくお願い致します。
+        </p>
+      </article>
     </div>
   </section>
 
@@ -114,6 +128,12 @@ const pageHtml = wp?.content?.rendered || '';
     font-size: clamp(26px, 3.6vw, 40px);
   }
 
+  .hero-inner .h1-sub {
+    display: block;
+    margin-top: 6px;
+    font-size: clamp(18px, 2.4vw, 26px);
+  }
+
   .page-section {
     padding: 40px 0 80px;
   }
@@ -126,7 +146,7 @@ const pageHtml = wp?.content?.rendered || '';
     font-size: 15px;
   }
 
-  .page-body :global(h2) {
+  .page-body h2 {
     margin: 32px 0 12px;
     font-size: clamp(20px, 2.8vw, 26px);
     line-height: 1.4;
@@ -134,68 +154,17 @@ const pageHtml = wp?.content?.rendered || '';
     padding-bottom: 8px;
   }
 
-  .page-body :global(h3) {
-    margin: 22px 0 8px;
-    font-size: clamp(17px, 2vw, 20px);
-    line-height: 1.5;
-  }
-
-  .page-body :global(p) {
+  .page-body p {
     margin: 0 0 1em;
   }
 
-  .page-body :global(ul),
-  .page-body :global(ol) {
+  .page-body ul {
     margin: 0 0 1em 1.4em;
-  }
-
-  .page-body :global(a) {
-    color: var(--brand-deep);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .page-body :global(table) {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid var(--line);
-    margin: 1.2em 0;
-    font-size: 14px;
-  }
-
-  .page-body :global(th),
-  .page-body :global(td) {
-    border: 1px solid var(--line);
-    padding: 10px 12px;
-    vertical-align: top;
-  }
-
-  .page-body :global(th) {
-    background: rgba(0, 0, 0, 0.04);
-    font-weight: 700;
-    white-space: nowrap;
-    width: 30%;
-  }
-
-  .empty {
-    color: var(--ink-2);
-    font-size: 15px;
   }
 
   @media (max-width: 640px) {
     .page-section {
       padding: 28px 0 56px;
-    }
-
-    .page-body :global(table) {
-      display: block;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .page-body :global(th) {
-      white-space: normal;
-      width: auto;
     }
   }
 </style>
