@@ -4,74 +4,160 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
 
-const WP_FAQ_BLUE_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/36';
-
-type WpPage = {
-  title: { rendered: string };
-  content: { rendered: string };
-  yoast_head_json?: {
-    title?: string;
-    og_description?: string;
-  };
-};
-
 type FaqItem = {
   id: string;
   question: string;
-  answerText: string;
-};
-
-const fetchFaqPage = async (): Promise<WpPage | null> => {
-  try {
-    const res = await fetch(WP_FAQ_BLUE_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
-    const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
-    return payload as WpPage;
-  } catch {
-    return null;
-  }
+  answerHtml: string;
 };
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-// ブルー版: .card-title/.card-body 形式をパース
-const parseBlueFaqItems = (html: string): FaqItem[] => {
-  const items: FaqItem[] = [];
-  const qRegex = /<div class="card card-title"[\s\S]*?data-toggle="collapse"\s+href="#([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/div>/g;
-  const aRegex = /<div class="collapse answer"\s+id="([^"]+)"[\s\S]*?<div class="card card-body">\s*([\s\S]*?)\s*<\/div>/g;
+const pageTitle = 'よくある質問';
+const pageDescription = 'ペンギンタイムカード（オレンジ版）のよくある質問ページです。';
 
-  const answers = new Map<string, string>();
-  let aMatch: RegExpExecArray | null;
-  while ((aMatch = aRegex.exec(html)) !== null) {
-    answers.set(aMatch[1], stripHtml(aMatch[2]));
-  }
-
-  let qMatch: RegExpExecArray | null;
-  let index = 0;
-  while ((qMatch = qRegex.exec(html)) !== null) {
-    index++;
-    const id = qMatch[1];
-    const question = stripHtml(qMatch[2]);
-    const answerText = answers.get(id) || '';
-    if (question) {
-      items.push({ id, question, answerText });
-    }
-  }
-  return items;
-};
-
-const wp = await fetchFaqPage();
-
-const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || 'よくある質問';
-const pageDescription = wp?.yoast_head_json?.og_description
-  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
-  ?.replace(/\[\.\.\.\]/g, '')
-  ?.trim()
-  || 'ペンギンタイムカード（ブルー版）のよくある質問ページです。';
-const displayTitle = wp?.title?.rendered || 'よくある質問';
-
-const faqItems = wp ? parseBlueFaqItems(wp.content.rendered) : [];
+// 質問と回答（旧サイトの掲載順）
+const faqItems: FaqItem[] = [
+  {
+    id: 'faq-question-1641977379863',
+    question: 'どのように使うのですか',
+    answerHtml: 'オフィス・店舗などに１台おき、名前をタップして出勤、退勤を記録します。また、各個人のスマートフォンやパソコンで記録することもできます。',
+  },
+  {
+    id: 'faq-question-1641978783564',
+    question: '特徴はなんですか',
+    answerHtml: 'タブレットやパソコン、スマートフォンがあれば、シンプルに誰でも始められることです。 時間集計、丸め計算などの必要な機能は充実しています。',
+  },
+  {
+    id: 'faq-question-1641978887204',
+    question: '何が必要ですか',
+    answerHtml: 'パソコン、スマートフォン、タブレットいずれでも動作します。iPad, iPhone, アンドロイド端末、Windowsパソコンのいずれかがあればスタートできます。ブラウザー（エッジ、クロームなど）でも動作しますので、どんな端末でも動作します。',
+  },
+  {
+    id: 'faq-question-1641978942762',
+    question: 'どのような業種や使い方に向いていますか',
+    answerHtml: '少人数から大規模まで幅広く対応できます。Google社の安定したサーバー技術により、人数に関係なく対応いたします。',
+  },
+  {
+    id: 'faq-question-1641978986580',
+    question: 'クラウドですか？',
+    answerHtml: 'データはクラウドで管理されています。Google社のセキュリティによってお客様のデータは守りつつ、クラウドですのでどの端末からでもアクセスできる便利さもあります。',
+  },
+  {
+    id: 'faq-question-1641979025856',
+    question: '正社員、パート社員などにも対応していますか',
+    answerHtml: '正社員、パート社員、契約社員など、異なる設定を「カテゴリー」として登録できます。異なる計算、締め日などを設定できます。',
+  },
+  {
+    id: 'faq-question-1641979094744',
+    question: '無料ですか',
+    answerHtml: '料金プランがあります。詳しくは<a href="/rate-plan/">こちら</a>をご参照ください。',
+  },
+  {
+    id: 'faq-question-1641979145130',
+    question: '何人まで利用できますか',
+    answerHtml: '特に人数制限はありません。50人以上でも数百人でも問題なくご利用いただけます。個別のお見積もりをご希望の方はお問い合わせフォームよりお気軽にお問い合わせください。',
+  },
+  {
+    id: 'faq-question-1641979192244',
+    question: '休憩の管理もできますか',
+    answerHtml: 'はい、可能です。ボタンを押して休憩時間を計測するパターンと、「休憩は１時間」のように固定する場合と、両方対応しています。',
+  },
+  {
+    id: 'faq-question-1641979278952',
+    question: '解約はどのようにしたらよいですか',
+    answerHtml: '管理画面右上のプロフィールアイコンをクリックし、画面一番下の「削除」からアカウントを削除してください。',
+  },
+  {
+    id: 'faq-question-1641979395100',
+    question: '大規模でも利用できますか',
+    answerHtml: '数百人もしくはそれ以上でも対応可能です。機能追加・変更や、専用のサーバー領域を使うなど個別対応もできます。また、規模に合わせて別途お見積もりを作成いたしますのでお気軽にお問い合わせください。',
+  },
+  {
+    id: 'faq-question-1641979501045',
+    question: 'リモートワークや在宅ワークには対応していますか',
+    answerHtml: 'はい、リモートワークや在宅ワークでもご利用いただけます。他のスタッフの情報が見れないように、スタッフごとのアカウントを作成できるようになっています。',
+  },
+  {
+    id: 'faq-question-1641979894045',
+    question: '丸めなどの計算はできますか',
+    answerHtml: 'はい、切り上げ、切り捨て、〇〇分単位など、自由に設定が可能です。設定が難しい場合は遠隔での設定代行も行なっております。',
+  },
+  {
+    id: 'faq-question-1646800764422',
+    question: '休憩が複数回あるんですが対応できますか',
+    answerHtml: '現在複数回の休憩に対応した機能を開発中です。リリースまで少々お待ちください。',
+  },
+  {
+    id: 'faq-question-1646800779615',
+    question: '複数の店舗で働く社員には対応していますか',
+    answerHtml: 'はい、対応しています。たとえば、ある人がこの日はA店舗、次の日はB店舗というように働く場合も対応可能です。',
+  },
+  {
+    id: 'faq-question-1646800790849',
+    question: '店舗ごとにアカウントを作る必要がありますか',
+    answerHtml: '店舗をまとめて見る人（管理者）、店舗ごとに見る人、というように権限を分けることができます。当アプリでは、各店舗を「オフィス」と呼び、それをまとめる単位を「オフィスグループ」と呼んでいます。①オーナー：全オフィスを見れます ②マネージャー：そのオフィスのみ見れます ③スタッフ：自分のデータのみ見れます ④表示・入力専用：そのオフィスの見れます。スタッフの追加などはできません',
+  },
+  {
+    id: 'faq-question-1646800807630',
+    question: '社員個人のスマートフォンやパソコンから入力できますか',
+    answerHtml: 'はい、入力できます。「ユーザー一覧」メニューから「スタッフ」としてアカウントを発行してください。その社員は自分のデータのみ入力・閲覧ができます。',
+  },
+  {
+    id: 'faq-question-1646800826099',
+    question: '深夜残業は計算できますか',
+    answerHtml: '「通常残業」と「深夜残業」のように分けて計算する機能はいまのところありません。将来的な開発予定に入っていますが、現時点では未定です。',
+  },
+  {
+    id: 'faq-question-1646800837049',
+    question: '日付をまたいだ夜勤などは対応していますか',
+    answerHtml: '日付をまたいだ計算については対応予定です。リリース時期は未定ですが少々お待ちください。',
+  },
+  {
+    id: 'faq-question-1646800848199',
+    question: 'iPadなどが壊れたらデータはどうなりますか',
+    answerHtml: 'データはGoogleのセキュリティによって守られたクラウドに管理されています。したがって、iPadやパソコンなどが壊れてもデータを紛失することはありません。',
+  },
+  {
+    id: 'faq-question-1646800863152',
+    question: '間違った場合などの修正はどうしますか',
+    answerHtml: '勤怠表の該当部分をタップして手入力できます。ボタンをタップした時間と手入力した時間はきちんと分けて記録されます。',
+  },
+  {
+    id: 'faq-question-1646800869339',
+    question: '私（管理者）は店舗にいないのですが、店舗の担当者にID、パスワードを教えないといけないのですか',
+    answerHtml: '管理者ID、パスワードを教えたくない場合は「表示・入力専用アカウント」をご利用ください。「ユーザー一覧」メニューから「表示・入力専用アカウント」を発行し、それを使って店舗の端末に設定してください。',
+  },
+  {
+    id: 'faq-question-1646800881217',
+    question: '入力し忘れた場合はどうなりますか',
+    answerHtml: '手入力できるようになっています。スタッフ名をタップした後、右上の「詳細」をクリックします。該当に日時のデータを手入力してください。不正を防ぐため、「ボタンをタップしたのか」「手修正したのか」は分けて記録され、管理者は確認することができます。<br />手入力できる余地を残すことで、直行直帰の場合の対応や、入力忘れにも対応できます。',
+  },
+  {
+    id: 'faq-question-1646800920532',
+    question: 'どのバージョンの端末に対応していますか',
+    answerHtml: '現時点ではiOS12.0以上のものに対応してますが、Apple社の制約により、古いiOSは徐々にサポートできなくなってきます。できるだけ新しい端末でのご利用をお勧めします。同様にAndroidもできるだけ新しいバージョンをお使いください。Windowsは現時点でWindows10、Windows11に対応しています。',
+  },
+  {
+    id: 'faq-question-1646800936314',
+    question: 'インターネットが切れても使えますか',
+    answerHtml: '一時的にインターネットが切れていても管理画面などは動作しますが、出勤、退勤ボタンを押すためにはインターネット接続が必要です。',
+  },
+  {
+    id: 'faq-question-1646800942126',
+    question: '本人認証機能はありますか',
+    answerHtml: '顔認証機能がございます。アプリの前に立つだけでどのスタッフかを判定します。<br />社員証などのカードの発行が不要で、オフィスに１台スマートフォンがあればスタートできるため、初期コストもランニングコストも抑えることができます。また、退職者の管理も容易になります。',
+  },
+  {
+    id: 'faq-question-1646800958132',
+    question: 'エクセルで開けますか',
+    answerHtml: 'はい、PDFとエクセルにダウンロードできます。また、PDFとエクセルをメール送信することもできます。エクセルについては、今後列の追加・変更や複数回休憩機能ができるのに合わせて、列も増えたり減ったりするように改修中です。',
+  },
+  {
+    id: 'faq-question-1646800964819',
+    question: '他の労務システムと連携はありますか',
+    answerHtml: '現時点で労務システムなどとの連携機能はありません。 必要に応じてエクセル（CSV）にダウンロードしていただき、加工して他システムに読み込ませていただくことになります。',
+  },
+];
 
 // JSON-LD 構造化データ
 const jsonLd = {
@@ -82,7 +168,7 @@ const jsonLd = {
     name: item.question,
     acceptedAnswer: {
       '@type': 'Answer',
-      text: item.answerText,
+      text: stripHtml(item.answerHtml),
     },
   })),
 };
@@ -102,43 +188,39 @@ const jsonLd = {
       </div>
       <div class="hero-inner">
         <span class="eyebrow">FAQ</span>
-        <h1 set:html={displayTitle}></h1>
+        <h1>よくある質問</h1>
         <p class="lead">{faqItems.length}件の質問と回答を掲載しています。</p>
       </div>
       <div class="version-notice">
-        こちらはブルー版のFAQです。
-        オレンジ版のFAQは<a href="/new-faq/">こちら</a>
+        こちらはオレンジ版のFAQです。
+        ブルー版のFAQは<a href="/faq-blue/">こちら</a>
       </div>
     </div>
   </section>
 
   <section class="faq-section">
     <div class="container">
-      {faqItems.length > 0 ? (
-        <dl class="faq-list">
-          {faqItems.map((item, index) => (
-            <div class="faq-item" id={item.id}>
-              <dt class="faq-q">
-                <button
-                  type="button"
-                  class="faq-toggle"
-                  aria-expanded="false"
-                  aria-controls={`ans-${item.id}`}
-                >
-                  <span class="q-badge">Q{String(index + 1).padStart(2, '0')}</span>
-                  <span class="q-text">{item.question}</span>
-                  <span class="q-icon" aria-hidden="true"></span>
-                </button>
-              </dt>
-              <dd class="faq-a" id={`ans-${item.id}`} hidden>
-                <div class="faq-a-inner">{item.answerText}</div>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
-      )}
+      <dl class="faq-list">
+        {faqItems.map((item, index) => (
+          <div class="faq-item" id={item.id}>
+            <dt class="faq-q">
+              <button
+                type="button"
+                class="faq-toggle"
+                aria-expanded="false"
+                aria-controls={`ans-${item.id}`}
+              >
+                <span class="q-badge">Q{String(index + 1).padStart(2, '0')}</span>
+                <span class="q-text">{item.question}</span>
+                <span class="q-icon" aria-hidden="true"></span>
+              </button>
+            </dt>
+            <dd class="faq-a" id={`ans-${item.id}`} hidden>
+              <div class="faq-a-inner" set:html={item.answerHtml}></div>
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   </section>
 
@@ -154,19 +236,26 @@ const jsonLd = {
 </Layout>
 
 <script>
+  // アコーディオン
   document.querySelectorAll<HTMLButtonElement>('.faq-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
       const expanded = btn.getAttribute('aria-expanded') === 'true';
       const answerId = btn.getAttribute('aria-controls');
       const answer = answerId ? document.getElementById(answerId) : null;
+
       btn.setAttribute('aria-expanded', String(!expanded));
       btn.closest('.faq-item')?.classList.toggle('open', !expanded);
       if (answer) {
-        answer.hidden = expanded;
+        if (expanded) {
+          answer.hidden = true;
+        } else {
+          answer.hidden = false;
+        }
       }
     });
   });
 
+  // reveal アニメーション
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -175,6 +264,7 @@ const jsonLd = {
       }
     });
   }, { threshold: 0.1 });
+
   document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
 </script>
 
@@ -182,14 +272,8 @@ const jsonLd = {
   .faq-hero {
     padding: 30px 0 44px;
     background:
-      radial-gradient(ellipse 60% 40% at 86% 20%, rgba(123, 200, 232, 0.15), transparent 65%),
-      radial-gradient(ellipse 45% 35% at 8% 88%, rgba(111, 191, 115, 0.12), transparent 65%);
-  }
-
-  .faq-hero .container,
-  .faq-section .container {
-    max-width: 1000px;
-    margin: 0 auto;
+      radial-gradient(ellipse 60% 40% at 86% 20%, rgba(243, 154, 45, 0.12), transparent 65%),
+      radial-gradient(ellipse 45% 35% at 8% 88%, rgba(123, 200, 232, 0.15), transparent 65%);
   }
 
   .breadcrumb {
@@ -212,7 +296,7 @@ const jsonLd = {
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.3em;
-    color: var(--sky);
+    color: var(--brand);
     display: block;
     margin-bottom: 10px;
   }
@@ -256,9 +340,7 @@ const jsonLd = {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 860px;
   }
 
   .faq-item {
@@ -271,11 +353,13 @@ const jsonLd = {
   }
 
   .faq-item.open {
-    box-shadow: 0 6px 0 rgba(123, 200, 232, 0.4);
-    border-color: var(--sky);
+    box-shadow: 0 6px 0 var(--brand-soft);
+    border-color: var(--brand-soft);
   }
 
-  .faq-q { margin: 0; }
+  .faq-q {
+    margin: 0;
+  }
 
   .faq-toggle {
     width: 100%;
@@ -293,15 +377,15 @@ const jsonLd = {
   }
 
   .faq-toggle:hover {
-    background: rgba(123, 200, 232, 0.06);
+    background: rgba(243, 154, 45, 0.04);
   }
 
   .q-badge {
     font-family: "JetBrains Mono", monospace;
     font-size: 12px;
     font-weight: 800;
-    color: #3a8ab0;
-    background: rgba(123, 200, 232, 0.18);
+    color: var(--brand-deep);
+    background: var(--brand-soft);
     border-radius: 999px;
     padding: 3px 10px;
     flex: none;
@@ -309,11 +393,13 @@ const jsonLd = {
   }
 
   .faq-item.open .q-badge {
-    background: var(--sky);
+    background: var(--brand);
     color: #fff;
   }
 
-  .q-text { flex: 1; }
+  .q-text {
+    flex: 1;
+  }
 
   .q-icon {
     flex: none;
@@ -325,7 +411,8 @@ const jsonLd = {
     transition: border-color .2s, background .2s;
   }
 
-  .q-icon::before, .q-icon::after {
+  .q-icon::before,
+  .q-icon::after {
     content: "";
     position: absolute;
     background: var(--ink-2);
@@ -334,20 +421,24 @@ const jsonLd = {
   }
 
   .q-icon::before {
-    width: 10px; height: 2px;
-    top: 50%; left: 50%;
+    width: 10px;
+    height: 2px;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
   }
 
   .q-icon::after {
-    width: 2px; height: 10px;
-    top: 50%; left: 50%;
+    width: 2px;
+    height: 10px;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
   }
 
   .faq-item.open .q-icon {
-    border-color: var(--sky);
-    background: var(--sky);
+    border-color: var(--brand);
+    background: var(--brand);
   }
 
   .faq-item.open .q-icon::before,
@@ -372,13 +463,24 @@ const jsonLd = {
     color: var(--ink);
   }
 
-  .empty {
-    color: var(--ink-2);
-    font-size: 15px;
+  .faq-a-inner :global(a) {
+    color: var(--brand-deep);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .faq-a-inner :global(p) {
+    margin: 0;
   }
 
   @media (max-width: 640px) {
-    .faq-toggle { gap: 10px; font-size: 15px; }
-    .faq-a-inner { padding: 14px 16px 16px 16px; }
+    .faq-toggle {
+      gap: 10px;
+      font-size: 15px;
+    }
+
+    .faq-a-inner {
+      padding: 14px 16px 16px 16px;
+    }
   }
 </style>
