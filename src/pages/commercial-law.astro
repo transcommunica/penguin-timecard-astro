@@ -3,40 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
-const WP_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/3229';
-
-type WpPage = {
-  title: { rendered: string };
-  content: { rendered: string };
-  yoast_head_json?: {
-    title?: string;
-    og_description?: string;
-  };
-};
-
-const fetchPage = async (): Promise<WpPage | null> => {
-  try {
-    const res = await fetch(WP_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
-    const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
-    return payload as WpPage;
-  } catch {
-    return null;
-  }
-};
-
-const wp = await fetchPage();
-
 const pageTitle = '特定商取引法';
-const pageDescription = wp?.yoast_head_json?.og_description
-  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
-  ?.replace(/\[\.\.\.\]/g, '')
-  ?.trim()
-  || 'ペンギンタイムカードの特定商取引法に基づく表示ページです。';
-const displayTitle = wp?.title?.rendered || '特定商取引法に基づく表記';
-const pageHtml = (wp?.content?.rendered || '')
-  .replace(/<h[1-6][^>]*>\s*特定商取引法に基づく表記\s*<\/h[1-6]>/gi, '');
+const pageDescription = 'ペンギンタイムカードの特定商取引法に基づく表示ページです。';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
@@ -50,18 +18,79 @@ const pageHtml = (wp?.content?.rendered || '')
         <span class="here">特定商取引法</span>
       </div>
       <div class="hero-inner">
-        <h1 set:html={displayTitle}></h1>
+        <h1>特定商取引法に基づく表記</h1>
       </div>
     </div>
   </section>
 
   <section class="page-section">
     <div class="container">
-      {wp ? (
-        <article class="page-body" set:html={pageHtml}></article>
-      ) : (
-        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
-      )}
+      <article class="page-body">
+        <table>
+          <tbody>
+            <tr>
+              <th scope="row">法人名</th>
+              <td>株式会社トランスコミュニカ</td>
+            </tr>
+            <tr>
+              <th scope="row">所在地</th>
+              <td>〒870-0007　大分市王子南町５番２７号</td>
+            </tr>
+            <tr>
+              <th scope="row">電話番号</th>
+              <td>097-594-2101</td>
+            </tr>
+            <tr>
+              <th scope="row">メールアドレス</th>
+              <td>timecard@transcommunica.com</td>
+            </tr>
+            <tr>
+              <th scope="row">取締役</th>
+              <td>山本譲治</td>
+            </tr>
+            <tr>
+              <th scope="row">追加手数料</th>
+              <td>銀行振込の場合は振込手数料</td>
+            </tr>
+            <tr>
+              <th scope="row">交換および返品</th>
+              <td>
+                ソフトウェアのため交換返品はありません。<br />
+                いつでも解約は可能です。支払った金額の対象期間終了までシステムを利用できます。返金対応は致しておりません。
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">配達時間</th>
+              <td>
+                ソフトウェアのため配達はありません。<br />
+                クレジットカードでのお支払い後、即時にご利用いただけます。
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">受け付け可能な決済手段</th>
+              <td>クレジットカードおよび銀行口座引き落とし</td>
+            </tr>
+            <tr>
+              <th scope="row">決済期間</th>
+              <td>
+                クレジットカード決済の場合はただちに処理されます。<br />
+                銀行口座引き落としの場合には、書類のやりとりや銀行側の処理を含めて３ヶ月程度かかります。
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">値</th>
+              <td>月額料金は2,000円からとなっております。</td>
+            </tr>
+            <tr>
+              <th scope="row">動作環境</th>
+              <td>
+                iPhone, iPad, Android, Windowsおよび各種ブラウザーで動作します。<br />
+                Apple社等の技術的制約により、古いバージョンのOSは順次使えなくなります。できるだけ最新のOSをご利用ください。
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
     </div>
   </section>
 
@@ -112,36 +141,7 @@ const pageHtml = (wp?.content?.rendered || '')
     font-size: 15px;
   }
 
-  .page-body :global(h2) {
-    margin: 32px 0 12px;
-    font-size: clamp(20px, 2.8vw, 26px);
-    line-height: 1.4;
-    border-bottom: 2px solid var(--line);
-    padding-bottom: 8px;
-  }
-
-  .page-body :global(h3) {
-    margin: 22px 0 8px;
-    font-size: clamp(17px, 2vw, 20px);
-    line-height: 1.5;
-  }
-
-  .page-body :global(p) {
-    margin: 0 0 1em;
-  }
-
-  .page-body :global(ul),
-  .page-body :global(ol) {
-    margin: 0 0 1em 1.4em;
-  }
-
-  .page-body :global(a) {
-    color: var(--brand-deep);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .page-body :global(table) {
+  .page-body table {
     width: 100%;
     border-collapse: collapse;
     border: 1px solid var(--line);
@@ -149,23 +149,19 @@ const pageHtml = (wp?.content?.rendered || '')
     font-size: 14px;
   }
 
-  .page-body :global(th),
-  .page-body :global(td) {
+  .page-body th,
+  .page-body td {
     border: 1px solid var(--line);
     padding: 10px 12px;
     vertical-align: top;
+    text-align: left;
   }
 
-  .page-body :global(th) {
+  .page-body th {
     background: rgba(0, 0, 0, 0.04);
     font-weight: 700;
     white-space: nowrap;
     width: 30%;
-  }
-
-  .empty {
-    color: var(--ink-2);
-    font-size: 15px;
   }
 
   @media (max-width: 640px) {
@@ -173,13 +169,13 @@ const pageHtml = (wp?.content?.rendered || '')
       padding: 28px 0 56px;
     }
 
-    .page-body :global(table) {
+    .page-body table {
       display: block;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
 
-    .page-body :global(th) {
+    .page-body th {
       white-space: normal;
       width: auto;
     }

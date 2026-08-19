@@ -3,56 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
-const WP_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages/2863';
-
-type WpPage = {
-  title: { rendered: string };
-  content: { rendered: string };
-  yoast_head_json?: {
-    title?: string;
-    og_description?: string;
-  };
-};
-
-const fetchPage = async (): Promise<WpPage | null> => {
-  try {
-    const res = await fetch(WP_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return null;
-    const payload = await res.json() as unknown;
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
-    return payload as WpPage;
-  } catch {
-    return null;
-  }
-};
-
-const wp = await fetchPage();
-
-const pageTitle = wp?.yoast_head_json?.title || wp?.title?.rendered || 'ブルー版との比較';
-const pageDescription = wp?.yoast_head_json?.og_description
-  ?.replace(/続きを読む\.\.\.\s*from.*$/i, '')
-  ?.replace(/\[\.\.\.\]/g, '')
-  ?.trim()
-  || 'ペンギンタイムカードのブルー版との比較ページです。';
-const displayTitle = wp?.title?.rendered || 'ブルー版との比較';
-const pageHtml = (wp?.content?.rendered || '')
-  .replace(/https:\/\/tc-timecard\.com\/contact-us\/?/g, '/contact-us/')
-  .replace(
-    /(<a[^>]*class=")([^"]*)("[^>]*>\s*ブルー版WEB画面はこちら\s*<\/a>)/g,
-    '$1$2 cmp-btn cmp-btn-blue$3'
-  )
-  .replace(
-    /(<a[^>]*class=")([^"]*)("[^>]*>\s*オレンジ版WEB画面はこちら\s*<\/a>)/g,
-    '$1$2 cmp-btn cmp-btn-orange$3'
-  )
-  .replace(
-    /<a((?:(?!class=)[^>])*)>\s*ブルー版WEB画面はこちら\s*<\/a>/g,
-    '<a$1 class="cmp-btn cmp-btn-blue">ブルー版WEB画面はこちら</a>'
-  )
-  .replace(
-    /<a((?:(?!class=)[^>])*)>\s*オレンジ版WEB画面はこちら\s*<\/a>/g,
-    '<a$1 class="cmp-btn cmp-btn-orange">オレンジ版WEB画面はこちら</a>'
-  );
+const pageTitle = 'オレンジ版とブルー版の比較';
+const pageDescription =
+  'ペンギンタイムカードのオレンジ版とブルー版の違いを、対応OS・データ共有・計算機能などの項目で比較しています。';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
@@ -66,18 +19,146 @@ const pageHtml = (wp?.content?.rendered || '')
         <span class="here">ブルー版との比較</span>
       </div>
       <div class="hero-inner">
-        <h1 set:html={displayTitle}></h1>
+        <h1>オレンジ版とブルー版の比較</h1>
       </div>
     </div>
   </section>
 
   <section class="page-section">
     <div class="container">
-      {wp ? (
-        <article class="page-body" set:html={pageHtml}></article>
-      ) : (
-        <p class="empty">コンテンツを取得できませんでした。時間を置いて再度お試しください。</p>
-      )}
+      <article class="page-body">
+        <div class="btn-row">
+          <a
+            class="cmp-btn cmp-btn-blue"
+            href="https://app.tc-timecard.com/"
+            target="_blank"
+            rel="noreferrer noopener"
+          >ブルー版WEB画面はこちら</a>
+        </div>
+
+        <p>2021年12月にペンギンタイムカード（オレンジ版）をリリースしました。</p>
+
+        <p>
+          ブルー版はiPad, iPhoneでしか使えませんでしたが、オレンジ版はウィンドウズ、アンドロイド、ウェブでも使えるようにいちから作り直しました。
+        </p>
+
+        <p>
+          今後、新規にご利用される方は、「オレンジ版」をご利用ください。<br />
+          将来的にブルー版は廃止し、すべてオレンジ版に移行する予定です。
+        </p>
+
+        <p>
+          ※ブルー版のお支払いの方は、<a href="/news/free-plan-payment/">こちらをご参照ください</a>。
+        </p>
+
+        <div class="btn-row">
+          <a
+            class="cmp-btn cmp-btn-orange"
+            href="https://m.tc-timecard.com/"
+            target="_blank"
+            rel="noreferrer noopener"
+          >オレンジ版WEB画面はこちら</a>
+        </div>
+
+        <h3 class="centered">主な機能比較</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th class="col-ver">ブルー版</th>
+              <th class="col-ver">オレンジ版</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="group">対応OS</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th scope="row">　iOS（iPad, iPhone）</th>
+              <td>✔️</td>
+              <td>✔️</td>
+            </tr>
+            <tr>
+              <th scope="row">　Android（アンドロイド）</th>
+              <td>×</td>
+              <td>✔️</td>
+            </tr>
+            <tr>
+              <th scope="row">　Windows（ウィンドウズ）</th>
+              <td>×</td>
+              <td>✔️</td>
+            </tr>
+            <tr>
+              <th scope="row">　WEB（ウェブ）</th>
+              <td>
+                △<br />（閲覧のみ）<br />
+                <a href="https://app.tc-timecard.com/" target="_blank" rel="noreferrer noopener"
+                  >https://app.tc-timecard.com/</a>
+              </td>
+              <td>
+                ✔️<br />（入力も可能）<br />
+                <a href="https://m.tc-timecard.com/" target="_blank" rel="noreferrer noopener"
+                  >https://m.tc-timecard.com/</a>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">データ共有</th>
+              <td>×</td>
+              <td>✔️<br />すべての端末でデータ自動同期<br />（クラウド）</td>
+            </tr>
+            <tr>
+              <th scope="row">バックアップ</th>
+              <td>△<br />設定時のみ。1日おき。</td>
+              <td>✔️<br />常時リアルタイム</td>
+            </tr>
+            <tr>
+              <th scope="row">在宅ワーク、外出先での個人利用</th>
+              <td>×</td>
+              <td>✔️<br />スタッフ用アカウントを発行可能</td>
+            </tr>
+            <tr>
+              <th scope="row">複数店舗対応</th>
+              <td>×</td>
+              <td>✔️</td>
+            </tr>
+            <tr>
+              <th scope="row" class="group">計算</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th scope="row">　丸め計算</th>
+              <td>✔️</td>
+              <td>✔️</td>
+            </tr>
+            <tr>
+              <th scope="row">　残業計算</th>
+              <td>✔️</td>
+              <td>✔️<br />定時前、定時後残業を分けて表示可能</td>
+            </tr>
+            <tr>
+              <th scope="row">メール送信</th>
+              <td>✔️<br />（1分後）</td>
+              <td>✔️<br />（即時）</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="centered">注意点</h3>
+
+        <ul>
+          <li>ブルー版とオレンジ版は別物です。それぞれ別のログインアカウントが必要です。</li>
+          <li>ブルー版のデータをオレンジ版に移行する機能は現在ありません（開発中）。</li>
+          <li>ブルー版からオレンジ版に移行する方は、オレンジ版にてアカウントを「新規作成」してください。</li>
+          <li>
+            ブルー版の有料会員の方は、オレンジ版でも引き続き有料会員としてご利用いただけます。<br />
+            ご希望の際は、オレンジ版にてアカウントを作成後、お手数ですが<a href="/contact-us/">お問い合わせフォーム</a>よりその旨ご連絡ください。
+          </li>
+        </ul>
+      </article>
     </div>
   </section>
 
@@ -128,36 +209,37 @@ const pageHtml = (wp?.content?.rendered || '')
     font-size: 15px;
   }
 
-  .page-body :global(h2) {
-    margin: 32px 0 12px;
-    font-size: clamp(20px, 2.8vw, 26px);
-    line-height: 1.4;
-    border-bottom: 2px solid var(--line);
-    padding-bottom: 8px;
-  }
-
-  .page-body :global(h3) {
-    margin: 22px 0 8px;
+  .page-body h3 {
+    margin: 32px 0 8px;
     font-size: clamp(17px, 2vw, 20px);
     line-height: 1.5;
   }
 
-  .page-body :global(p) {
+  .page-body h3.centered {
+    text-align: center;
+  }
+
+  .page-body p {
     margin: 0 0 1em;
   }
 
-  .page-body :global(ul),
-  .page-body :global(ol) {
+  .page-body ul {
     margin: 0 0 1em 1.4em;
   }
 
-  .page-body :global(a) {
+  .page-body a {
     color: var(--brand-deep);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .page-body :global(a.cmp-btn) {
+  .btn-row {
+    display: flex;
+    justify-content: center;
+    margin: 0 0 1.2em;
+  }
+
+  .page-body a.cmp-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -165,31 +247,29 @@ const pageHtml = (wp?.content?.rendered || '')
     border-radius: 999px;
     font-weight: 800;
     line-height: 1.2;
-    text-decoration: none !important;
-    margin: 2px 8px 6px 0;
+    text-decoration: none;
     border: 2px solid transparent;
     transition: transform .15s ease, filter .2s ease;
   }
 
-  .page-body :global(a.cmp-btn:hover) {
+  .page-body a.cmp-btn:hover {
     transform: translateY(-1px);
     filter: saturate(1.08);
   }
 
-  .page-body :global(a.cmp-btn-blue) {
-    background: #2b8ec7 !important;
-    border-color: #1f76aa !important;
-    color: #fff !important;
-    margin-top: 14px;
+  .page-body a.cmp-btn-blue {
+    background: #2b8ec7;
+    border-color: #1f76aa;
+    color: #fff;
   }
 
-  .page-body :global(a.cmp-btn-orange) {
-    background: #ee8a2b !important;
-    border-color: #d97516 !important;
-    color: #fff !important;
+  .page-body a.cmp-btn-orange {
+    background: #ee8a2b;
+    border-color: #d97516;
+    color: #fff;
   }
 
-  .page-body :global(table) {
+  .page-body table {
     width: 100%;
     border-collapse: collapse;
     border: 1px solid var(--line);
@@ -197,21 +277,31 @@ const pageHtml = (wp?.content?.rendered || '')
     font-size: 14px;
   }
 
-  .page-body :global(th),
-  .page-body :global(td) {
+  .page-body th,
+  .page-body td {
     border: 1px solid var(--line);
     padding: 10px 12px;
     vertical-align: top;
   }
 
-  .page-body :global(th) {
+  /* 項目名の列は左寄せ、バージョン別の列は中央寄せ */
+  .page-body th {
     background: rgba(0, 0, 0, 0.04);
     font-weight: 700;
+    text-align: left;
   }
 
-  .empty {
-    color: var(--ink-2);
-    font-size: 15px;
+  .page-body th.group {
+    font-weight: 800;
+  }
+
+  .page-body thead th,
+  .page-body th.col-ver {
+    text-align: center;
+  }
+
+  .page-body td {
+    text-align: center;
   }
 
   @media (max-width: 640px) {
@@ -219,7 +309,7 @@ const pageHtml = (wp?.content?.rendered || '')
       padding: 28px 0 56px;
     }
 
-    .page-body :global(table) {
+    .page-body table {
       display: block;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
