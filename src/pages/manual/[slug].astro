@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -527,11 +528,24 @@ const nextLink = isWpManual
     : undefined;
 const nextTitle = isWpManual ? nextWpPage?.title.rendered : nextEntry?.data.title;
 
+const breadcrumbTitle = stripHtml(
+  isWpManual && wpPage ? wpPage.title.rendered : pageTitle
+);
 const title = `${pageTitle} — マニュアル — ペンギンタイムカード`;
 const description = pageDescription;
 ---
 
 <Layout title={title} description={description}>
+  <Fragment slot="head">
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'マニュアル', href: '/manual/' },
+        { name: breadcrumbTitle },
+      ]}
+    />
+  </Fragment>
+
   <SiteHeader active="manual" />
 
   <section class="manual-detail-page">

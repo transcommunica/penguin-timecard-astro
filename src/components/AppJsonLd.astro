@@ -1,0 +1,49 @@
+---
+/**
+ * アプリ本体（ペンギンタイムカード）の構造化データ。
+ * 勤怠管理アプリであること・対応OS・料金レンジを検索エンジンに明示する。
+ */
+const site = Astro.site!;
+const origin = new URL('/', site).href.replace(/\/$/, '');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  '@id': `${origin}/#software`,
+  name: 'ペンギンタイムカード',
+  alternateName: 'Penguin Timecard',
+  applicationCategory: 'BusinessApplication',
+  applicationSubCategory: '勤怠管理・タイムカード',
+  operatingSystem: 'Windows, iOS, iPadOS, Android, Web',
+  url: origin + '/',
+  description:
+    '小さなお店・会社のための勤怠管理アプリ。ICカードや専用機械を用意せず、手持ちのタブレット・PC・スマートフォンで出退勤の打刻から集計まで行えます。AI顔認証、深夜割増、複数回休憩、シフト管理に対応。',
+  inLanguage: 'ja',
+  publisher: { '@id': `${origin}/#organization` },
+  softwareHelp: new URL('/manual/', site).href,
+  featureList: [
+    '出勤・退勤・休憩の打刻',
+    'AI顔認証による本人確認',
+    '残業・深夜割増時間の自動集計',
+    '複数回休憩・日付をまたぐ勤務に対応',
+    'シフト管理',
+    '月次集計のExcel出力',
+    'Slack連携',
+  ],
+  downloadUrl: [
+    'https://apps.apple.com/jp/app/id1568440167',
+    'https://play.google.com/store/apps/details?id=com.transcommunica.TimeCardCloud',
+  ],
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'JPY',
+    lowPrice: '1210',
+    highPrice: '8250',
+    offerCount: 5,
+    url: new URL('/rate-plan/', site).href,
+    availability: 'https://schema.org/InStock',
+  },
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)}></script>

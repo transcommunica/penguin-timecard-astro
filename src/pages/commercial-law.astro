@@ -2,12 +2,22 @@
 import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 const pageTitle = '特定商取引法';
 const pageDescription = 'ペンギンタイムカードの特定商取引法に基づく表示ページです。';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: '特定商取引法' },
+      ]}
+    />
+  </Fragment>
+
   <SiteHeader />
 
   <section class="page-hero">

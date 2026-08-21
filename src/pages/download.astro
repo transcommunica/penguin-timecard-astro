@@ -3,6 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import AppJsonLd from '../components/AppJsonLd.astro';
 const pageTitle = 'ダウンロード';
 const pageDescription = 'ペンギンタイムカードのアプリダウンロードページです。';
 const displayTitle = 'ダウンロード';
@@ -48,6 +50,16 @@ const platforms = [
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <AppJsonLd />
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'ダウンロード' },
+      ]}
+    />
+  </Fragment>
+
   <SiteHeader />
 
   <section class="download-hero">

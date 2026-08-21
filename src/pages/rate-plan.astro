@@ -3,12 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
+import AppJsonLd from '../components/AppJsonLd.astro';
 
 const title = '料金 — ペンギンタイムカード';
 const description = '料金プラン比較';
 ---
 
 <Layout title={title} description={description}>
+  <Fragment slot="head">
+    <AppJsonLd />
+  </Fragment>
+
 	<SiteHeader active="rate" />
 
 	<section class="rate-hero" data-screen-label="02 Rate Hero">

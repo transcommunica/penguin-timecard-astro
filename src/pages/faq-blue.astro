@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 type FaqItem = {
   id: string;
@@ -125,9 +126,18 @@ const jsonLd = {
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)}></script>
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'よくある質問' },
+      ]}
+    />
+  </Fragment>
+
   <SiteHeader />
 
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 
   <section class="faq-hero">
     <div class="container">

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 const pageTitle = 'プライバシーポリシー';
 const pageDescription =
@@ -9,6 +10,15 @@ const pageDescription =
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'プライバシーポリシー' },
+      ]}
+    />
+  </Fragment>
+
   <SiteHeader />
 
   <section class="page-hero">

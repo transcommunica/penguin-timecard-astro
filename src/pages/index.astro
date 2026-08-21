@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import AppJsonLd from '../components/AppJsonLd.astro';
 import { getCollection } from 'astro:content';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -131,6 +132,10 @@ const topNews = contentNews.length > 0
 ---
 
 <Layout title={title}>
+  <Fragment slot="head">
+    <AppJsonLd />
+  </Fragment>
+
 	<SiteHeader isHome={true} active="home" />
 
 	<section class="hero" data-screen-label="02 Hero">

@@ -1,0 +1,56 @@
+---
+/**
+ * サイト全体で共通の構造化データ（Organization / WebSite）。
+ * @id で相互参照することで、Google がサイトと運営組織を同一エンティティとして扱える。
+ */
+const site = Astro.site!;
+const origin = new URL('/', site).href.replace(/\/$/, '');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${origin}/#organization`,
+      name: '株式会社トランスコミュニカ',
+      url: origin + '/',
+      logo: {
+        '@type': 'ImageObject',
+        '@id': `${origin}/#logo`,
+        url: new URL('/assets/penguin.png', site).href,
+        caption: 'ペンギンタイムカード',
+      },
+      image: { '@id': `${origin}/#logo` },
+      email: 'timecard@transcommunica.com',
+      telephone: '+81-97-594-2101',
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'JP',
+        postalCode: '870-0007',
+        addressRegion: '大分県',
+        addressLocality: '大分市',
+        streetAddress: '王子南町5番27号',
+      },
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        email: 'timecard@transcommunica.com',
+        telephone: '+81-97-594-2101',
+        availableLanguage: ['ja'],
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${origin}/#website`,
+      url: origin + '/',
+      name: 'ペンギンタイムカード',
+      description:
+        '小さなお店・会社のための、インストールしたその日から使えるやさしい勤怠管理アプリ。',
+      publisher: { '@id': `${origin}/#organization` },
+      inLanguage: 'ja',
+    },
+  ],
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)}></script>

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -540,10 +541,31 @@ if (isPageRoute) {
   backHref = source === 'home' ? '/#news' : createPageHref(sourcePage);
   backLabel = source === 'home' ? 'トップに戻る' : '一覧に戻る';
 }
+// article:published_time 用。パースできない日付は出力しない。
+const parsedPostDate = postDate ? new Date(postDate) : null;
+const publishedTimeIso =
+  parsedPostDate && !Number.isNaN(parsedPostDate.getTime())
+    ? parsedPostDate.toISOString()
+    : undefined;
+
 ---
 
-<Layout title={layoutTitle} description={layoutDescription}>
+<Layout
+  title={layoutTitle}
+  description={layoutDescription}
+  ogType={renderListPage ? 'website' : 'article'}
+  publishedTime={publishedTimeIso}
+>
   <Fragment slot="head">
+    {!renderListPage && (
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'ホーム', href: '/' },
+          { name: 'お知らせ', href: '/news/' },
+          { name: stripHtml(postTitle) },
+        ]}
+      />
+    )}
     {renderListPage && (
       <>
         <link rel="prev" href={new URL(createPageHref(currentPage - 1), Astro.site).href} />
