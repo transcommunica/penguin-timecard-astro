@@ -1,0 +1,25 @@
+---
+/**
+ * パンくずリストの構造化データ。
+ * 各ページの見た目のパンくずと同じ階層を渡す（最終要素は現在ページ）。
+ * item は絶対URL。最終要素は URL を省略できる。
+ */
+interface Props {
+  items: Array<{ name: string; href?: string }>;
+}
+
+const { items } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    ...(item.href ? { item: new URL(item.href, Astro.site).href } : {}),
+  })),
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)}></script>

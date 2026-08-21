@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 const WP_MANUAL_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages?parent=2887&per_page=100';
 
@@ -401,6 +402,15 @@ const grouped = categoryMeta
 ---
 
 <Layout title={title} description={description}>
+  <Fragment slot="head">
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'マニュアル' },
+      ]}
+    />
+  </Fragment>
+
 	<SiteHeader active="manual" />
 
 	<section class="manual-hero" data-screen-label="02 Manual Hero">
