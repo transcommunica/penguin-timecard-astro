@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+const title = 'ページが見つかりません — ペンギンタイムカード';
+const description = 'お探しのページは移動または削除された可能性があります。マニュアルやよくある質問から目的のページをお探しください。';
+---
+
+<Layout title={title} description={description} noindex={true}>
+  <SiteHeader />
+
+  <section class="section notfound-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">404 NOT FOUND</span>
+        <h1>ページが<span class="accent">見つかりません</span>。</h1>
+        <p class="lead">
+          お探しのページは、移動または削除された可能性があります。<br />
+          下記から目的のページをお探しください。
+        </p>
+      </div>
+
+      <ul class="notfound-links">
+        <li><a href="/">トップページ</a><span>サービスの概要と最新のお知らせ</span></li>
+        <li><a href="/manual/">マニュアル</a><span>基本の使い方から応用設定まで</span></li>
+        <li><a href="/faq/">よくある質問</a><span>操作や料金についてのご質問</span></li>
+        <li><a href="/rate-plan/">料金/お支払い</a><span>プランと支払い方法のご案内</span></li>
+        <li><a href="/news/">お知らせ</a><span>機能追加・不具合修正の履歴</span></li>
+        <li><a href="/contact-us/">お問い合わせ</a><span>解決しない場合はこちらから</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <SiteFooter />
+</Layout>
+
+<style>
+  .notfound-section {
+    padding: 90px 0 110px;
+  }
+  .notfound-section .section-head {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+  .notfound-links {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    max-width: 860px;
+  }
+  .notfound-links li {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 0 var(--line);
+  }
+  .notfound-links a {
+    display: block;
+    font-weight: 800;
+    color: var(--brand-deep);
+    margin-bottom: 4px;
+  }
+  .notfound-links span {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+</style>

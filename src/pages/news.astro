@@ -240,11 +240,16 @@ const currentPage = Math.min(Math.max(Number.isFinite(currentPageParam) ? Math.t
 const paginatedPosts = posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 const createPageHref = (page: number) => (page <= 1 ? '/news/' : `/news/${page}/`);
 
-const pageTitle = 'お知らせ';
-const pageDescription = 'ペンギンタイムカードのお知らせ一覧です。';
+const pageTitle = 'お知らせ - 【公式】ペンギンタイムカード';
+const pageDescription =
+  'ペンギンタイムカードの新機能・改善・不具合修正のお知らせ一覧です。最新のアップデート内容をご確認いただけます。';
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    {totalPages > 1 && <link rel="next" href={new URL(createPageHref(2), Astro.site).href} />}
+  </Fragment>
+
   <SiteHeader />
 
   <section class="section news-section">
@@ -275,9 +280,11 @@ const pageDescription = 'ペンギンタイムカードのお知らせ一覧で�
 
       {totalPages > 1 && (
         <nav class="pagination" aria-label="お知らせページネーション">
-          <a class={`pagination-link pagination-nav ${currentPage === 1 ? 'is-disabled' : ''}`} href={createPageHref(currentPage - 1)} aria-disabled={currentPage === 1}>
-            前へ
-          </a>
+          {currentPage === 1 ? (
+            <span class="pagination-link pagination-nav is-disabled" aria-hidden="true">前へ</span>
+          ) : (
+            <a class="pagination-link pagination-nav" href={createPageHref(currentPage - 1)}>前へ</a>
+          )}
           <div class="pagination-pages">
             {Array.from({ length: totalPages }, (_, index) => {
               const page = index + 1;
@@ -288,9 +295,11 @@ const pageDescription = 'ペンギンタイムカードのお知らせ一覧で�
               );
             })}
           </div>
-          <a class={`pagination-link pagination-nav ${currentPage === totalPages ? 'is-disabled' : ''}`} href={createPageHref(currentPage + 1)} aria-disabled={currentPage === totalPages}>
-            次へ
-          </a>
+          {currentPage === totalPages ? (
+            <span class="pagination-link pagination-nav is-disabled" aria-hidden="true">次へ</span>
+          ) : (
+            <a class="pagination-link pagination-nav" href={createPageHref(currentPage + 1)}>次へ</a>
+          )}
         </nav>
       )}
     </div>

@@ -4,9 +4,22 @@ import '../styles/styles.css';
 interface Props {
 	title?: string;
 	description?: string;
+	/** 正規URL。省略時は現在のパス（クエリパラメータを除いたもの）。 */
+	canonical?: string;
+	/** true でこのページを検索結果から除外する。 */
+	noindex?: boolean;
 }
 
-const { title = 'ペンギンタイムカード — インストールしたその日から使える、やさしい勤怠管理', description = '小さなお店・会社のための、インストール不要のやさしい勤怠管理アプリ。ICカードも機械も不要。今すぐ無料で始められます。' } = Astro.props;
+const {
+	title = 'ペンギンタイムカード — インストールしたその日から使える、やさしい勤怠管理',
+	description = '小さなお店・会社のための、インストール不要のやさしい勤怠管理アプリ。ICカードも機械も不要。今すぐ無料で始められます。',
+	canonical,
+	noindex = false,
+} = Astro.props;
+
+// Astro.url.pathname だけを使うことで ?from=home / ?page=2 のような
+// クエリ付きURLでも正規URLが1本に収束する。
+const canonicalHref = new URL(canonical ?? Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
@@ -17,6 +30,8 @@ const { title = 'ペンギンタイムカード — インストールしたそ�
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<link rel="canonical" href={canonicalHref} />
+		{noindex && <meta name="robots" content="noindex, follow" />}
 		<script is:inline>
 			(function () {
 				try {
@@ -39,6 +54,8 @@ const { title = 'ペンギンタイムカード — インストールしたそ�
 				transition-duration: 0.001ms !important;
 			}
 		</style>
+		<!-- ページ固有の head 要素（rel=prev/next、構造化データなど） -->
+		<slot name="head" />
 		<!-- Google Analytics -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-NZ5W1S0PZV"></script>
 		<script is:inline>
