@@ -1,3 +1,12 @@
 # 旧URL: オレンジ版のFAQは /new-faq/ から /faq/ へ移動
 /new-faq /faq/ 301
 /new-faq/ /faq/ 301
+
+# 旧WordPressサイトのみに存在したページ（新サイトでは不要のため削除）
+/news/category/manual  /manual/     301
+/news/category/manual/ /manual/     301
+/news/category/*       /news/       301
+/features              /#features   301
+/features/             /#features   301
+/corporation           /contact-us/ 301
+/corporation/          /contact-us/ 301
