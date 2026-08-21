@@ -468,6 +468,9 @@ if (isPageRoute) {
   renderListPage = true;
   currentPage = requestedPage;
   paginatedPosts = posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+  // 1ページ目（/news/）と重複しないよう、ページ番号をタイトルとdescriptionに入れる。
+  layoutTitle = `お知らせ（${currentPage}ページ目） - 【公式】ペンギンタイムカード`;
+  layoutDescription = `ペンギンタイムカードのお知らせ一覧 ${currentPage}／${totalPages}ページ目です。新機能・改善・不具合修正の履歴をご確認いただけます。`;
 } else {
   const slug = routeValue;
   const markdownPost = markdownNewsPosts.find((entry) =>
@@ -540,6 +543,17 @@ if (isPageRoute) {
 ---
 
 <Layout title={layoutTitle} description={layoutDescription}>
+  <Fragment slot="head">
+    {renderListPage && (
+      <>
+        <link rel="prev" href={new URL(createPageHref(currentPage - 1), Astro.site).href} />
+        {currentPage < totalPages && (
+          <link rel="next" href={new URL(createPageHref(currentPage + 1), Astro.site).href} />
+        )}
+      </>
+    )}
+  </Fragment>
+
   <SiteHeader />
 
   {renderListPage ? (
@@ -571,9 +585,11 @@ if (isPageRoute) {
 
         {totalPages > 1 && (
           <nav class="pagination" aria-label="お知らせページネーション">
-            <a class={`pagination-link pagination-nav ${currentPage === 1 ? 'is-disabled' : ''}`} href={createPageHref(currentPage - 1)} aria-disabled={currentPage === 1}>
-              前へ
-            </a>
+            {currentPage === 1 ? (
+              <span class="pagination-link pagination-nav is-disabled" aria-hidden="true">前へ</span>
+            ) : (
+              <a class="pagination-link pagination-nav" href={createPageHref(currentPage - 1)}>前へ</a>
+            )}
             <div class="pagination-pages">
               {Array.from({ length: totalPages }, (_, index) => {
                 const page = index + 1;
@@ -584,9 +600,11 @@ if (isPageRoute) {
                 );
               })}
             </div>
-            <a class={`pagination-link pagination-nav ${currentPage === totalPages ? 'is-disabled' : ''}`} href={createPageHref(currentPage + 1)} aria-disabled={currentPage === totalPages}>
-              次へ
-            </a>
+            {currentPage === totalPages ? (
+              <span class="pagination-link pagination-nav is-disabled" aria-hidden="true">次へ</span>
+            ) : (
+              <a class="pagination-link pagination-nav" href={createPageHref(currentPage + 1)}>次へ</a>
+            )}
           </nav>
         )}
       </div>
