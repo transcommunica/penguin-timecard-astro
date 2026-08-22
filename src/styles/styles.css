@@ -261,16 +261,16 @@ body.mobile-nav-open .nav {
   gap: 10px;
   padding: 13px 24px;
   border-radius: 999px;
-  background: #FBE1EC;
+  background: none;
+  border: 2px solid #d62976;
   color: #d62976;
   font-size: 15px;
   font-weight: 800;
-  box-shadow: 0 10px 24px -12px rgba(214, 41, 118, 0.3);
-  transition: transform .2s, box-shadow .2s;
+  transition: transform .2s, background .2s;
 }
 .mobile-nav-social:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px -12px rgba(214, 41, 118, 0.35);
+  background: rgba(214, 41, 118, 0.08);
 }
 .mobile-nav-login {
   display: inline-flex;
@@ -943,11 +943,11 @@ body.mobile-nav-open .nav::after {
   grid-template-columns: 280px 1fr;
   align-items: center;
   gap: 48px;
-  background: #FBE1EC;
+  background: none;
+  border: 2px solid #d62976;
   border-radius: 32px;
   padding: 48px;
   color: var(--ink);
-  box-shadow: var(--shadow-lg);
 }
 .instagram-card-media,
 .instagram-card-body {
@@ -956,7 +956,7 @@ body.mobile-nav-open .nav::after {
 .instagram-card-media {
   border-radius: 20px;
   overflow: hidden;
-  border: 4px solid rgba(255,255,255,0.8);
+  border: 4px solid rgba(214, 41, 118, 0.25);
   box-shadow: 0 20px 40px -20px rgba(214, 41, 118, 0.35);
 }
 .instagram-card-media img { width: 100%; height: auto; display: block; }
