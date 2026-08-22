@@ -987,6 +987,16 @@ body.mobile-nav-open .nav::after {
 }
 .footer-brand { display: flex; flex-direction: column; gap: 14px; }
 .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.55); margin: 0; line-height: 1.7; }
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  transition: color .2s;
+}
+.footer-social:hover { color: var(--brand); }
 .footer-cols {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
