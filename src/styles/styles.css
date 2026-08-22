@@ -261,7 +261,7 @@ body.mobile-nav-open .nav {
   gap: 10px;
   padding: 13px 24px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #4f5bd5 0%, #962fbf 28%, #d62976 55%, #fa7e1e 80%, #feda75 100%);
+  background: #d62976;
   color: white;
   font-size: 15px;
   font-weight: 800;
@@ -943,7 +943,7 @@ body.mobile-nav-open .nav::after {
   grid-template-columns: 280px 1fr;
   align-items: center;
   gap: 48px;
-  background: linear-gradient(135deg, #4f5bd5 0%, #962fbf 28%, #d62976 55%, #fa7e1e 80%, #feda75 100%);
+  background: #d62976;
   border-radius: 32px;
   padding: 48px;
   color: white;
