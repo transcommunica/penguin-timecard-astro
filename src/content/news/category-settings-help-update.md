@@ -2,6 +2,7 @@
 slug: "category-settings-help-update"
 title: "スタッフ区分の設定画面がわかりやすくなりました"
 date: "2026-07-26T10:00:00"
+newsCategory: "feature"
 excerptHtml: "<p>スタッフ区分（カテゴリー）・勤務パターンの編集画面で、各設定の「？」ヘルプがより具体的になりました。丸め設定の説明は実際の計算例つきに、ボタン名称の説明にも変更例がつき、ヘルプから該当マニュアルに直接ジャンプできる「マニュアルを見る」ボタンも [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/category-settings-help-update/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from スタッフ区分の設定画面がわかりやすくなりました</span></a></p>"
 description: "スタッフ区分（カテゴリー）・勤務パターンの編集画面で、各設定の「？」ヘルプがより具体的になりました。丸め設定の説明は実際の計算例つきに、対象オフィスの設定はより安全に変更されました。"
 seoTitle: "スタッフ区分の設定画面がわかりやすくなりました - 【公式】ペンギンタイムカード"

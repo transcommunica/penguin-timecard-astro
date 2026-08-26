@@ -29,15 +29,15 @@ order: 109
 
 1. 設定したいカテゴリーを選択します
 
-![manual-image](/assets/manual/2024/03/cp21-1024x712.png)
+![自動翌日計算｜操作画面1](/assets/manual/2024/03/cp21-1024x712.png)
 
 2. 「夜勤」の「自動翌日計算」をONにして保存します。
 
-![manual-image](/assets/manual/2024/03/cp22-1024x712.png)
+![自動翌日計算｜操作画面2](/assets/manual/2024/03/cp22-1024x712.png)
 
 以上の設定で、OUT時刻がIN時刻より前の場合、自動的に翌日と判断して計算します。
 
-![manual-image](/assets/manual/2024/03/cp23.png)
+![自動翌日計算｜操作画面3](/assets/manual/2024/03/cp23.png)
 
 ## 注意点
 

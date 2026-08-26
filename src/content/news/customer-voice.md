@@ -2,6 +2,7 @@
 slug: "customer-voice"
 title: "お客様の声・評判"
 date: "2019-05-13T14:32:05"
+newsCategory: "guide"
 excerptHtml: "<p>ペンギンタイムカードを使っているお客様の声を集めました 年配スタッフも簡単 「スタッフの勤怠管理を今まで紙のタイムカードで行なっていました。しかし、 毎月回収したタイムカードの出勤時間を計算する時間がとにかく無 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/customer-voice/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from お客様の声・評判</span></a></p>"
 description: "ペンギンタイムカードを使っているお客様の声を集めました 年配スタッフも簡単 「スタッフの勤怠管理を今まで紙のタイムカードで行なっていました。しかし、 毎月回収したタイムカードの出勤時間を計算する時間がとにかく無 […] 続きを読む… from お客様の声・評判"
 seoTitle: "お客様の声・評判 - 【公式】ペンギンタイムカード"

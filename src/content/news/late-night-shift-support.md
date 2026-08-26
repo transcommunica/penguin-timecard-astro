@@ -2,6 +2,7 @@
 slug: "late-night-shift-support"
 title: "深夜勤務に対応しました"
 date: "2023-12-25T18:01:00"
+newsCategory: "feature"
 excerptHtml: "<p>深夜勤務も打刻できるようになりました。 たとえば22時から翌日5時までというような勤務の場合、今までは、日付が異なるため記録することができませんでした。新しい仕組みでは、翌日5時を「29時」のように記録し、「29時-22 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/late-night-shift-support/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 深夜勤務に対応しました</span></a></p>"
 description: "深夜勤務も打刻できるようになりました。 たとえば22時から翌日5時までというような勤務の場合、今までは、日付が異なるため記録することができませんでした。新しい仕組みでは、翌日5時を「29時」のように記録し、「29時-22 […] 続きを読む… from 深夜勤務に対応しました"
 seoTitle: "深夜勤務に対応しました - 【公式】ペンギンタイムカード"

@@ -2,6 +2,7 @@
 slug: "late-night-premium-timeband-support"
 title: "深夜割増時間などの時間帯集計に対応しました"
 date: "2024-03-01T15:24:15"
+newsCategory: "feature"
 excerptHtml: "<p>勤務時間のうち、たとえば22時から翌日5時までの深夜割増時間を集計したいなど、特定の時間の計算に対応しました。 などのように、特定の時間帯の集計を自動的に行うことが可能です。 詳しくは下記のリンクをご参照ください。 深夜 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/late-night-premium-timeband-support/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 深夜割増時間などの時間帯集計に対応しました</span></a></p>"
 description: "勤務時間のうち、たとえば22時から翌日5時までの深夜割増時間を集計したいなど、特定の時間の計算に対応しました。 などのように、特定の時間帯の集計を自動的に行うことが可能です。 詳しくは下記のリンクをご参照ください。 深夜 […] 続きを読む… from 深夜割増時間などの時間帯集計に対応しました"
 seoTitle: "深夜割増時間などの時間帯集計に対応しました - 【公式】ペンギンタイムカード"

@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
 import AppJsonLd from '../components/AppJsonLd.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 const title = '料金 — ペンギンタイムカード';
 const description = '料金プラン比較';
@@ -12,6 +13,12 @@ const description = '料金プラン比較';
 <Layout title={title} description={description}>
   <Fragment slot="head">
     <AppJsonLd />
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: '料金/お支払い' },
+      ]}
+    />
   </Fragment>
 
 	<SiteHeader active="rate" />
@@ -19,6 +26,11 @@ const description = '料金プラン比較';
 	<section class="rate-hero" data-screen-label="02 Rate Hero">
 		<div class="rate-hero-bg"></div>
 		<div class="container rate-hero-inner">
+			<div class="breadcrumb">
+				<a href="/">ホーム</a>
+				<span class="sep">/</span>
+				<span class="here">料金/お支払い</span>
+			</div>
 			<span class="eyebrow">RATE PLAN</span>
 			<h1>
 				人数に合わせて、<br />
@@ -52,7 +64,7 @@ const description = '料金プラン比較';
 
 			<div class="plans-grid">
 				<div class="plan-card p1 reveal">
-					<div class="plan-penguin size-1"><img src="/assets/penguin.png" alt="マイクロペンギン" /></div>
+					<div class="plan-penguin size-1"><img src="/assets/penguin.png" alt="マイクロペンギン" width="1383" height="1385" loading="lazy" /></div>
 					<div class="plan-jp">マイクロ<br />ペンギン</div>
 					<div class="plan-alias">MICRO</div>
 					<div class="plan-price"><span class="amount">1,210</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -64,7 +76,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="plan-card p2 reveal">
-					<div class="plan-penguin size-2"><img src="/assets/penguin.png" alt="コガタペンギン" /></div>
+					<div class="plan-penguin size-2"><img src="/assets/penguin.png" alt="コガタペンギン" width="1383" height="1385" loading="lazy" /></div>
 					<div class="plan-jp">コガタ<br />ペンギン</div>
 					<div class="plan-alias">MINI</div>
 					<div class="plan-price"><span class="amount">2,200</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -77,7 +89,7 @@ const description = '料金プラン比較';
 
 				<div class="plan-card p3 featured reveal">
 					<div class="plan-ribbon">人気プラン</div>
-					<div class="plan-penguin size-3"><img src="/assets/penguin.png" alt="アデリーペンギン" /></div>
+					<div class="plan-penguin size-3"><img src="/assets/penguin.png" alt="アデリーペンギン" width="1383" height="1385" loading="lazy" /></div>
 					<div class="plan-jp">アデリー<br />ペンギン</div>
 					<div class="plan-alias">SMALL</div>
 					<div class="plan-price"><span class="amount">3,850</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -89,7 +101,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="plan-card p4 reveal">
-					<div class="plan-penguin size-4"><img src="/assets/penguin.png" alt="オウサマペンギン" /></div>
+					<div class="plan-penguin size-4"><img src="/assets/penguin.png" alt="オウサマペンギン" width="1383" height="1385" loading="lazy" /></div>
 					<div class="plan-jp">オウサマ<br />ペンギン</div>
 					<div class="plan-alias">MEDIUM</div>
 					<div class="plan-price"><span class="amount">5,500</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -101,7 +113,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="plan-card p5 reveal">
-					<div class="plan-penguin size-5"><img src="/assets/penguin.png" alt="コウテイペンギン" /></div>
+					<div class="plan-penguin size-5"><img src="/assets/penguin.png" alt="コウテイペンギン" width="1383" height="1385" loading="lazy" /></div>
 					<div class="plan-jp">コウテイ<br />ペンギン</div>
 					<div class="plan-alias">LARGE</div>
 					<div class="plan-price"><span class="amount">8,250</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -180,7 +192,7 @@ const description = '料金プラン比較';
 
 			<div class="other-plans">
 				<div class="other-card coming reveal">
-					<img class="pen-corner" src="/assets/penguin.png" alt="" />
+					<img class="pen-corner" src="/assets/penguin.png" alt="" width="1383" height="1385" loading="lazy" />
 					<span class="other-tag">PAY-AS-YOU-GO</span>
 					<h3>マカロニペンギン</h3>
 					<div class="sub">従量プラン</div>
@@ -191,7 +203,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="other-card reveal">
-					<img class="pen-corner" src="/assets/penguin.png" alt="" />
+					<img class="pen-corner" src="/assets/penguin.png" alt="" width="1383" height="1385" loading="lazy" />
 					<span class="other-tag">ENTERPRISE</span>
 					<h3>法人向けプラン</h3>
 					<div class="sub">中・大規模企業向け</div>
@@ -283,6 +295,17 @@ const description = '料金プラン比較';
 </Layout>
 
 <style>
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: var(--ink-2);
+		margin-bottom: 18px;
+	}
+	.breadcrumb a { color: var(--brand-deep); font-weight: 700; }
+	.breadcrumb .sep { opacity: .5; }
+
 	.rate-hero { position: relative; padding: 80px 0 60px; overflow: hidden; }
 	.rate-hero-bg {
 		position: absolute; inset: 0;

@@ -2,6 +2,7 @@
 slug: "holiday-work"
 title: "休日勤務の計算方法"
 date: "2019-06-07T14:48:35"
+newsCategory: "guide"
 excerptHtml: "<p>休日勤務の考え方 休日勤務の計算が必要な理由 たとえばパート従業員の時給が、平日と休日で異なる場合、平日に何時間働いたか、休日に何時間働いたかを分けて集計し、それぞれに異なる時給をかけることになりますので、休日勤務の時間 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/holiday-work/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 休日勤務の計算方法</span></a></p>"
 description: "休日勤務の考え方 休日勤務の計算が必要な理由 たとえばパート従業員の時給が、平日と休日で異なる場合、平日に何時間働いたか、休日に何時間働いたかを分けて集計し、それぞれに異なる時給をかけることになりますので、休日勤務の時間 […] 続きを読む… from 休日勤務の計算方法"
 seoTitle: "休日勤務の計算方法 - 【公式】ペンギンタイムカード"

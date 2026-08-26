@@ -2,6 +2,7 @@
 slug: "add-staff"
 title: "スタッフ追加"
 date: "2022-03-16T14:01:36"
+newsCategory: "guide"
 excerptHtml: "<p> [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/add-staff/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from スタッフ追加</span></a></p>"
 description: "[…] 続きを読む… from スタッフ追加"
 seoTitle: "スタッフ追加 - 【公式】ペンギンタイムカード"

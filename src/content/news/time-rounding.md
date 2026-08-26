@@ -2,6 +2,7 @@
 slug: "time-rounding"
 title: "丸め処理"
 date: "2019-05-17T17:37:34"
+newsCategory: "guide"
 excerptHtml: "<p>丸め処理の考え方 1. 丸め処理とは 例えば、定時退社が18:00で、18:23に退社した場合、それを18:20の退社とみなしたり、18:15の退社とみなしたりするのが丸め処理です。 この例では、「10分ごとの切り捨て」 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/time-rounding/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 丸め処理</span></a></p>"
 description: "丸め処理の考え方 1. 丸め処理とは 例えば、定時退社が18:00で、18:23に退社した場合、それを18:20の退社とみなしたり、18:15の退社とみなしたりするのが丸め処理です。 この例では、「10分ごとの切り捨て」 […] 続きを読む… from 丸め処理"
 seoTitle: "丸め処理 - 【公式】ペンギンタイムカード"

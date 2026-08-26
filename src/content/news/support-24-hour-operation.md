@@ -2,6 +2,7 @@
 slug: "support-24-hour-operation"
 title: "24時間営業に対応しました"
 date: "2024-02-06T15:13:00"
+newsCategory: "feature"
 excerptHtml: "<p>すでに深夜営業についてリリースしましたが、24時間営業の場合、当該機能では不十分な場合もございました。 このたび24時間営業の場合でも計算可能な機能がリリースされました。 詳しくは下記リンクをご参照ください。 24時間営 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/support-24-hour-operation/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 24時間営業に対応しました</span></a></p>"
 description: "すでに深夜営業についてリリースしましたが、24時間営業の場合、当該機能では不十分な場合もございました。 このたび24時間営業の場合でも計算可能な機能がリリースされました。 詳しくは下記リンクをご参照ください。 24時間営 […] 続きを読む… from 24時間営業に対応しました"
 seoTitle: "24時間営業に対応しました - 【公式】ペンギンタイムカード"

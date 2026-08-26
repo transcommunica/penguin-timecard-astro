@@ -2,6 +2,7 @@
 slug: "cloud-app-comparison"
 title: "クラウド型とアプリ型 どっちがいいの？"
 date: "2019-06-09T00:47:18"
+newsCategory: "guide"
 excerptHtml: "<p>クラウド型とアプリ型の違い クラウド型 アプリ型 データの保存場所 クラウドサーバー アプリ端末内 データ喪失のリスク サーバーハッキング 端末ハッキング、端末紛失 データ保存の確実性 高い 端末が壊れるリスク 操作スピ [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/cloud-app-comparison/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from クラウド型とアプリ型　どっちがいいの？</span></a></p>"
 description: "クラウド型とアプリ型の違い クラウド型 アプリ型 データの保存場所 クラウドサーバー アプリ端末内 データ喪失のリスク サーバーハッキング 端末ハッキング、端末紛失 データ保存の確実性 高い 端末が壊れるリスク 操作スピ […] 続きを読む… from クラウド型とアプリ型 どっちがいいの？"
 seoTitle: "クラウド型とアプリ型 どっちがいいの？ - 【公式】ペンギンタイムカード"

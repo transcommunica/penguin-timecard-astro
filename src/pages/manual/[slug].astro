@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import ArticleJsonLd from '../../components/ArticleJsonLd.astro';
 import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -23,11 +24,15 @@ type ManualMdFrontmatter = {
   description: string;
   category: 'core' | 'overview' | 'settings' | 'behavior' | 'billing';
   itemCode: string;
+  /** 最終更新日（YYYY-MM-DD）。任意。 */
+  updated?: string;
 };
 
 type ManualMdModule = {
   frontmatter: ManualMdFrontmatter;
   Content: Awaited<ReturnType<typeof render>>['Content'];
+  /** Markdown の生テキスト（代表画像の抽出に使う）。 */
+  rawContent?: () => string;
 };
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -484,14 +489,18 @@ const wpLocalMeta = wpPage
 const wpFallbackCategory = wpPage ? wpSlugToCategory[wpPage.slug] : undefined;
 const resolvedCategory = entry?.data.category ?? mdModule?.frontmatter.category ?? wpLocalMeta?.category ?? wpFallbackCategory;
 
-const updatedDate = isWpManual && wpPage ? new Date(wpPage.modified) : new Date();
-const updatedText = new Intl.DateTimeFormat('ja-JP', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-})
-  .format(updatedDate)
-  .replaceAll('/', '.');
+// 「最終更新」はフロントマターの updated（または WordPress の modified）がある場合だけ出す。
+// 以前はここで new Date() を使っており、全ページがビルド当日を最終更新として表示していた。
+const updatedRaw = isWpManual && wpPage
+  ? wpPage.modified
+  : entry?.data.updated ?? mdModule?.frontmatter.updated ?? null;
+const updatedDate = updatedRaw ? new Date(updatedRaw) : null;
+const hasUpdatedDate = Boolean(updatedDate && !Number.isNaN(updatedDate.getTime()));
+const updatedText = hasUpdatedDate
+  ? new Intl.DateTimeFormat('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
+      .format(updatedDate!)
+      .replaceAll('/', '.')
+  : '';
 
 const categoryLabel = resolvedCategory ? categoryLabelMap[resolvedCategory] : 'マニュアル';
 const categoryEnLabel = resolvedCategory ? categoryEnMap[resolvedCategory] : 'WORDPRESS';
@@ -528,6 +537,13 @@ const nextLink = isWpManual
     : undefined;
 const nextTitle = isWpManual ? nextWpPage?.title.rendered : nextEntry?.data.title;
 
+// 構造化データ用: 本文の最初の画像を代表画像として使う。
+const bodyRaw = mdModule?.rawContent?.() ?? '';
+const firstImage =
+  bodyRaw.match(/!\[[^\]]*\]\((\/assets\/[^)\s]+)\)/)?.[1] ??
+  bodyRaw.match(/<img[^>]+src="(\/assets\/[^"]+)"/)?.[1] ??
+  undefined;
+
 const breadcrumbTitle = stripHtml(
   isWpManual && wpPage ? wpPage.title.rendered : pageTitle
 );
@@ -537,6 +553,14 @@ const description = pageDescription;
 
 <Layout title={title} description={description}>
   <Fragment slot="head">
+    <ArticleJsonLd
+      type="TechArticle"
+      headline={breadcrumbTitle}
+      description={description}
+      dateModified={hasUpdatedDate ? updatedDate!.toISOString() : undefined}
+      image={firstImage}
+      path={`/manual/${slug}/`}
+    />
     <BreadcrumbJsonLd
       items={[
         { name: 'ホーム', href: '/' },
@@ -562,7 +586,7 @@ const description = pageDescription;
         <div class="meta">
           <span class="num">{itemCodeText} / {categoryLabel}</span>
           <span class="cat">{categoryEnLabel}</span>
-          <span class="updated">最終更新 {updatedText}</span>
+          {hasUpdatedDate && <span class="updated">最終更新 {updatedText}</span>}
         </div>
         <h1 set:html={isWpManual && wpPage ? wpPage.title.rendered : pageTitle}></h1>
         <p class="lead">{pageDescription}</p>

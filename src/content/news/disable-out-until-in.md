@@ -2,6 +2,7 @@
 slug: "disable-out-until-in"
 title: "出勤を記録するまで退勤ボタンを押せないように設定できるようになりました"
 date: "2025-10-03T10:00:00"
+newsCategory: "feature"
 excerptHtml: "<p>スタッフ区分（カテゴリー）ごとに、「IN ボタンを押すまでOUTボタンを無効にする」設定を追加しました。「出勤を押したつもりで、間違って退勤ボタンを押してしまう」というお声にお応えした設定です。初期設定はこれまでどおり、先に退勤ボタンを押せる動きのままです [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/disable-out-until-in/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 出勤を記録するまで退勤ボタンを押せないように設定できるようになりました</span></a></p>"
 description: "スタッフ区分（カテゴリー）ごとに「IN ボタンを押すまでOUTボタンを無効にする」設定を追加しました。間違って退勤ボタンを押してしまうのを防ぎたいお客様向けの設定です。"
 seoTitle: "出勤を記録するまで退勤ボタンを押せないように設定できるようになりました - 【公式】ペンギンタイムカード"

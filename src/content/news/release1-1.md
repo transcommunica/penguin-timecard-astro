@@ -2,6 +2,7 @@
 slug: "release1-1"
 title: "バージョン1.1をリリース"
 date: "2018-07-04T18:23:06"
+newsCategory: "release"
 excerptHtml: "<p>2018/7/4 &nbsp; iOSアプリのバージョン1.1をリリースしました。 主な修正点 &#8211; 管理画面にヘルプページを追加 &#8211; バグ修正 &nbsp; 引き続きペンギンタイムカード [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/release1-1/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from バージョン1.1をリリース</span></a></p>"
 description: "2018/7/4   iOSアプリのバージョン1.1をリリースしました。 主な修正点 &#8211; 管理画面にヘルプページを追加 &#8211; バグ修正   引き続きペンギンタイムカード […] 続きを読む… from バージョン1.1をリリース"
 seoTitle: "バージョン1.1をリリース - 【公式】ペンギンタイムカード"

@@ -2,6 +2,7 @@
 slug: "release2-4"
 title: "バージョン2.4をリリース"
 date: "2019-01-20T18:48:16"
+newsCategory: "release"
 excerptHtml: "<p>2019/1/20 &nbsp; iOSアプリのバージョン2.4をリリースしました。 &nbsp; 主な修正点 勤怠一覧、PDF、エクセルに「勤務日数」が表示されるようになりました。 勤務時間修正時に、標準勤務時間が初期 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/release2-4/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from バージョン2.4をリリース</span></a></p>"
 description: "2019/1/20   iOSアプリのバージョン2.4をリリースしました。   主な修正点 勤怠一覧、PDF、エクセルに「勤務日数」が表示されるようになりました。 勤務時間修正時に、標準勤務時間が初期 […] 続きを読む… from バージョン2.4をリリース"
 seoTitle: "バージョン2.4をリリース - 【公式】ペンギンタイムカード"

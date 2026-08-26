@@ -2,6 +2,7 @@
 slug: "total-worktime-overtime"
 title: "総勤務時間・残業時間の考え方"
 date: "2019-05-16T15:31:59"
+newsCategory: "guide"
 excerptHtml: "<p>総勤務時間、残業時間の計算方法 従業員の時間計算方法は、主に以下の２パターンに分かれます。 正社員、パート社員における時間の考え方 1. 正社員 正社員は、標準勤務時間（いわゆる定時）が決まっています。たとえば9:00か [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/total-worktime-overtime/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 総勤務時間・残業時間の考え方</span></a></p>"
 description: "総勤務時間、残業時間の計算方法 従業員の時間計算方法は、主に以下の２パターンに分かれます。 正社員、パート社員における時間の考え方 1. 正社員 正社員は、標準勤務時間（いわゆる定時）が決まっています。たとえば9:00か […] 続きを読む… from 総勤務時間・残業時間の考え方"
 seoTitle: "総勤務時間・残業時間の考え方 - 【公式】ペンギンタイムカード"

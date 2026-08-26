@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import { newsCategoryHref, NEWS_CATEGORIES, NEWS_CATEGORY_META } from '../lib/news-category';
 import { getCollection } from 'astro:content';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -248,12 +250,24 @@ const pageDescription =
 <Layout title={pageTitle} description={pageDescription}>
   <Fragment slot="head">
     {totalPages > 1 && <link rel="next" href={new URL(createPageHref(2), Astro.site).href} />}
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'お知らせ' },
+      ]}
+    />
   </Fragment>
 
   <SiteHeader />
 
   <section class="section news-section">
     <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">お知らせ</span>
+      </div>
+
       <div class="section-head">
         <span class="eyebrow">NEWS</span>
         <h1>お知らせ</h1>
@@ -277,6 +291,13 @@ const pageDescription =
       ) : (
         <p class="empty">投稿を取得できませんでした。時間を置いて再度お試しください。</p>
       )}
+
+      <nav class="category-nav" aria-label="お知らせのカテゴリ">
+        <span class="category-nav-label">カテゴリから探す</span>
+        {NEWS_CATEGORIES.map((id) => (
+          <a href={newsCategoryHref(id)}>{NEWS_CATEGORY_META[id].heading}</a>
+        ))}
+      </nav>
 
       {totalPages > 1 && (
         <nav class="pagination" aria-label="お知らせページネーション">
@@ -309,6 +330,40 @@ const pageDescription =
 </Layout>
 
 <style>
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-bottom: 18px;
+  }
+  .breadcrumb a { color: var(--brand-deep); font-weight: 700; }
+  .breadcrumb .sep { opacity: .5; }
+
+  .category-nav {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+  }
+  .category-nav-label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+  .category-nav a {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: transform .2s, border-color .2s;
+  }
+  .category-nav a:hover { transform: translateY(-2px); border-color: var(--brand); }
+
   .news-section {
     padding-top: 36px;
   }

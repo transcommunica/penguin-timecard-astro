@@ -2,6 +2,7 @@
 slug: "overtimework-calculation"
 title: "残業時間・総勤務時間"
 date: "2019-05-21T00:15:43"
+newsCategory: "guide"
 excerptHtml: "<p>1. 残業時間と総勤務時間の対象 残業時間の対象 残業時間の計算が必要となるのは主に正社員です。 正社員は基本給があり、残業時間に応じて追加の給与を計算するためです。 総勤務時間の対象 総勤務時間の計算が必要となるのは主 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/overtimework-calculation/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 残業時間・総勤務時間</span></a></p>"
 description: "1. 残業時間と総勤務時間の対象 残業時間の対象 残業時間の計算が必要となるのは主に正社員です。 正社員は基本給があり、残業時間に応じて追加の給与を計算するためです。 総勤務時間の対象 総勤務時間の計算が必要となるのは主 […] 続きを読む… from 残業時間・総勤務時間"
 seoTitle: "残業時間・総勤務時間 - 【公式】ペンギンタイムカード"

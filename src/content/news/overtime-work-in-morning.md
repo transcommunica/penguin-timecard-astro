@@ -2,6 +2,7 @@
 slug: "overtime-work-in-morning"
 title: "早出残業・出勤前の残業"
 date: "2019-06-07T19:45:56"
+newsCategory: "guide"
 excerptHtml: "<p>出勤前の残業について 1. 定時前の出社は残業なのか？ 一般的に「残業」というと、言葉のとおり定時の「後」に働いた業務をイメージします。 では、出社時刻の「前」に働いた時間は残業に入るのでしょうか？ これは企業によって社 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/overtime-work-in-morning/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 早出残業・出勤前の残業</span></a></p>"
 description: "出勤前の残業について 1. 定時前の出社は残業なのか？ 一般的に「残業」というと、言葉のとおり定時の「後」に働いた業務をイメージします。 では、出社時刻の「前」に働いた時間は残業に入るのでしょうか？ これは企業によって社 […] 続きを読む… from 早出残業・出勤前の残業"
 seoTitle: "早出残業・出勤前の残業 - 【公式】ペンギンタイムカード"

@@ -2,6 +2,7 @@
 slug: "net-worktime-calculation-bugfix"
 title: "純勤務時間の計算不具合について"
 date: "2024-03-08T13:57:03"
+newsCategory: "feature"
 excerptHtml: "<p>いつもペンギンタイムカードをご利用いただきありがとうございます。 一部の条件のお客様にて、出退勤記録の「純勤務」時間が計算されない不具合が判明いたしました。 つきましては、アプリを最新バージョン（7.2.1以上）にアップ [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/net-worktime-calculation-bugfix/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 純勤務時間の計算不具合について</span></a></p>"
 description: "いつもペンギンタイムカードをご利用いただきありがとうございます。 一部の条件のお客様にて、出退勤記録の「純勤務」時間が計算されない不具合が判明いたしました。 つきましては、アプリを最新バージョン（7.2.1以上）にアップ […] 続きを読む… from 純勤務時間の計算不具合について"
 seoTitle: "純勤務時間の計算不具合について - 【公式】ペンギンタイムカード"

@@ -2,6 +2,7 @@
 slug: "edit-time"
 title: "時間の修正"
 date: "2019-05-20T22:15:00"
+newsCategory: "guide"
 excerptHtml: "<p>時間の修正 「朝、出勤ボタンを押し忘れた」「直帰したので退勤ボタンを押せなかった」など、ボタンを押せないときってありますよね。 そのような場合、時間を手入力することができます。紙のタイムカードの場合に手書き修正するのと同 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/edit-time/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 時間の修正</span></a></p>"
 description: "時間の修正 「朝、出勤ボタンを押し忘れた」「直帰したので退勤ボタンを押せなかった」など、ボタンを押せないときってありますよね。 そのような場合、時間を手入力することができます。紙のタイムカードの場合に手書き修正するのと同 […] 続きを読む… from 時間の修正"
 seoTitle: "時間の修正 - 【公式】ペンギンタイムカード"
