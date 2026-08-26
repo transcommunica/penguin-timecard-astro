@@ -1,12 +1,14 @@
 ---
+import { Image } from 'astro:assets';
+import penguin from '../assets/penguin.png';
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
 import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import { fetchWp } from '../lib/wp-api';
 
-const WP_MANUAL_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/pages?parent=2887&per_page=100';
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -208,28 +210,13 @@ type ManualListItem = {
 };
 
 const fetchWpManualPages = async (): Promise<WpPage[]> => {
-	try {
-		const response = await fetch(WP_MANUAL_ENDPOINT, {
-			headers: { Accept: 'application/json' },
-		});
-
-		if (!response.ok) {
-			return [];
-		}
-
-		const payload = (await response.json()) as unknown;
-		if (!Array.isArray(payload)) {
-			return [];
-		}
-
-		return payload as WpPage[];
-	} catch {
-		return [];
-	}
+	const payload = await fetchWp<unknown>('pages?parent=2887&per_page=100', []);
+	return Array.isArray(payload) ? (payload as WpPage[]) : [];
 };
 
 const title = 'マニュアル — ペンギンタイムカード';
-const description = 'ペンギンタイムカードの使い方、機能説明などのマニュアル';
+const description =
+  'ペンギンタイムカードのマニュアルです。基本的な打刻の手順から、締め日・丸め処理・深夜割増・シフト管理・顔認証といった設定まで、目的別にまとめています。';
 
 const categoryMeta = [
   { key: 'core', num: '01', en: 'CORE SETTINGS', ja: '重要な基本設定' },
@@ -439,6 +426,7 @@ const grouped = categoryMeta
 					</div>
 				</div>
 
+				<div class="manual-hero-visual">
 				<div class="manual-hero-card">
 					<div class="stack">
 						<div class="mock-doc">
@@ -458,7 +446,8 @@ const grouped = categoryMeta
 							<div class="lines"><div class="l1" style="width: 65%;"></div><div class="l2" style="width: 40%;"></div></div>
 						</div>
 					</div>
-					<img class="penguin-peek" src="/assets/penguin.png" alt="" width="1383" height="1385" loading="lazy" />
+				</div>
+				<Image class="penguin-peek" src={penguin} alt="" width={130} height={130} densities={[1, 2]} loading="lazy" />
 				</div>
 			</div>
 		</div>
@@ -579,7 +568,7 @@ const grouped = categoryMeta
 		flex: 1;
 		font-family: inherit;
 		font-size: 16px;
-		font-weight: 600;
+		font-weight: 700;
 		color: var(--ink);
 		background: transparent;
 	}
@@ -657,13 +646,24 @@ const grouped = categoryMeta
 	.mock-doc .lines .l1 { height: 8px; background: var(--ink); opacity: 0.85; border-radius: 999px; width: 80%; }
 	.mock-doc .lines .l2 { height: 6px; background: var(--ink-2); opacity: 0.5; border-radius: 999px; width: 55%; }
 
-	.manual-hero-card .penguin-peek {
+	/* カードは overflow: hidden で罫線パターンを角丸に収めているため、
+	   ペンギンはカードの外側に置いてクリップされないようにする。
+	   トップページの .hero-penguin-big と同じく、カードの手前に重ねる。 */
+	.manual-hero-visual {
+		position: relative;
+	}
+	.manual-hero-visual .penguin-peek {
 		position: absolute;
-		bottom: -20px;
-		right: -16px;
-		width: 110px;
-		filter: drop-shadow(0 10px 14px rgba(31, 26, 23, 0.18));
+		bottom: -26px;
+		right: -22px;
+		width: 130px;
+		height: auto;
+		z-index: 2;
+		filter: drop-shadow(0 12px 16px rgba(31, 26, 23, 0.2));
 		animation: bob 5s ease-in-out infinite;
+	}
+	@media (max-width: 820px) {
+		.manual-hero-visual .penguin-peek { width: 100px; bottom: -18px; right: -10px; }
 	}
 
 	.manual-notice {
@@ -692,7 +692,7 @@ const grouped = categoryMeta
 	}
 	.manual-notice small {
 		color: var(--ink-2);
-		font-weight: 600;
+		font-weight: 700;
 		font-size: 13px;
 		margin-left: auto;
 	}
@@ -712,7 +712,7 @@ const grouped = categoryMeta
 	.manual-cat-head .num {
 		font-family: "JetBrains Mono", monospace;
 		font-size: 32px;
-		font-weight: 900;
+		font-weight: 800;
 		color: var(--brand-deep);
 		background: var(--brand-soft);
 		width: 56px;

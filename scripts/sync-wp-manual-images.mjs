@@ -1,7 +1,15 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const API_URL = 'https://tc-timecard.com/wp-json/wp/v2/pages?parent=2887&per_page=100';
+// 旧WordPressサイトの WP REST API。tc-timecard.com は現在このAstroサイトを指しているため、
+// 移設先のオリジンを環境変数 WP_API_BASE で指定する。
+//   例: WP_API_BASE=https://old.tc-timecard.com node scripts/sync-wp-manual-images.mjs
+const WP_API_BASE = (process.env.WP_API_BASE || '').trim().replace(/\/+$/, '');
+if (!WP_API_BASE) {
+  console.error('WP_API_BASE が未設定です。移設先のオリジンを指定してください（例: https://old.tc-timecard.com）。');
+  process.exit(1);
+}
+const API_URL = `${WP_API_BASE}/wp-json/wp/v2/pages?parent=2887&per_page=100`;
 const UPLOAD_BASE = 'https://tc-timecard.com/wp-content/uploads/';
 const OUTPUT_BASE = path.resolve('public/assets/manual');
 
