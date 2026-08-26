@@ -426,6 +426,7 @@ const grouped = categoryMeta
 					</div>
 				</div>
 
+				<div class="manual-hero-visual">
 				<div class="manual-hero-card">
 					<div class="stack">
 						<div class="mock-doc">
@@ -445,7 +446,8 @@ const grouped = categoryMeta
 							<div class="lines"><div class="l1" style="width: 65%;"></div><div class="l2" style="width: 40%;"></div></div>
 						</div>
 					</div>
-					<Image class="penguin-peek" src={penguin} alt="" width={110} height={110} densities={[1, 2]} loading="lazy" />
+				</div>
+				<Image class="penguin-peek" src={penguin} alt="" width={130} height={130} densities={[1, 2]} loading="lazy" />
 				</div>
 			</div>
 		</div>
@@ -644,14 +646,24 @@ const grouped = categoryMeta
 	.mock-doc .lines .l1 { height: 8px; background: var(--ink); opacity: 0.85; border-radius: 999px; width: 80%; }
 	.mock-doc .lines .l2 { height: 6px; background: var(--ink-2); opacity: 0.5; border-radius: 999px; width: 55%; }
 
-	.manual-hero-card .penguin-peek {
+	/* カードは overflow: hidden で罫線パターンを角丸に収めているため、
+	   ペンギンはカードの外側に置いてクリップされないようにする。
+	   トップページの .hero-penguin-big と同じく、カードの手前に重ねる。 */
+	.manual-hero-visual {
+		position: relative;
+	}
+	.manual-hero-visual .penguin-peek {
 		position: absolute;
-		bottom: -20px;
-		right: -16px;
-		width: 110px;
+		bottom: -26px;
+		right: -22px;
+		width: 130px;
 		height: auto;
-		filter: drop-shadow(0 10px 14px rgba(31, 26, 23, 0.18));
+		z-index: 2;
+		filter: drop-shadow(0 12px 16px rgba(31, 26, 23, 0.2));
 		animation: bob 5s ease-in-out infinite;
+	}
+	@media (max-width: 820px) {
+		.manual-hero-visual .penguin-peek { width: 100px; bottom: -18px; right: -10px; }
 	}
 
 	.manual-notice {
