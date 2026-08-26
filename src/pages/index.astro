@@ -1,13 +1,17 @@
 ---
+import { Image } from 'astro:assets';
+import penguin from '../assets/penguin.png';
 import Layout from '../layouts/Layout.astro';
 import AppJsonLd from '../components/AppJsonLd.astro';
 import { getCollection } from 'astro:content';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
+import { fetchWp } from '../lib/wp-api';
 
 const title = 'ペンギンタイムカード — インストールしたその日から使える、やさしい勤怠管理';
-const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100';
+const description =
+  '小さなお店・会社のための、やさしい勤怠管理アプリ。ICカードも専用の打刻機も不要で、手持ちのiPad・スマホ・パソコンがそのまま出勤簿になります。月額1,210円（税込）から、まず1ヶ月無料。';
 
 type WpPost = {
 	slug: string;
@@ -94,15 +98,8 @@ const canonicalNewsSlug = (rawSlug: string, title: string) => {
 };
 
 const fetchWpPosts = async (): Promise<WpPost[]> => {
-	try {
-		const res = await fetch(WP_POSTS_ENDPOINT, { headers: { Accept: 'application/json' } });
-		if (!res.ok) return [];
-		const payload = await res.json() as unknown;
-		if (!Array.isArray(payload)) return [];
-		return payload as WpPost[];
-	} catch {
-		return [];
-	}
+	const payload = await fetchWp<unknown>('posts?per_page=100', []);
+	return Array.isArray(payload) ? (payload as WpPost[]) : [];
 };
 
 const contentNews = (await getCollection('news'))
@@ -131,7 +128,7 @@ const topNews = contentNews.length > 0
 		});
 ---
 
-<Layout title={title}>
+<Layout title={title} description={description}>
   <Fragment slot="head">
     <AppJsonLd />
   </Fragment>
@@ -205,7 +202,7 @@ const topNews = contentNews.length > 0
 						</div>
 					</div>
 
-					<img class="hero-penguin-big mascot" src="/assets/penguin.png" alt="" width="1383" height="1385" />
+					<Image class="hero-penguin-big mascot" src={penguin} alt="" width={200} height={200} densities={[1, 2]} loading="eager" fetchpriority="high" />
 				</div>
 			</div>
 

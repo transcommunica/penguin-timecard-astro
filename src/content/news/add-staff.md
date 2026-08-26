@@ -4,7 +4,8 @@ title: "スタッフ追加"
 date: "2022-03-16T14:01:36"
 newsCategory: "guide"
 excerptHtml: "<p> [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/add-staff/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from スタッフ追加</span></a></p>"
-description: "[…] 続きを読む… from スタッフ追加"
+description: "スタッフの追加手順を動画で解説しています。"
+seoDescription: "ペンギンタイムカードでスタッフを追加する手順を動画で解説しています。管理画面からの登録の流れをそのままご確認いただけます。"
 seoTitle: "スタッフ追加 - 【公式】ペンギンタイムカード"
 ---
 <figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-4-3 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper">

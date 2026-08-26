@@ -1,10 +1,15 @@
+---
+import { Image } from 'astro:assets';
+import penguin from '../assets/penguin.png';
+---
+
 <footer class="footer" data-screen-label="10 Footer">
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
         <a class="brand" href="/" style="color:#fff;">
           <span class="brand-mark">
-            <img src="/assets/penguin.png" alt="" width="38" height="38" style="object-fit: contain; filter: brightness(0) invert(1);" />
+            <Image src={penguin} alt="" width={38} height={38} densities={[1, 2]} style="object-fit: contain; filter: brightness(0) invert(1);" />
           </span>
           <span>ペンギンタイムカード</span>
         </a>

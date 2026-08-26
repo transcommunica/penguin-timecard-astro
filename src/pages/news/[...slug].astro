@@ -6,9 +6,8 @@ import { newsCategoryHref, resolveNewsCategory, NEWS_CATEGORY_META, NEWS_CATEGOR
 import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
+import { fetchWp } from '../../lib/wp-api';
 
-const WP_POSTS_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/posts?per_page=100&_embed';
-const WP_CATEGORIES_ENDPOINT = 'https://tc-timecard.com/wp-json/wp/v2/categories?per_page=100';
 
 type NewsTag = {
   label: string;
@@ -78,27 +77,13 @@ const keepJapaneseLocaleText = (text: string) =>
     .trim();
 
 const fetchWpPosts = async (): Promise<WpPost[]> => {
-  try {
-    const res = await fetch(WP_POSTS_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return [];
-    const payload = await res.json() as unknown;
-    if (!Array.isArray(payload)) return [];
-    return payload as WpPost[];
-  } catch {
-    return [];
-  }
+  const payload = await fetchWp<unknown>('posts?per_page=100&_embed', []);
+  return Array.isArray(payload) ? (payload as WpPost[]) : [];
 };
 
 const fetchWpCategories = async (): Promise<WpCategory[]> => {
-  try {
-    const res = await fetch(WP_CATEGORIES_ENDPOINT, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return [];
-    const payload = await res.json() as unknown;
-    if (!Array.isArray(payload)) return [];
-    return payload as WpCategory[];
-  } catch {
-    return [];
-  }
+  const payload = await fetchWp<unknown>('categories?per_page=100', []);
+  return Array.isArray(payload) ? (payload as WpCategory[]) : [];
 };
 
 const cleanExcerptHtml = (html: string) =>

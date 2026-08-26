@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import penguin from '../assets/penguin.png';
 import Layout from '../layouts/Layout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -7,7 +9,8 @@ import AppJsonLd from '../components/AppJsonLd.astro';
 import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 const title = '料金 — ペンギンタイムカード';
-const description = '料金プラン比較';
+const description =
+  'ペンギンタイムカードの料金プランです。スタッフ5人まで月額1,210円（税込）から、50人まで5つのプラン。初期費用・オプション料金はなく、まず1ヶ月無料でお試しいただけます。';
 ---
 
 <Layout title={title} description={description}>
@@ -64,7 +67,7 @@ const description = '料金プラン比較';
 
 			<div class="plans-grid">
 				<div class="plan-card p1 reveal">
-					<div class="plan-penguin size-1"><img src="/assets/penguin.png" alt="マイクロペンギン" width="1383" height="1385" loading="lazy" /></div>
+					<div class="plan-penguin size-1"><Image src={penguin} alt="マイクロペンギン" width={90} height={90} densities={[1, 2]} loading="lazy" /></div>
 					<div class="plan-jp">マイクロ<br />ペンギン</div>
 					<div class="plan-alias">MICRO</div>
 					<div class="plan-price"><span class="amount">1,210</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -76,7 +79,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="plan-card p2 reveal">
-					<div class="plan-penguin size-2"><img src="/assets/penguin.png" alt="コガタペンギン" width="1383" height="1385" loading="lazy" /></div>
+					<div class="plan-penguin size-2"><Image src={penguin} alt="コガタペンギン" width={90} height={90} densities={[1, 2]} loading="lazy" /></div>
 					<div class="plan-jp">コガタ<br />ペンギン</div>
 					<div class="plan-alias">MINI</div>
 					<div class="plan-price"><span class="amount">2,200</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -89,7 +92,7 @@ const description = '料金プラン比較';
 
 				<div class="plan-card p3 featured reveal">
 					<div class="plan-ribbon">人気プラン</div>
-					<div class="plan-penguin size-3"><img src="/assets/penguin.png" alt="アデリーペンギン" width="1383" height="1385" loading="lazy" /></div>
+					<div class="plan-penguin size-3"><Image src={penguin} alt="アデリーペンギン" width={90} height={90} densities={[1, 2]} loading="lazy" /></div>
 					<div class="plan-jp">アデリー<br />ペンギン</div>
 					<div class="plan-alias">SMALL</div>
 					<div class="plan-price"><span class="amount">3,850</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -101,7 +104,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="plan-card p4 reveal">
-					<div class="plan-penguin size-4"><img src="/assets/penguin.png" alt="オウサマペンギン" width="1383" height="1385" loading="lazy" /></div>
+					<div class="plan-penguin size-4"><Image src={penguin} alt="オウサマペンギン" width={90} height={90} densities={[1, 2]} loading="lazy" /></div>
 					<div class="plan-jp">オウサマ<br />ペンギン</div>
 					<div class="plan-alias">MEDIUM</div>
 					<div class="plan-price"><span class="amount">5,500</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -113,7 +116,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="plan-card p5 reveal">
-					<div class="plan-penguin size-5"><img src="/assets/penguin.png" alt="コウテイペンギン" width="1383" height="1385" loading="lazy" /></div>
+					<div class="plan-penguin size-5"><Image src={penguin} alt="コウテイペンギン" width={90} height={90} densities={[1, 2]} loading="lazy" /></div>
 					<div class="plan-jp">コウテイ<br />ペンギン</div>
 					<div class="plan-alias">LARGE</div>
 					<div class="plan-price"><span class="amount">8,250</span><span class="yen">円</span><span class="per">/月</span></div>
@@ -192,7 +195,7 @@ const description = '料金プラン比較';
 
 			<div class="other-plans">
 				<div class="other-card coming reveal">
-					<img class="pen-corner" src="/assets/penguin.png" alt="" width="1383" height="1385" loading="lazy" />
+					<Image class="pen-corner" src={penguin} alt="" width={70} height={70} densities={[1, 2]} loading="lazy" />
 					<span class="other-tag">PAY-AS-YOU-GO</span>
 					<h3>マカロニペンギン</h3>
 					<div class="sub">従量プラン</div>
@@ -203,7 +206,7 @@ const description = '料金プラン比較';
 				</div>
 
 				<div class="other-card reveal">
-					<img class="pen-corner" src="/assets/penguin.png" alt="" width="1383" height="1385" loading="lazy" />
+					<Image class="pen-corner" src={penguin} alt="" width={70} height={70} densities={[1, 2]} loading="lazy" />
 					<span class="other-tag">ENTERPRISE</span>
 					<h3>法人向けプラン</h3>
 					<div class="sub">中・大規模企業向け</div>
@@ -377,7 +380,7 @@ const description = '料金プラン比較';
 		display: flex; align-items: baseline; justify-content: center; gap: 4px; padding: 14px 0;
 		border-top: 2px dashed var(--line); border-bottom: 2px dashed var(--line); margin-bottom: 18px;
 	}
-	.plan-price .amount { font-family: "JetBrains Mono", monospace; font-size: 30px; font-weight: 900; color: var(--brand-deep); line-height: 1; }
+	.plan-price .amount { font-family: "JetBrains Mono", monospace; font-size: 30px; font-weight: 800; color: var(--brand-deep); line-height: 1; }
 	.plan-price .yen { font-size: 14px; font-weight: 800; color: var(--ink); }
 	.plan-price .per { font-size: 12px; color: var(--ink-2); font-weight: 700; }
 	.plan-spec { font-size: 13px; color: var(--ink-2); font-weight: 700; display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 0 4px; }
@@ -386,7 +389,7 @@ const description = '料金プラン比較';
 		padding: 4px 0; border-bottom: 1px dotted var(--line);
 	}
 	.plan-spec-row:last-child { border-bottom: none; }
-	.plan-spec-row .val { color: var(--ink); font-weight: 900; font-family: "JetBrains Mono", monospace; }
+	.plan-spec-row .val { color: var(--ink); font-weight: 800; font-family: "JetBrains Mono", monospace; }
 	.plan-spec-row .val.dash { color: #bbb; font-family: inherit; }
 	.plan-spec-row .check {
 		display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
@@ -467,7 +470,7 @@ const description = '料金プラン比較';
 		place-items: center; text-align: center; margin: 0 auto; box-shadow: 0 14px 0 var(--brand-deep), 0 30px 40px -16px rgba(226, 125, 23, 0.5);
 		transform: rotate(-6deg);
 	}
-	.stamp-circle .num { font-family: "JetBrains Mono", monospace; font-size: 72px; font-weight: 900; line-height: 1; }
+	.stamp-circle .num { font-family: "JetBrains Mono", monospace; font-size: 72px; font-weight: 800; line-height: 1; }
 	.stamp-circle .lbl { font-size: 14px; font-weight: 800; letter-spacing: .1em; margin-top: 8px; }
 	.stamp-circle .lbl-big { font-size: 22px; font-weight: 900; margin-top: 4px; }
 
@@ -489,7 +492,7 @@ const description = '料金プラン比較';
 	}
 	.pay-step .num {
 		width: 48px; height: 48px; border-radius: 50%; background: var(--brand); color: white;
-		display: grid; place-items: center; font-family: "JetBrains Mono", monospace; font-weight: 900; font-size: 20px;
+		display: grid; place-items: center; font-family: "JetBrains Mono", monospace; font-weight: 800; font-size: 20px;
 		box-shadow: 0 6px 0 var(--brand-deep);
 	}
 	.pay-step h4 { font-size: 17px; margin-bottom: 6px; line-height: 1.5; }

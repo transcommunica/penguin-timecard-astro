@@ -13,8 +13,9 @@ type FaqItem = {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-const pageTitle = 'よくある質問';
-const pageDescription = 'ペンギンタイムカード（ブルー版）のよくある質問ページです。';
+const pageTitle = 'よくある質問（ブルー版） — ペンギンタイムカード';
+const pageDescription =
+  'ペンギンタイムカード ブルー版についてよくいただく質問と回答をまとめています。オレンジ版との違いは比較ページでご確認いただけます。';
 
 // 質問と回答（旧サイトの掲載順）
 const faqItems: FaqItem[] = [
@@ -131,7 +132,7 @@ const jsonLd = {
     <BreadcrumbJsonLd
       items={[
         { name: 'ホーム', href: '/' },
-        { name: 'よくある質問' },
+        { name: 'よくある質問（ブルー版）' },
       ]}
     />
   </Fragment>
@@ -144,11 +145,11 @@ const jsonLd = {
       <div class="breadcrumb">
         <a href="/">ホーム</a>
         <span class="sep">/</span>
-        <span class="here">よくある質問</span>
+        <span class="here">よくある質問（ブルー版）</span>
       </div>
       <div class="hero-inner">
         <span class="eyebrow">FAQ</span>
-        <h1>よくある質問</h1>
+        <h1>よくある質問（ブルー版）</h1>
         <p class="lead">{faqItems.length}件の質問と回答を掲載しています。</p>
       </div>
       <div class="version-notice">

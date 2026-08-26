@@ -13,8 +13,9 @@ type FaqItem = {
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
-const pageTitle = 'よくある質問';
-const pageDescription = 'ペンギンタイムカード（オレンジ版）のよくある質問ページです。';
+const pageTitle = 'よくある質問 — ペンギンタイムカード';
+const pageDescription =
+  'ペンギンタイムカードの使い方・料金・対応端末についてよくいただく質問と回答をまとめています。打刻の修正、休憩や深夜勤務の集計、複数店舗での利用など。';
 
 // 質問と回答（旧サイトの掲載順）
 const faqItems: FaqItem[] = [

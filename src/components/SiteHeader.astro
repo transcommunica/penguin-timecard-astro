@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import penguin from '../assets/penguin.png';
 interface Props {
   isHome?: boolean;
   active?: 'home' | 'rate' | 'manual' | 'contact' | 'faq';
@@ -12,7 +14,7 @@ const root = isHome ? '' : '/';
   <div class="container nav-inner">
     <a class="brand" href={isHome ? '#' : '/'}>
       <span class="brand-mark">
-        <img src="/assets/penguin.png" alt="" width="38" height="38" style="object-fit: contain;" />
+        <Image src={penguin} alt="" width={38} height={38} densities={[1, 2]} loading="eager" style="object-fit: contain;" />
       </span>
       <span>ペンギンタイムカード</span>
     </a>
