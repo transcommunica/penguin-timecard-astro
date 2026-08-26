@@ -1,0 +1,213 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import FaqJsonLd from '../components/FaqJsonLd.astro';
+import AppJsonLd from '../components/AppJsonLd.astro';
+import '../styles/landing.css';
+
+const pageTitle = 'タイムカードアプリで勤怠管理 — ペンギンタイムカード';
+const pageDescription =
+  '紙のタイムカードやExcelでの勤怠管理を、手持ちのiPad・スマホ・パソコンでそのまま置き換えられるタイムカードアプリです。ICカードも専用の打刻機も不要。月額1,210円から、まず1ヶ月無料でお試しいただけます。';
+
+const pains = [
+  '月末にタイムカードを集めて、電卓で集計している',
+  'Excelに手入力していて、転記ミスが見つかる',
+  '打刻機やICカードを入れたいが、初期費用が高い',
+  '出勤簿が事務所にしかなく、外出先から確認できない',
+];
+
+const faqs = [
+  {
+    q: 'タイムカードアプリを使うのに、専用の機械は必要ですか？',
+    a: '必要ありません。パソコン、スマートフォン、タブレットのいずれかがあれば始められます。iPad・iPhone・Android端末・Windowsパソコンに対応しているほか、Edge や Chrome などのブラウザーでも動作します。ICカードリーダーや専用の打刻機を購入する必要はありません。',
+  },
+  {
+    q: '集計したデータはExcelで開けますか？',
+    a: 'はい。PDFとExcelにダウンロードできます。PDFとExcelをメールで送信することもできます。なお、現時点で他の労務システムとの直接連携機能はないため、他システムに取り込む場合はExcel（CSV）にダウンロードして加工していただく形になります。',
+  },
+  {
+    q: '無料で使えますか？',
+    a: 'アカウント登録から1ヶ月は無料でお試しいただけます。無料期間が終了すると新たに出勤・退勤のボタンが押せなくなりますが、勝手に課金されることはありません。継続してご利用の場合のみ、お支払い画面からお手続きをお願いします。',
+  },
+  {
+    q: 'インターネットが切れても打刻できますか？',
+    a: '一時的にインターネットが切れていても管理画面などは動作しますが、出勤・退勤ボタンを押すためにはインターネット接続が必要です。',
+  },
+];
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <AppJsonLd />
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'タイムカードアプリ' },
+      ]}
+    />
+    <FaqJsonLd items={faqs} />
+  </Fragment>
+
+  <SiteHeader />
+
+  <section class="lp-hero">
+    <div class="container lp-hero-inner">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">タイムカードアプリ</span>
+      </div>
+      <span class="eyebrow">TIMECARD APP</span>
+      <h1>
+        紙とExcelの勤怠管理を、<br />
+        <span class="accent">手持ちの端末</span>だけで。
+      </h1>
+      <p class="lead">
+        ペンギンタイムカードは、出退勤の打刻から月次集計までをまとめて置き換えるタイムカードアプリです。<br />
+        ICカードも専用の打刻機も要りません。いま使っているiPadやパソコンが、そのまま出勤簿になります。
+      </p>
+      <div class="lp-hero-actions">
+        <a class="btn btn-primary" href="https://m.tc-timecard.com/?page=register">1ヶ月無料ではじめる</a>
+        <a class="btn btn-ghost" href="/rate-plan/">料金を見る</a>
+      </div>
+      <p class="lp-hero-note">月額1,210円（税込）から／登録から1ヶ月は無料。自動で課金されることはありません。</p>
+    </div>
+  </section>
+
+  <section class="lp-pain">
+    <div class="container">
+      <h2>こんな手間、残っていませんか</h2>
+      <ul class="lp-pain-list">
+        {pains.map((pain) => <li>{pain}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>今ある端末が、<span class="mark">そのまま打刻機</span>になります</h2>
+      <p>
+        導入時に用意するものはありません。パソコン、スマートフォン、タブレットのいずれかがあれば始められます。
+        <strong>iPad・iPhone・Android端末・Windowsパソコン</strong>に対応しているほか、
+        Edge や Chrome などのブラウザーでも動作するので、インストールせずに試すこともできます。
+      </p>
+      <ul class="lp-cards">
+        <li>
+          <h3>店舗に1台を置く使い方</h3>
+          <p>受付や事務所にタブレットを1台置き、スタッフが自分の名前をタップして出勤・退勤を記録します。紙のタイムカードと同じ運用のまま、集計だけが自動になります。</p>
+          <a class="lp-card-link" href="/manual/basic-usage/">基本的な使い方を見る →</a>
+        </li>
+        <li>
+          <h3>各自の端末から打刻する使い方</h3>
+          <p>スタッフごとのアカウントを作れば、個人のスマートフォンやパソコンからも記録できます。他のスタッフの情報は見えないので、リモートワークや在宅勤務にも使えます。</p>
+          <a class="lp-card-link" href="/manual/staff-account/">スタッフアカウントの追加 →</a>
+        </li>
+        <li>
+          <h3>なりすましが心配な場合</h3>
+          <p>AI顔認証に対応しています。名前のボタンを隠して顔認証だけで打刻する設定もできるので、本人以外が押せない運用にできます。</p>
+          <a class="lp-card-link" href="/manual/face-auth/">顔認証機能を見る →</a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>集計と転記の作業が<span class="mark">まるごと不要</span>に</h2>
+      <p>
+        打刻された時間はその場で集計されます。締め日や丸め処理、残業の扱いは設定で自社のルールに合わせられるので、
+        「アプリの計算が実態と違う」ということが起きにくくなっています。
+        集計結果は<strong>PDFとExcelにダウンロード</strong>でき、そのままメール送信もできます。
+      </p>
+      <div class="lp-links">
+        <p class="lp-links-label">計算まわりの設定</p>
+        <ul>
+          <li><a href="/manual/closing-day/">締め日</a></li>
+          <li><a href="/manual/rounding/">丸め処理（端数処理）</a></li>
+          <li><a href="/manual/worksummary/">残業時間・勤務時間</a></li>
+          <li><a href="/manual/early-overtime/">早出残業（前残業）</a></li>
+          <li><a href="/manual/holiday-settings/">休日設定</a></li>
+          <li><a href="/manual/category-patterns/">カテゴリー、勤務パターン設定</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>打刻の間違いは、<span class="mark">あとから直せます</span></h2>
+      <p>
+        押し忘れや押し間違いは必ず起きます。管理者は記録された時間をあとから修正できるので、
+        紙のタイムカードに手書きで直していたのと同じことが、履歴を残したままできます。
+        逆に、スタッフに時間を触らせたくない場合は<strong>修正できないようにロック</strong>することもできます。
+      </p>
+      <div class="lp-links">
+        <p class="lp-links-label">運用ルールの設定</p>
+        <ul>
+          <li><a href="/manual/lock-edit-time/">時間を修正できないようにする</a></li>
+          <li><a href="/manual/admin-password/">管理画面をパスワード保護する</a></li>
+          <li><a href="/manual/owner-account/">アカウント（オーナー）追加</a></li>
+          <li><a href="/manual/limited-account/">アカウント（表示・入力専用）追加</a></li>
+          <li><a href="/manual/memo-feature/">メモ機能</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>料金は<span class="mark">人数で決まる</span>だけ</h2>
+      <p>
+        オプションや初期費用はありません。スタッフ数の上限に合わせて5つのプランから選ぶだけです。
+        顔認証以外の機能は、どのプランでも同じように使えます。
+      </p>
+      <div class="lp-table-wrap">
+        <table class="lp-price-table">
+          <thead>
+            <tr><th>プラン</th><th>月額（税込）</th><th>スタッフ数上限</th><th>顔認証</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>マイクロペンギン</td><td class="num">1,210円</td><td>5人</td><td>―</td></tr>
+            <tr><td>コガタペンギン</td><td class="num">2,200円</td><td>15人</td><td>10人まで登録</td></tr>
+            <tr><td>アデリーペンギン</td><td class="num">3,850円</td><td>25人</td><td>17人まで登録</td></tr>
+            <tr><td>オウサマペンギン</td><td class="num">5,500円</td><td>35人</td><td>25人まで登録</td></tr>
+            <tr><td>コウテイペンギン</td><td class="num">8,250円</td><td>50人</td><td>35人まで登録</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lp-note">
+        50人を超える場合や、専用のサーバー領域・個別の機能追加をご希望の場合は、別途お見積もりいたします。
+        <a href="/contact-us/">お問い合わせ</a>からご相談ください。
+      </p>
+    </div>
+  </section>
+
+  <section class="lp-faq">
+    <div class="container">
+      <h2>よくある質問</h2>
+      <div class="lp-faq-list">
+        {faqs.map((faq) => (
+          <div class="lp-faq-item">
+            <h3>{faq.q}</h3>
+            <p>{faq.a}</p>
+          </div>
+        ))}
+      </div>
+      <p class="lp-note">ほかの質問は<a href="/faq/">よくある質問</a>にまとめています。<br />業種ごとの使い方は<a href="/for-small-business/">小さなお店・会社の勤怠管理</a>、夜勤やシフト制については<a href="/shift-work/">シフト制・夜勤の勤怠管理</a>もあわせてご覧ください。</p>
+    </div>
+  </section>
+
+  <PageCta
+    eyebrow="FREE TRIAL"
+    title="まずは1ヶ月、<br/>無料で試してみませんか？"
+    description="アプリをインストールしなくても大丈夫です。<br/>まずはこちらから、どんな感じかお試しいただけます。1ヶ月間無料、合わなければ何もしなくてOK。<br/>勝手に課金されることは、もちろんありません。"
+    buttonText="1ヶ月無料ではじめる"
+    buttonHref="https://m.tc-timecard.com/?page=register"
+    meta="登録は無料です。自動で課金されることはありません"
+  />
+
+  <SiteFooter />
+</Layout>

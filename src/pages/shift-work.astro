@@ -1,0 +1,203 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import FaqJsonLd from '../components/FaqJsonLd.astro';
+import AppJsonLd from '../components/AppJsonLd.astro';
+import '../styles/landing.css';
+
+const pageTitle = 'シフト制・夜勤の勤怠管理 — ペンギンタイムカード';
+const pageDescription =
+  'シフト制、夜勤、24時間営業の勤怠管理に対応したアプリです。22時以降の深夜割増時間の集計、日付をまたぐ勤務、1日に何度もある休憩を自動で計算します。月額1,210円から、1ヶ月無料でお試しいただけます。';
+
+const pains = [
+  '22時をまたぐ勤務があり、深夜割増を手で数えている',
+  '夜勤で日付が変わると、何時間働いたのか集計しづらい',
+  '休憩が1日に何度もあり、合計が合わない',
+  '24時間営業で、そもそも「1日の区切り」が曖昧',
+];
+
+const faqs = [
+  {
+    q: '深夜割増の時間は自動で計算できますか？',
+    a: 'はい。22時から翌5時までのように、集計したい時間帯を指定しておくと、その時間帯に該当する勤務時間が自動的に集計されます。深夜割増以外の時間帯（早朝手当など）にも同じ仕組みが使えます。',
+  },
+  {
+    q: '日付をまたぐ夜勤には対応していますか？',
+    a: 'はい。たとえば22時から翌5時までの勤務の場合、翌5時を「29時」のように記録し、「29時 − 22時 = 7時間」として計算します。日付が変わっても1回の勤務として扱われます。',
+  },
+  {
+    q: '休憩が1日に複数回ある場合も記録できますか？',
+    a: 'はい。複数回の休憩に対応しています。休憩ボタンを押した回数だけ記録され、合計の休憩時間が勤務時間から差し引かれます。',
+  },
+  {
+    q: '24時間営業でも使えますか？',
+    a: 'はい。24時間営業に対応しています。日をまたいで営業が続く場合の1日の区切り方を設定できるので、営業実態に合わせた集計ができます。',
+  },
+];
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <AppJsonLd />
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'シフト制・夜勤の勤怠管理' },
+      ]}
+    />
+    <FaqJsonLd items={faqs} />
+  </Fragment>
+
+  <SiteHeader />
+
+  <section class="lp-hero">
+    <div class="container lp-hero-inner">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">シフト制・夜勤の勤怠管理</span>
+      </div>
+      <span class="eyebrow">SHIFT &amp; NIGHT WORK</span>
+      <h1>
+        夜勤も、日またぎも、<br />
+        <span class="accent">数えなくていい</span>。
+      </h1>
+      <p class="lead">
+        深夜割増の時間帯集計、日付をまたぐ勤務、1日に何度もある休憩。<br />
+        シフト制の現場でいちばん面倒な計算を、打刻したその場で終わらせます。
+      </p>
+      <div class="lp-hero-actions">
+        <a class="btn btn-primary" href="https://m.tc-timecard.com/?page=register">1ヶ月無料ではじめる</a>
+        <a class="btn btn-ghost" href="/manual/calc-by-period/">深夜割増の設定を見る</a>
+      </div>
+      <p class="lp-hero-note">月額1,210円（税込）から／登録から1ヶ月は無料。自動で課金されることはありません。</p>
+    </div>
+  </section>
+
+  <section class="lp-pain">
+    <div class="container">
+      <h2>シフト制の勤怠で、つまずくところ</h2>
+      <ul class="lp-pain-list">
+        {pains.map((pain) => <li>{pain}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>深夜割増は、<span class="mark">時間帯を決めるだけ</span></h2>
+      <p>
+        「22時から翌5時まで」のように集計したい時間帯を登録しておくと、
+        その時間帯に重なった勤務時間だけが自動的に切り出されて集計されます。
+        <strong>深夜割増以外の時間帯にも同じ仕組みが使える</strong>ので、
+        早朝手当や特定時間帯の手当を出している場合にも当てはめられます。
+      </p>
+      <p>
+        手で数えていたときのような「この日は22時15分から入ったから…」という計算は要りません。
+        打刻さえ正しければ、月末の集計に出てきます。
+      </p>
+      <div class="lp-links">
+        <p class="lp-links-label">関連するマニュアル</p>
+        <ul>
+          <li><a href="/manual/calc-by-period/">深夜割増時間など特定時間帯の集計</a></li>
+          <li><a href="/manual/worksummary/">残業時間・勤務時間</a></li>
+          <li><a href="/manual/early-overtime/">早出残業（前残業）</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>日付が変わっても、<span class="mark">1回の勤務</span>として扱います</h2>
+      <p>
+        22時に出勤して翌朝5時に退勤する勤務は、そのままでは日付が異なるため記録しづらいものです。
+        ペンギンタイムカードでは翌5時を<strong>「29時」のように記録</strong>し、
+        「29時 − 22時 = 7時間」として計算します。日をまたいでも、1回の勤務としてきれいに集計されます。
+      </p>
+      <p>
+        深夜営業や、翌日にかかる勤務が常態化している場合は、自動翌日計算の設定もあわせてご確認ください。
+      </p>
+      <div class="lp-links">
+        <p class="lp-links-label">関連するマニュアル</p>
+        <ul>
+          <li><a href="/manual/midnight-operation/">深夜営業</a></li>
+          <li><a href="/manual/auto-next-day/">自動翌日計算</a></li>
+          <li><a href="/manual/open-24h/">24時間営業</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>休憩が<span class="mark">何度あっても</span>合計されます</h2>
+      <p>
+        長時間のシフトでは、休憩が1日に何度も入ります。
+        ペンギンタイムカードは複数回休憩に対応しているので、
+        休憩ボタンを押した回数だけ記録され、合計の休憩時間が勤務時間から差し引かれます。
+        「1日1回しか休憩を入力できないので、まとめて入れている」という運用から抜けられます。
+      </p>
+      <div class="lp-links">
+        <p class="lp-links-label">関連するマニュアル</p>
+        <ul>
+          <li><a href="/manual/multi-break/">複数回休憩</a></li>
+          <li><a href="/manual/rounding/">丸め処理（端数処理）</a></li>
+          <li><a href="/manual/skip-detail-after-stamp/">打刻後の詳細画面をスキップする</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>シフトと勤務パターンを<span class="mark">先に決めておく</span></h2>
+      <p>
+        曜日ごとに勤務時間が違う、正社員とパートで締めや残業の扱いが違う。
+        こうした違いはカテゴリー（スタッフ区分）と勤務パターンとして先に設定しておけます。
+        あとは各スタッフをどの区分に入れるかを決めるだけで、集計のルールが切り替わります。
+      </p>
+      <div class="lp-links">
+        <p class="lp-links-label">関連するマニュアル</p>
+        <ul>
+          <li><a href="/manual/shift-management/">シフト管理</a></li>
+          <li><a href="/manual/category-patterns/">カテゴリー、勤務パターン設定</a></li>
+          <li><a href="/manual/holiday-settings/">休日設定</a></li>
+          <li><a href="/manual/closing-day/">締め日</a></li>
+        </ul>
+      </div>
+      <p class="lp-note">
+        機能が追加された経緯は<a href="/news/category/feature/">新機能・改善のお知らせ</a>にまとめています。
+      </p>
+    </div>
+  </section>
+
+  <section class="lp-faq">
+    <div class="container">
+      <h2>よくある質問</h2>
+      <div class="lp-faq-list">
+        {faqs.map((faq) => (
+          <div class="lp-faq-item">
+            <h3>{faq.q}</h3>
+            <p>{faq.a}</p>
+          </div>
+        ))}
+      </div>
+      <p class="lp-note">ほかの質問は<a href="/faq/">よくある質問</a>にまとめています。<br />アプリ全体の概要は<a href="/timecard-app/">タイムカードアプリとして使う</a>、業種ごとの使い方は<a href="/for-small-business/">小さなお店・会社の勤怠管理</a>をご覧ください。</p>
+    </div>
+  </section>
+
+  <PageCta
+    eyebrow="FREE TRIAL"
+    title="夜勤の集計、<br/>1ヶ月ためしてみませんか？"
+    description="インストールなしで、ブラウザーからすぐ試せます。<br/>実際のシフトを1ヶ月入れてみて、集計が合うかどうかを確かめてください。<br/>合わなければ何もしなくてOK。勝手に課金されることはありません。"
+    buttonText="1ヶ月無料ではじめる"
+    buttonHref="https://m.tc-timecard.com/?page=register"
+    meta="登録は無料です。自動で課金されることはありません"
+  />
+
+  <SiteFooter />
+</Layout>
