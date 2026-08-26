@@ -1,0 +1,168 @@
+/* 集客用ランディングページ共通スタイル。
+   3ページで同じブロックを使うため、スコープ付き <style> ではなく共有CSSにしている。 */
+
+.lp-hero {
+  position: relative;
+  padding: 34px 0 60px;
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--cream) 100%);
+  overflow: hidden;
+}
+.lp-hero-inner { position: relative; z-index: 2; max-width: 780px; }
+.lp-hero h1 {
+  font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  margin: 10px 0 18px;
+}
+.lp-hero h1 .accent { color: var(--brand-deep); }
+.lp-hero .lead { font-size: 17px; line-height: 1.9; color: var(--ink-2); margin: 0 0 26px; }
+.lp-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.lp-hero-note { margin-top: 16px; font-size: 13px; color: var(--ink-2); }
+
+.lp-pain { padding: 56px 0; }
+.lp-pain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.lp-pain-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
+  font-weight: 700;
+  color: var(--ink);
+  box-shadow: 0 4px 0 var(--line);
+}
+.lp-pain-list li::before {
+  content: '?';
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  font-size: 14px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+}
+
+.lp-block { padding: 56px 0; }
+.lp-block + .lp-block { border-top: 1px solid var(--line); }
+.lp-block h2 {
+  font-size: clamp(23px, 3vw, 30px);
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+.lp-block h2 .mark {
+  background: linear-gradient(transparent 62%, var(--brand-soft) 62%);
+  padding: 0 2px;
+}
+.lp-block h3 { font-size: 18px; margin: 26px 0 8px; }
+.lp-block p { line-height: 1.95; color: var(--ink-2); margin: 0 0 14px; max-width: 760px; }
+.lp-block p strong { color: var(--ink); }
+
+.lp-cards {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.lp-cards li {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 5px 0 var(--line);
+}
+.lp-cards h3 { margin: 0 0 8px; font-size: 17px; }
+.lp-cards p { margin: 0; font-size: 14px; line-height: 1.85; }
+.lp-cards .lp-card-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+.lp-links {
+  margin: 22px 0 0;
+  padding: 20px 22px;
+  border: 1.5px dashed var(--line);
+  border-radius: 18px;
+  background: var(--cream);
+}
+.lp-links-label { font-size: 13px; font-weight: 700; color: var(--ink-2); margin: 0 0 10px; }
+.lp-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 10px; }
+.lp-links a {
+  display: inline-block;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: white;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: transform .2s, border-color .2s;
+}
+.lp-links a:hover { transform: translateY(-2px); border-color: var(--brand); }
+
+.lp-price-table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 14px; }
+.lp-price-table th, .lp-price-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.lp-price-table thead th { background: var(--cream-2); font-size: 13px; }
+.lp-price-table td.num { font-variant-numeric: tabular-nums; font-weight: 700; }
+.lp-table-wrap { overflow-x: auto; }
+.lp-note { font-size: 13px; color: var(--ink-2); margin-top: 12px; }
+
+.lp-faq { padding: 56px 0; }
+.lp-faq-list { display: grid; gap: 12px; margin-top: 22px; }
+.lp-faq-item {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+.lp-faq-item h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.lp-faq-item h3::before {
+  content: 'Q';
+  flex-shrink: 0;
+  color: var(--brand-deep);
+  font-weight: 900;
+}
+.lp-faq-item p { margin: 0; font-size: 14px; line-height: 1.9; color: var(--ink-2); }
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.breadcrumb a { color: var(--brand-deep); font-weight: 700; }
+.breadcrumb .sep { opacity: .5; }
+
+@media (max-width: 640px) {
+  .lp-hero { padding: 24px 0 44px; }
+  .lp-block, .lp-pain, .lp-faq { padding: 40px 0; }
+}

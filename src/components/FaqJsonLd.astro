@@ -1,0 +1,19 @@
+---
+/** FAQPage の構造化データ。回答は装飾のないプレーンテキストで渡す。 */
+interface Props {
+  items: Array<{ q: string; a: string }>;
+}
+const { items } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)}></script>

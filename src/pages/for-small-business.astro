@@ -1,0 +1,201 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageCta from '../components/PageCta.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
+import FaqJsonLd from '../components/FaqJsonLd.astro';
+import AppJsonLd from '../components/AppJsonLd.astro';
+import '../styles/landing.css';
+
+const pageTitle = '小さなお店・会社の勤怠管理 — ペンギンタイムカード';
+const pageDescription =
+  'クリニック、美容室、飲食店、事務所など、数人から数十人のお店・会社向けの勤怠管理アプリです。専用の打刻機は不要、月額1,210円から。開店前の準備時間や複数店舗の掛け持ちにも対応します。';
+
+const pains = [
+  'スタッフが5人ほどで、大がかりなシステムは要らない',
+  '開店前の準備時間を、どう勤務時間に入れるか決まっていない',
+  '複数の店舗を掛け持ちするスタッフがいる',
+  '店長に管理画面を全部見せてよいのか迷っている',
+];
+
+const industries = [
+  {
+    id: 'clinic',
+    name: 'クリニック・歯科医院',
+    body: '受付に1台タブレットを置き、スタッフが名前をタップして打刻する使い方が基本です。診療前の準備時間を勤務時間に含める場合は、早出残業（前残業）の設定で扱いを決められます。常勤・非常勤で締めや計算のルールが違う場合も、カテゴリー（スタッフ区分）を分けておけば別々に集計されます。',
+    links: [
+      { href: '/manual/early-overtime/', label: '早出残業（前残業）' },
+      { href: '/manual/category-patterns/', label: 'カテゴリー、勤務パターン設定' },
+      { href: '/manual/basic-usage/', label: '基本的な使い方' },
+    ],
+  },
+  {
+    id: 'salon',
+    name: '美容室・サロン',
+    body: '営業時間が長く、休憩が分かれて入りやすい業種です。複数回休憩に対応しているので、手が空いたときに休憩ボタンを押す運用でも合計が正しく差し引かれます。他人の打刻が気になる場合は、AI顔認証で本人以外が押せないようにできます。',
+    links: [
+      { href: '/manual/multi-break/', label: '複数回休憩' },
+      { href: '/manual/face-auth/', label: '顔認証機能' },
+      { href: '/manual/rounding/', label: '丸め処理（端数処理）' },
+    ],
+  },
+  {
+    id: 'restaurant',
+    name: '飲食店',
+    body: '深夜まで営業する店舗では、22時以降の深夜割増時間を時間帯集計で自動的に切り出せます。日付をまたぐ勤務も1回の勤務として扱われるため、閉店作業が翌日にかかっても集計が崩れません。24時間営業の店舗にも対応しています。',
+    links: [
+      { href: '/manual/calc-by-period/', label: '深夜割増時間など特定時間帯の集計' },
+      { href: '/manual/midnight-operation/', label: '深夜営業' },
+      { href: '/manual/open-24h/', label: '24時間営業' },
+    ],
+  },
+  {
+    id: 'office',
+    name: '事務所・小規模オフィス',
+    body: 'スタッフごとにアカウントを作れば、各自のパソコンやスマートフォンから打刻できます。他のスタッフの情報は見えないので、リモートワークや在宅勤務にも使えます。集計結果はPDFとExcelにダウンロードでき、そのままメール送信もできます。',
+    links: [
+      { href: '/manual/staff-account/', label: 'アカウント（スタッフ）追加' },
+      { href: '/manual/limited-account/', label: 'アカウント（表示・入力専用）追加' },
+      { href: '/manual/worksummary/', label: '残業時間・勤務時間' },
+    ],
+  },
+];
+
+const faqs = [
+  {
+    q: 'スタッフが5人程度でも使えますか？',
+    a: 'はい。いちばん小さいマイクロペンギンプランがスタッフ5人まで、月額1,210円（税込）です。初期費用やオプション料金はありません。',
+  },
+  {
+    q: '複数の店舗で働くスタッフがいても対応できますか？',
+    a: 'はい。ある人がこの日はA店舗、次の日はB店舗というように働く場合にも対応しています。アプリでは各店舗を「オフィス」と呼び、それをまとめる単位を「オフィスグループ」と呼んでいます。',
+  },
+  {
+    q: '店長に管理画面を全部見せたくないのですが',
+    a: '権限を分けられます。オーナーは全オフィス、マネージャーはそのオフィスのみ、スタッフは自分のデータのみ、表示・入力専用はそのオフィスのみ閲覧でき、スタッフの追加などはできません。管理画面自体にパスワードをかけることもできます。',
+  },
+  {
+    q: '導入するのに何を買えばいいですか？',
+    a: '新しく買うものはありません。パソコン、スマートフォン、タブレットのいずれかがあれば始められます。ICカードリーダーや専用の打刻機は不要です。',
+  },
+];
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <AppJsonLd />
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: '小さなお店・会社の勤怠管理' },
+      ]}
+    />
+    <FaqJsonLd items={faqs} />
+  </Fragment>
+
+  <SiteHeader />
+
+  <section class="lp-hero">
+    <div class="container lp-hero-inner">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <span class="here">小さなお店・会社の勤怠管理</span>
+      </div>
+      <span class="eyebrow">FOR SMALL BUSINESS</span>
+      <h1>
+        数人のお店にちょうどいい、<br />
+        <span class="accent">やさしい勤怠管理</span>。
+      </h1>
+      <p class="lead">
+        クリニック、美容室、飲食店、事務所。<br />
+        大がかりな導入作業も、専用の機械も要りません。いまある端末で、今日から始められます。
+      </p>
+      <div class="lp-hero-actions">
+        <a class="btn btn-primary" href="https://m.tc-timecard.com/?page=register">1ヶ月無料ではじめる</a>
+        <a class="btn btn-ghost" href="/rate-plan/">料金を見る</a>
+      </div>
+      <p class="lp-hero-note">5人まで月額1,210円（税込）／登録から1ヶ月は無料。自動で課金されることはありません。</p>
+    </div>
+  </section>
+
+  <section class="lp-pain">
+    <div class="container">
+      <h2>小さな職場ならではの、こんな迷い</h2>
+      <ul class="lp-pain-list">
+        {pains.map((pain) => <li>{pain}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  {industries.map((industry) => (
+    <section class="lp-block" id={industry.id}>
+      <div class="container">
+        <h2>{industry.name}の<span class="mark">勤怠管理</span></h2>
+        <p>{industry.body}</p>
+        <div class="lp-links">
+          <p class="lp-links-label">関連するマニュアル</p>
+          <ul>
+            {industry.links.map((link) => (
+              <li><a href={link.href}>{link.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="lp-block">
+    <div class="container">
+      <h2>人数が増えても、<span class="mark">プランを変えるだけ</span></h2>
+      <p>
+        スタッフ数の上限に合わせて5つのプランがあります。顔認証以外の機能は、どのプランでも同じように使えます。
+        50人を超える場合や、専用のサーバー領域・個別の機能追加をご希望の場合は別途お見積もりいたします。
+      </p>
+      <div class="lp-table-wrap">
+        <table class="lp-price-table">
+          <thead>
+            <tr><th>プラン</th><th>月額（税込）</th><th>スタッフ数上限</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>マイクロペンギン</td><td class="num">1,210円</td><td>5人</td></tr>
+            <tr><td>コガタペンギン</td><td class="num">2,200円</td><td>15人</td></tr>
+            <tr><td>アデリーペンギン</td><td class="num">3,850円</td><td>25人</td></tr>
+            <tr><td>オウサマペンギン</td><td class="num">5,500円</td><td>35人</td></tr>
+            <tr><td>コウテイペンギン</td><td class="num">8,250円</td><td>50人</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lp-note">
+        プランごとの違いは<a href="/rate-plan/">料金ページ</a>で詳しくご確認いただけます。
+      </p>
+    </div>
+  </section>
+
+  <section class="lp-faq">
+    <div class="container">
+      <h2>よくある質問</h2>
+      <div class="lp-faq-list">
+        {faqs.map((faq) => (
+          <div class="lp-faq-item">
+            <h3>{faq.q}</h3>
+            <p>{faq.a}</p>
+          </div>
+        ))}
+      </div>
+      <p class="lp-note">ほかの質問は<a href="/faq/">よくある質問</a>にまとめています。<br />アプリ全体の概要は<a href="/timecard-app/">タイムカードアプリとして使う</a>、夜勤やシフト制については<a href="/shift-work/">シフト制・夜勤の勤怠管理</a>をご覧ください。</p>
+    </div>
+  </section>
+
+  <PageCta
+    eyebrow="FREE TRIAL"
+    title="まずは1ヶ月、<br/>お店で使ってみませんか？"
+    description="インストールなしで、ブラウザーからすぐ試せます。<br/>実際の勤務を1ヶ月入れてみて、集計が合うかどうかを確かめてください。<br/>合わなければ何もしなくてOK。勝手に課金されることはありません。"
+    buttonText="1ヶ月無料ではじめる"
+    buttonHref="https://m.tc-timecard.com/?page=register"
+    meta="登録は無料です。自動で課金されることはありません"
+  />
+
+  <SiteFooter />
+</Layout>
