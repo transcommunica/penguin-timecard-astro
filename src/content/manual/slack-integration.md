@@ -40,7 +40,7 @@ Slack連携
 
 IN・OUTボタンを押すと、以下のようにSlackに通知が届きます。
 
-![manual-image](/assets/manual/2023/08/ptc07-1024x262.png)
+![Slack連携 Slack通知設定方法｜操作画面](/assets/manual/2023/08/ptc07-1024x262.png)
 
 #### Slack連携解除
 

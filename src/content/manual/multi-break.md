@@ -20,49 +20,49 @@ order: 110
 
 1. 「カテゴリー」メニューから設定したいカテゴリーを選択します
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-1024x712.png)
+![複数回休憩 設定｜操作画面1](/assets/manual/2024/01/multipleBreak1-1024x712.png)
 
 2. 「最大休憩回数」にて２回もしくは３回を選択します
 
-![manual-image](/assets/manual/2024/01/multipleBreak2-1024x712.png)
+![複数回休憩 設定｜操作画面2](/assets/manual/2024/01/multipleBreak2-1024x712.png)
 
 ## 休憩時
 
 1. 通常通り休憩INもしくは休憩OUTボタンを押して打刻します
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-2-1024x712.png)
+![複数回休憩 休憩時｜操作画面1](/assets/manual/2024/01/multipleBreak1-2-1024x712.png)
 
 休憩回数が表示されます
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-5-1024x712.png)
+![複数回休憩 休憩時｜操作画面2](/assets/manual/2024/01/multipleBreak1-5-1024x712.png)
 
 2. 休憩INと休憩OUTが押されると、２回目の休憩INが押せるようになります。
 また「休憩が１回あります」のように表示され、クリックすると休憩の内訳が確認できます。
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-6-1024x712.png)
+![複数回休憩 休憩時｜操作画面3](/assets/manual/2024/01/multipleBreak1-6-1024x712.png)
 
 下記の例では休憩回数が「２」と表示されています。
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-8-1024x712.png)
+![複数回休憩 休憩時｜操作画面4](/assets/manual/2024/01/multipleBreak1-8-1024x712.png)
 
 回数の数字をクリックすると、各休憩の時刻が表示されます。
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-9-1024x712.png)
+![複数回休憩 休憩時｜操作画面5](/assets/manual/2024/01/multipleBreak1-9-1024x712.png)
 
 ## 管理画面での確認・修正
 
 管理画面でも休憩回数が表示され、数字をタップすると内訳が表示されます。
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-10-1-1024x712.png)
+![複数回休憩 管理画面での確認・修正｜操作画面1](/assets/manual/2024/01/multipleBreak1-10-1-1024x712.png)
 
 なお、ここでは「打刻」の休憩と「手入力」の休憩が別々に記録されていることに注意してください。
 この例では「手入力」の休憩は特に記録がありません。
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-10-2-1024x712.png)
+![複数回休憩 管理画面での確認・修正｜操作画面2](/assets/manual/2024/01/multipleBreak1-10-2-1024x712.png)
 
 しかし、手入力の列の「回数」の空白セルをクリックすると以下のようなダイアログが表示されます。これは手入力された休憩がないことを意味しています。もし休憩時間を手修正したい場合は、各ハイフン部分をクリックして時間を設定します。
 
-![manual-image](/assets/manual/2024/01/multipleBreak1-11-1024x712.png)
+![複数回休憩 管理画面での確認・修正｜操作画面3](/assets/manual/2024/01/multipleBreak1-11-1024x712.png)
 
 なお、画面上の休憩「IN」と「OUT」列には、１回目の休憩の時間が表示されます。２回目以降の休憩の内訳を確認するには、回数の数字をクリックする必要があります。
 

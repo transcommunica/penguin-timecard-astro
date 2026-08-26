@@ -15,17 +15,17 @@ AI顔認証機能
 
 1. トップページ下部にある顔認証ボタンを押します。
 
-![manual-image](/assets/manual/2023/09/facerecognition16-1024x750.jpg)
+![顔認証機能 ご利用方法｜操作画面1](/assets/manual/2023/09/facerecognition16-1024x750.jpg)
 
 2. カメラが立ち上がりますので、画面内に顔が入るように端末の前に立ちます。
 
 3. AIによって人物が判定されると、IN・OUTを押す画面へ遷移しますので、通常通り出勤などのボタンを押します。
 
-![manual-image](/assets/manual/2023/09/facerecognition17-1024x750.jpeg)
+![顔認証機能 ご利用方法｜操作画面2](/assets/manual/2023/09/facerecognition17-1024x750.jpeg)
 
 4. 顔認証を経てボタンを押した場合には、時刻が青字で表示されます。通常は黒字です。
 
-![manual-image](/assets/manual/2023/09/facerecognition18-1024x750.jpeg)
+![顔認証機能 ご利用方法｜操作画面3](/assets/manual/2023/09/facerecognition18-1024x750.jpeg)
 
 ## 設定方法
 
@@ -46,18 +46,18 @@ AI顔認証機能
 
 1. 「ユーザー管理」メニューから、該当のユーザーを編集します。
 
-![manual-image](/assets/manual/2023/09/facerecognition2-1024x712.png)
+![顔認証機能 オーナーによるON・OFF設定｜操作画面1](/assets/manual/2023/09/facerecognition2-1024x712.png)
 
 2. 「顔認証機能を有効にする」にチェックを入れ、保存します。
 
-![manual-image](/assets/manual/2023/09/facerecognition3-1024x712.png)
+![顔認証機能 オーナーによるON・OFF設定｜操作画面2](/assets/manual/2023/09/facerecognition3-1024x712.png)
 
 ### 顔認証のみにする（名前のボタンを表示しない）
 
 名前をタップして打刻する方法では、他の人のボタンを押すことも可能です。
 それを防ぐ方法のひとつとして、名前ボタンを表示せず、顔認証のみにする方法が考えられます。
 
-![manual-image](/assets/manual/2023/09/facerecognition21-1024x750.jpeg)
+![顔認証機能 顔認証のみにする（名前のボタンを表示しない）｜操作画面1](/assets/manual/2023/09/facerecognition21-1024x750.jpeg)
 
 そうすると、トップ画面には顔認証のボタンしか表示されず、名前をタップできなくなります。
 （デザイン的にちょっと寂しいですが、今後表示方法を変更予定です）
@@ -68,7 +68,7 @@ AI顔認証機能
 
 2. 「スタッフボタンを非表示にする」にチェックを入れ、保存します。
 
-![manual-image](/assets/manual/2023/09/facerecognition19-1024x750.jpeg)
+![顔認証機能 顔認証のみにする（名前のボタンを表示しない）｜操作画面2](/assets/manual/2023/09/facerecognition19-1024x750.jpeg)
 
 #### オーナーによる非表示設定
 
@@ -78,7 +78,7 @@ AI顔認証機能
 
 2. 「スタッフボタンを非表示にする」にチェックを入れ、保存します。
 
-![manual-image](/assets/manual/2023/09/facerecognition20-1024x750.jpeg)
+![顔認証機能 オーナーによる非表示設定｜操作画面](/assets/manual/2023/09/facerecognition20-1024x750.jpeg)
 
 ### 顔写真登録
 
@@ -86,16 +86,16 @@ AI顔認証機能
 
 1.該当のスタッフ編集画面を開きます。
 
-![manual-image](/assets/manual/2023/09/facerecognition5-1024x712.png)
+![顔認証機能 顔写真登録｜操作画面1](/assets/manual/2023/09/facerecognition5-1024x712.png)
 
 トップページから歯車アイコンをクリックして進むこともできます。
 
-![manual-image](/assets/manual/2023/09/facerecognition8-1024x768.jpeg)
+![顔認証機能 顔写真登録｜操作画面2](/assets/manual/2023/09/facerecognition8-1024x768.jpeg)
 
 2. 写真を撮影もしくはアップロードします。撮影・アップロード後、保存します。
 ※撮影はアプリのみ可能です。WEBブラウザーからはアップロードのみ可能です。
 
-![manual-image](/assets/manual/2023/09/facerecognition10-1-1024x750.jpeg)
+![顔認証機能 顔写真登録｜操作画面3](/assets/manual/2023/09/facerecognition10-1-1024x750.jpeg)
 
 ## 設定を調整する
 
@@ -113,7 +113,7 @@ AI顔認証機能
 
 「より正確」に近づけると、人物が誰かを判定する精度が上がります。その代わり、判定するまでの時間が長くなります。
 
-![manual-image](/assets/manual/2023/09/facerecognition11-1024x712.png)
+![顔認証機能 スピードを調整する｜操作画面](/assets/manual/2023/09/facerecognition11-1024x712.png)
 
 ### 精度を調整する
 
@@ -135,7 +135,7 @@ AI顔認証機能
 
 設定は、端末に関係なくそのオフィス全体に適用されます。これは、端末によって判定のレベルが異なるのはおかしいためです。
 
-![manual-image](/assets/manual/2023/09/facerecognition12-1-1024x712.png)
+![顔認証機能 しきい値を調整する｜操作画面](/assets/manual/2023/09/facerecognition12-1-1024x712.png)
 
 #### 登録枚数を増やす
 
@@ -158,7 +158,7 @@ AI顔認証機能
 
 - 少し下（10度くらい）を向いた写真
 
-![manual-image](/assets/manual/2023/09/facerecognition14-1-1024x712.png)
+![顔認証機能 登録枚数を増やす｜操作画面](/assets/manual/2023/09/facerecognition14-1-1024x712.png)
 
 ### カメラを停止する
 
@@ -171,4 +171,4 @@ AI顔認証機能
 
 1. 「端末設定」から「顔認証用カメラを自動停止」をクリックして、時間を設定してください。
 
-![manual-image](/assets/manual/2023/09/facerecognition15-1024x712.png)
+![顔認証機能 カメラを停止する｜操作画面](/assets/manual/2023/09/facerecognition15-1024x712.png)

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
+import ArticleJsonLd from '../../components/ArticleJsonLd.astro';
 import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -54,6 +55,8 @@ type MarkdownNewsPost = {
   seoTitle?: string;
   seoDescription?: string;
   Content: any;
+  /** Markdown の生テキスト（代表画像の抽出に使う）。 */
+  rawContent: string;
 };
 
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -360,6 +363,7 @@ const markdownNewsPosts = (await Promise.all(
       frontmatter?: Record<string, unknown>;
       default?: any;
       Content?: any;
+      rawContent?: () => string;
     };
     const frontmatter = mod.frontmatter || {};
     const fileSlug = String(path.split('/').pop() || '').replace(/\.md$/i, '').trim();
@@ -376,6 +380,7 @@ const markdownNewsPosts = (await Promise.all(
       seoTitle: keepJapaneseLocaleText(String(frontmatter.seoTitle || '')) || undefined,
       seoDescription: keepJapaneseLocaleText(String(frontmatter.seoDescription || '')) || undefined,
       Content: mod.Content || mod.default,
+      rawContent: mod.rawContent?.() ?? '',
     } satisfies MarkdownNewsPost;
   })
 )).sort((a, b) => +new Date(b.date) - +new Date(a.date));
@@ -541,6 +546,15 @@ if (isPageRoute) {
   backHref = source === 'home' ? '/#news' : createPageHref(sourcePage);
   backLabel = source === 'home' ? 'トップに戻る' : '一覧に戻る';
 }
+// 構造化データ用: 本文の最初の画像を代表画像として使う。
+const newsSourceForImage = postContentHtml || markdownNewsPosts.find((entry) =>
+  isSameNewsSlug(routeValue, entry.slug, entry.title, entry.fileSlug)
+)?.rawContent || '';
+const newsFirstImage =
+  newsSourceForImage.match(/<img[^>]+src="(\/assets\/[^"]+)"/)?.[1] ??
+  newsSourceForImage.match(/!\[[^\]]*\]\((\/assets\/[^)\s]+)\)/)?.[1] ??
+  undefined;
+
 // article:published_time 用。パースできない日付は出力しない。
 const parsedPostDate = postDate ? new Date(postDate) : null;
 const publishedTimeIso =
@@ -557,6 +571,16 @@ const publishedTimeIso =
   publishedTime={publishedTimeIso}
 >
   <Fragment slot="head">
+    {!renderListPage && (
+      <ArticleJsonLd
+        type="Article"
+        headline={stripHtml(postTitle)}
+        description={layoutDescription}
+        datePublished={publishedTimeIso}
+        image={newsFirstImage}
+        path={`/news/${Astro.params.slug}/`}
+      />
+    )}
     {!renderListPage && (
       <BreadcrumbJsonLd
         items={[

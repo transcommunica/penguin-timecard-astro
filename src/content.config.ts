@@ -8,6 +8,9 @@ const manual = defineCollection({
     description: z.string(),
     category: z.enum(['core', 'overview', 'settings', 'behavior', 'billing']),
     itemCode: z.string(),
+    // 最終更新日（YYYY-MM-DD）。未設定なら「最終更新」を表示せず、
+    // 構造化データにも dateModified を出さない。
+    updated: z.string().optional(),
     keywords: z.array(z.string()).default([]),
     isNew: z.boolean().default(false),
     popular: z.boolean().default(false),

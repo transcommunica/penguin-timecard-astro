@@ -1,0 +1,46 @@
+---
+/**
+ * 記事ページの構造化データ。
+ * マニュアルは TechArticle（技術解説記事）、お知らせは Article を想定。
+ *
+ * 補足: Google は 2023年に HowTo のリッチリザルトを廃止しているため、
+ * 手順ページでも HowTo ではなく TechArticle を使っている。
+ * リッチリザルトは出ないが、ページの主題と鮮度を明示する意味はある。
+ */
+interface Props {
+  type: 'TechArticle' | 'Article';
+  headline: string;
+  description?: string;
+  /** 公開日（ISO文字列）。不明なら省略。 */
+  datePublished?: string;
+  /** 最終更新日（ISO文字列）。不明なら省略。 */
+  dateModified?: string;
+  /** 本文中の代表画像（サイト内絶対パス）。 */
+  image?: string;
+  /** このページの正規URL（パス）。 */
+  path: string;
+}
+
+const { type, headline, description, datePublished, dateModified, image, path } = Astro.props;
+
+const site = Astro.site!;
+const origin = new URL('/', site).href.replace(/\/$/, '');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': type,
+  headline,
+  ...(description ? { description } : {}),
+  ...(datePublished ? { datePublished } : {}),
+  ...(dateModified ? { dateModified } : {}),
+  ...(image ? { image: new URL(image, site).href } : {}),
+  mainEntityOfPage: { '@type': 'WebPage', '@id': new URL(path, site).href },
+  inLanguage: 'ja',
+  author: { '@id': `${origin}/#organization` },
+  publisher: { '@id': `${origin}/#organization` },
+  isPartOf: { '@id': `${origin}/#website` },
+  about: { '@id': `${origin}/#software` },
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)}></script>

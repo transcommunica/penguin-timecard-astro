@@ -82,7 +82,7 @@ const platforms = [
         {platforms.map((p) => (
           <div class="platform-card" id={p.id}>
             <div class="card-img-wrap">
-              <img src={p.img} alt={p.label} loading="lazy" />
+              <img src={p.img} alt={p.label} width="510" height="280" loading="lazy" decoding="async" />
             </div>
             <div class="card-body">
               <span class="badge">{p.badge}</span>

@@ -25,27 +25,27 @@ order: 108
 
 1. 対象の「カテゴリー」を選択します。設定はカテゴリー単位で行います。
 
-![manual-image](/assets/manual/2023/12/overnight1-1024x712.png)
+![深夜営業 事前設定｜操作画面1](/assets/manual/2023/12/overnight1-1024x712.png)
 
 2. 「深夜営業」をONにします。また、何時で日付を変更するかを設定します。
 たとえば５時に閉店であっても、残業で６時くらいまで残ることがあるのであれば、6:00や7:00など余裕を持たせた時刻を設定してください。
 
-![manual-image](/assets/manual/2024/01/overnight2-1-1024x712.png)
+![深夜営業 事前設定｜操作画面2](/assets/manual/2024/01/overnight2-1-1024x712.png)
 
 ### 使用時
 
 1. 名前をクリックします
 
-![manual-image](/assets/manual/2024/01/overnight9-1024x712.png)
+![深夜営業 使用時｜操作画面1](/assets/manual/2024/01/overnight9-1024x712.png)
 
 2. 設定した日付変更時刻より前の場合、自動的に前日の打刻とみなされます。
 画面下に緑の注意が表示されます。
 
-![manual-image](/assets/manual/2024/01/overnight10-1024x712.png)
+![深夜営業 使用時｜操作画面2](/assets/manual/2024/01/overnight10-1024x712.png)
 
 3. この例では「6:08」が「30:08」のように打刻されます。
 
-![manual-image](/assets/manual/2024/01/overnight11-1024x712.png)
+![深夜営業 使用時｜操作画面3](/assets/manual/2024/01/overnight11-1024x712.png)
 
 ### 標準時刻（パターン）設定
 
@@ -56,28 +56,28 @@ order: 108
 
 1. 該当の勤務パターンをクリックします。新規追加したい場合はプラスボタンをクリックします。
 
-![manual-image](/assets/manual/2024/01/overnight2-2-1024x626.png)
+![深夜営業 標準時刻（パターン）設定｜操作画面1](/assets/manual/2024/01/overnight2-2-1024x626.png)
 
 2. 編集したい時刻をクリックします。
 
-![manual-image](/assets/manual/2024/01/overnight3-1-1024x626.png)
+![深夜営業 標準時刻（パターン）設定｜操作画面2](/assets/manual/2024/01/overnight3-1-1024x626.png)
 
 3. 必要に応じて「翌日」をONにし、時刻を設定します。
 この例では、22時から翌朝6時までを設定します。6時を設定する際には「翌日」スイッチをONにします。
 
-![manual-image](/assets/manual/2024/01/overnight4-1-1024x626.png)
+![深夜営業 標準時刻（パターン）設定｜操作画面3](/assets/manual/2024/01/overnight4-1-1024x626.png)
 
 4.  6時が「30:00」のように設定されます。
 
-![manual-image](/assets/manual/2024/01/overnight5-1-1024x626.png)
+![深夜営業 標準時刻（パターン）設定｜操作画面4](/assets/manual/2024/01/overnight5-1-1024x626.png)
 
 5. すべて設定したら保存します。
 
-![manual-image](/assets/manual/2024/01/overnight6-1-1024x626.png)
+![深夜営業 標準時刻（パターン）設定｜操作画面5](/assets/manual/2024/01/overnight6-1-1024x626.png)
 
 6. 必要な場合、「カテゴリー」メニューから特定のカテゴリーに割り当てます。
 
-![manual-image](/assets/manual/2024/01/overnight7-1-1024x626.png)
+![深夜営業 標準時刻（パターン）設定｜操作画面6](/assets/manual/2024/01/overnight7-1-1024x626.png)
 
 設定は以上です。
 

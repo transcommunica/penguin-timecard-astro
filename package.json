@@ -18,5 +18,8 @@
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^6.3.2",
     "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "image-size": "^2.0.2"
   }
 }

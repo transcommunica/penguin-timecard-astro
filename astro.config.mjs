@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import rehypeLocalImageAttrs from './src/plugins/rehype-local-image-attrs.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
 	integrations: [sitemap()],
 	markdown: {
 		remarkRehype: { allowDangerousHtml: true },
-		rehypePlugins: [],
+		// Markdown本文の画像に width/height/loading を補い、レイアウトシフトを防ぐ。
+		rehypePlugins: [rehypeLocalImageAttrs],
 	},
 });
