@@ -24,6 +24,8 @@ const news = defineCollection({
     slug: z.string(),
     title: z.string(),
     date: z.string(),
+    // 索引ページ用のカテゴリ。未設定ならタイトルから推測される。
+    newsCategory: z.enum(['release', 'feature', 'guide']).optional(),
     excerptHtml: z.string().default(''),
     description: z.string().default(''),
     seoTitle: z.string().optional(),

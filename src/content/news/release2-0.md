@@ -2,6 +2,7 @@
 slug: "release2-0"
 title: "バージョン2.0をリリース"
 date: "2018-10-02T18:27:43"
+newsCategory: "release"
 excerptHtml: "<p> 2018/10/2 &nbsp; iOSアプリのバージョン2.0をリリースしました。 今回より、iPadのみでなく、iPhoneでもアプリを使えるようになりました。 いらなくなったiPhoneなどを活用して端 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/release2-0/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from バージョン2.0をリリース</span></a></p>"
 description: "2018/10/2   iOSアプリのバージョン2.0をリリースしました。 今回より、iPadのみでなく、iPhoneでもアプリを使えるようになりました。 いらなくなったiPhoneなどを活用して端 […] 続きを読む… from バージョン2.0をリリース"
 seoTitle: "バージョン2.0をリリース - 【公式】ペンギンタイムカード"

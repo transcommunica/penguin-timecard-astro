@@ -2,6 +2,7 @@
 slug: "cloud-web-version-released"
 title: "クラウド(WEB)版がリリースされました！"
 date: "2020-07-23T10:00:42"
+newsCategory: "release"
 excerptHtml: "<p>長らくお待たせいたしました！ ご要望の多かったWEBでの閲覧ができるようになりました！ こちらのリンクか、右上の「ダッシュボード」ボタン（スマホの場合はメニュー内の「ログイン」ボタン）からログインしてください。 手元にi [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/cloud-web-version-released/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from クラウド(WEB)版がリリースされました！</span></a></p>"
 description: "長らくお待たせいたしました！ ご要望の多かったWEBでの閲覧ができるようになりました！ こちらのリンクか、右上の「ダッシュボード」ボタン（スマホの場合はメニュー内の「ログイン」ボタン）からログインしてください。 手元にi […] 続きを読む… from クラウド(WEB)版がリリースされました！"
 seoTitle: "クラウド(WEB)版がリリースされました！ - 【公式】ペンギンタイムカード"

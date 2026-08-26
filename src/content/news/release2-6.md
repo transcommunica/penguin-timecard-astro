@@ -2,6 +2,7 @@
 slug: "release2-6"
 title: "バージョン2.6をリリース"
 date: "2019-04-18T18:42:08"
+newsCategory: "release"
 excerptHtml: "<p>2019/4/18 &nbsp; iOSアプリのバージョン2.6をリリースしました。 &nbsp; 主な修正点 休日勤務の時間を自動集計できるようになりました 各曜日ごとに通常勤務か休日勤務かが初期設定できます。 メール [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/release2-6/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from バージョン2.6をリリース</span></a></p>"
 description: "2019/4/18   iOSアプリのバージョン2.6をリリースしました。   主な修正点 休日勤務の時間を自動集計できるようになりました 各曜日ごとに通常勤務か休日勤務かが初期設定できます。 メール […] 続きを読む… from バージョン2.6をリリース"
 seoTitle: "バージョン2.6をリリース - 【公式】ペンギンタイムカード"

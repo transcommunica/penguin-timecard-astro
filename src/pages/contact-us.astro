@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import ContactForm from '../components/ContactForm.astro';
@@ -9,11 +10,25 @@ const description = 'ペンギンタイムカードへのお問い合わせペ�
 ---
 
 <Layout title={title} description={description}>
+	<Fragment slot="head">
+		<BreadcrumbJsonLd
+			items={[
+				{ name: 'ホーム', href: '/' },
+				{ name: 'お問い合わせ' },
+			]}
+		/>
+	</Fragment>
+
 	<SiteHeader active="contact" />
 
 	<section class="contact-hero" data-screen-label="02 Contact Hero">
 		<div class="contact-hero-bg"></div>
 		<div class="container contact-hero-inner">
+			<div class="breadcrumb">
+				<a href="/">ホーム</a>
+				<span class="sep">/</span>
+				<span class="here">お問い合わせ</span>
+			</div>
 			<span class="eyebrow">CONTACT</span>
 			<h1><span class="accent">お問い合わせ</span></h1>
 			<p class="lead">ご不明な点、導入前のご相談、法人利用のご相談などはこちらからお送りください。</p>
@@ -26,6 +41,17 @@ const description = 'ペンギンタイムカードへのお問い合わせペ�
 </Layout>
 
 <style>
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: var(--ink-2);
+		margin-bottom: 18px;
+	}
+	.breadcrumb a { color: var(--brand-deep); font-weight: 700; }
+	.breadcrumb .sep { opacity: .5; }
+
 	.contact-hero {
 		position: relative;
 		padding: 72px 0 40px;

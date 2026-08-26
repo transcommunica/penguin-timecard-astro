@@ -2,6 +2,7 @@
 slug: "free-plan-payment"
 title: "無料試用期間とお支払い"
 date: "2019-05-13T17:26:51"
+newsCategory: "guide"
 excerptHtml: "<p>無料試用期間について 1ヶ月間は無料！ ペンギンタイムカードは1ヶ月間無料でご利用いただけます。 実際に入力してみていただき、締め処理をして、どのように使えるかお試しいただけます。 勝手に課金されることはありません 1ヶ [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/free-plan-payment/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 無料試用期間とお支払い</span></a></p>"
 description: "無料試用期間について 1ヶ月間は無料！ ペンギンタイムカードは1ヶ月間無料でご利用いただけます。 実際に入力してみていただき、締め処理をして、どのように使えるかお試しいただけます。 勝手に課金されることはありません 1ヶ […] 続きを読む… from 無料試用期間とお支払い"
 seoTitle: "無料試用期間とお支払い - 【公式】ペンギンタイムカード"

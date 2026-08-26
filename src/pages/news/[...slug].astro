@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import ArticleJsonLd from '../../components/ArticleJsonLd.astro';
+import { newsCategoryHref, resolveNewsCategory, NEWS_CATEGORY_META, NEWS_CATEGORIES } from '../../lib/news-category';
 import { getCollection, render } from 'astro:content';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -546,6 +547,31 @@ if (isPageRoute) {
   backHref = source === 'home' ? '/#news' : createPageHref(sourcePage);
   backLabel = source === 'home' ? 'トップに戻る' : '一覧に戻る';
 }
+// 詳細ページのカテゴリはフロントマター（newsCategory）を正とする。
+// 同一カテゴリの前後の記事を「関連記事」として出し、詳細ページの行き止まりを解消する。
+const detailEntry = !renderListPage
+  ? contentPosts.find((entry) =>
+      isSameNewsSlug(routeValue, entry.data.slug || entry.id.replace(/\.md$/, ''), entry.data.title, entry.id.replace(/\.md$/, ''))
+    )
+  : undefined;
+const detailCategory = !renderListPage
+  ? resolveNewsCategory(detailEntry?.data.newsCategory, stripHtml(postTitle))
+  : undefined;
+
+const relatedPosts = !renderListPage && detailCategory
+  ? contentPosts
+      .map((entry) => ({
+        slug: entry.data.slug || entry.id.replace(/\.md$/, ''),
+        title: entry.data.title,
+        date: entry.data.date,
+        category: resolveNewsCategory(entry.data.newsCategory, entry.data.title),
+      }))
+      .filter((post) => post.category.id === detailCategory.id)
+      .filter((post) => !isSameNewsSlug(routeValue, post.slug, post.title, post.slug))
+      .sort((a, b) => +new Date(b.date) - +new Date(a.date))
+      .slice(0, 4)
+  : [];
+
 // 構造化データ用: 本文の最初の画像を代表画像として使う。
 const newsSourceForImage = postContentHtml || markdownNewsPosts.find((entry) =>
   isSameNewsSlug(routeValue, entry.slug, entry.title, entry.fileSlug)
@@ -629,6 +655,13 @@ const publishedTimeIso =
           <p class="empty">投稿を取得できませんでした。時間を置いて再度お試しください。</p>
         )}
 
+        <nav class="category-nav" aria-label="お知らせのカテゴリ">
+          <span class="category-nav-label">カテゴリから探す</span>
+          {NEWS_CATEGORIES.map((id) => (
+            <a href={newsCategoryHref(id)}>{NEWS_CATEGORY_META[id].heading}</a>
+          ))}
+        </nav>
+
         {totalPages > 1 && (
           <nav class="pagination" aria-label="お知らせページネーション">
             {currentPage === 1 ? (
@@ -668,7 +701,13 @@ const publishedTimeIso =
           </div>
           <div class="news-meta">
             <time class="news-date">{formatDate(postDate)}</time>
-            <span class={`news-tag ${newsCategory.cls}`}>{newsCategory.label}</span>
+            {detailCategory ? (
+              <a class={`news-tag news-tag-link ${detailCategory.cls}`} href={newsCategoryHref(detailCategory.id)}>
+                {detailCategory.label}
+              </a>
+            ) : (
+              <span class={`news-tag ${newsCategory.cls}`}>{newsCategory.label}</span>
+            )}
           </div>
           <h1 set:html={postTitle}></h1>
         </div>
@@ -679,6 +718,27 @@ const publishedTimeIso =
           <article class="news-detail-body">
             {Content ? <Content /> : <div set:html={postContentHtml}></div>}
           </article>
+          {relatedPosts.length > 0 && detailCategory && (
+            <section class="related-posts" aria-labelledby="related-heading">
+              <h2 id="related-heading">
+                同じカテゴリのお知らせ<span class="related-cat">{detailCategory.heading}</span>
+              </h2>
+              <ul class="related-list">
+                {relatedPosts.map((post) => (
+                  <li>
+                    <a href={`/news/${post.slug}/`}>
+                      <span class="related-date">{formatDate(post.date)}</span>
+                      <span class="related-title">{post.title}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <a class="related-more" href={newsCategoryHref(detailCategory.id)}>
+                {detailCategory.heading}の一覧を見る →
+              </a>
+            </section>
+          )}
+
           <div class="news-detail-back">
             <a class="news-back-link" href={backHref}>{backLabel}</a>
           </div>
@@ -691,6 +751,77 @@ const publishedTimeIso =
 </Layout>
 
 <style>
+  .news-tag-link {
+    text-decoration: none;
+    transition: transform .2s;
+  }
+  .news-tag-link:hover { transform: translateY(-1px); }
+
+  .category-nav {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+  }
+  .category-nav-label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+  .category-nav a {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: transform .2s, border-color .2s;
+  }
+  .category-nav a:hover { transform: translateY(-2px); border-color: var(--brand); }
+
+  .related-posts {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .related-posts h2 {
+    font-size: 20px;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .related-cat {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--brand-soft);
+    color: var(--brand-deep);
+  }
+  .related-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .related-list a {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: white;
+    transition: transform .2s, border-color .2s;
+  }
+  .related-list a:hover { transform: translateY(-2px); border-color: var(--brand); }
+  .related-date { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .related-title { font-weight: 700; color: var(--ink); }
+  .related-more {
+    display: inline-block;
+    margin-top: 18px;
+    font-weight: 700;
+    color: var(--brand-deep);
+  }
+
   .news-section {
     padding-top: 36px;
   }

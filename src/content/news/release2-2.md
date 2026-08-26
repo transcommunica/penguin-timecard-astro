@@ -2,6 +2,7 @@
 slug: "release2-2"
 title: "バージョン2.2をリリース"
 date: "2018-11-15T18:50:36"
+newsCategory: "release"
 excerptHtml: "<p> 2018/11/15 &nbsp; iOSアプリのバージョン2.2をリリースしました。 &nbsp; 主な修正点 正社員等で休憩ボタンを押さない場合に、休憩時間を自動的にセットするよう修正しました。 これによ [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/release2-2/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from バージョン2.2をリリース</span></a></p>"
 description: "2018/11/15   iOSアプリのバージョン2.2をリリースしました。   主な修正点 正社員等で休憩ボタンを押さない場合に、休憩時間を自動的にセットするよう修正しました。 これによ […] 続きを読む… from バージョン2.2をリリース"
 seoTitle: "バージョン2.2をリリース - 【公式】ペンギンタイムカード"

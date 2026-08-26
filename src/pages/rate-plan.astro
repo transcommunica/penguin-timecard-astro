@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageCta from '../components/PageCta.astro';
 import AppJsonLd from '../components/AppJsonLd.astro';
+import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 
 const title = '料金 — ペンギンタイムカード';
 const description = '料金プラン比較';
@@ -12,6 +13,12 @@ const description = '料金プラン比較';
 <Layout title={title} description={description}>
   <Fragment slot="head">
     <AppJsonLd />
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: '料金/お支払い' },
+      ]}
+    />
   </Fragment>
 
 	<SiteHeader active="rate" />
@@ -19,6 +26,11 @@ const description = '料金プラン比較';
 	<section class="rate-hero" data-screen-label="02 Rate Hero">
 		<div class="rate-hero-bg"></div>
 		<div class="container rate-hero-inner">
+			<div class="breadcrumb">
+				<a href="/">ホーム</a>
+				<span class="sep">/</span>
+				<span class="here">料金/お支払い</span>
+			</div>
 			<span class="eyebrow">RATE PLAN</span>
 			<h1>
 				人数に合わせて、<br />
@@ -283,6 +295,17 @@ const description = '料金プラン比較';
 </Layout>
 
 <style>
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: var(--ink-2);
+		margin-bottom: 18px;
+	}
+	.breadcrumb a { color: var(--brand-deep); font-weight: 700; }
+	.breadcrumb .sep { opacity: .5; }
+
 	.rate-hero { position: relative; padding: 80px 0 60px; overflow: hidden; }
 	.rate-hero-bg {
 		position: absolute; inset: 0;

@@ -1,0 +1,137 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import SiteHeader from '../../../components/SiteHeader.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
+import BreadcrumbJsonLd from '../../../components/BreadcrumbJsonLd.astro';
+import { getCollection } from 'astro:content';
+import {
+  NEWS_CATEGORIES,
+  NEWS_CATEGORY_META,
+  newsCategoryHref,
+  resolveNewsCategory,
+  type NewsCategoryId,
+} from '../../../lib/news-category';
+
+export async function getStaticPaths() {
+  return NEWS_CATEGORIES.map((category) => ({ params: { category } }));
+}
+
+const category = Astro.params.category as NewsCategoryId;
+const meta = NEWS_CATEGORY_META[category];
+
+const posts = (await getCollection('news'))
+  .map((entry) => ({
+    slug: entry.data.slug || entry.id.replace(/\.md$/, ''),
+    title: entry.data.title,
+    date: entry.data.date,
+    description: entry.data.seoDescription || entry.data.description,
+    category: resolveNewsCategory(entry.data.newsCategory, entry.data.title),
+  }))
+  .filter((post) => post.category.id === category)
+  .sort((a, b) => +new Date(b.date) - +new Date(a.date));
+
+const formatDate = (value: string) => {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const otherCategories = NEWS_CATEGORIES.filter((id) => id !== category).map(
+  (id) => NEWS_CATEGORY_META[id]
+);
+---
+
+<Layout title={meta.title} description={meta.description}>
+  <Fragment slot="head">
+    <BreadcrumbJsonLd
+      items={[
+        { name: 'ホーム', href: '/' },
+        { name: 'お知らせ', href: '/news/' },
+        { name: meta.heading },
+      ]}
+    />
+  </Fragment>
+
+  <SiteHeader />
+
+  <section class="section news-category-section">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/">ホーム</a>
+        <span class="sep">/</span>
+        <a href="/news/">お知らせ</a>
+        <span class="sep">/</span>
+        <span class="here">{meta.heading}</span>
+      </div>
+
+      <div class="section-head">
+        <span class="eyebrow">NEWS</span>
+        <h1>{meta.heading}</h1>
+        <p class="lead">{meta.lead}</p>
+      </div>
+
+      {posts.length > 0 ? (
+        <div class="news-list">
+          {posts.map((post) => (
+            <a class="news-row news-row-page" href={`/news/${post.slug}/`}>
+              <span class="news-date">{formatDate(post.date)}</span>
+              <span class={`news-tag ${meta.cls}`}>{meta.label}</span>
+              <span class="news-title-wrap">
+                <span class="news-title">{post.title}</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="news-empty">このカテゴリのお知らせはまだありません。</p>
+      )}
+
+      <nav class="category-nav" aria-label="お知らせのカテゴリ">
+        <span class="category-nav-label">ほかのカテゴリ</span>
+        <a href="/news/">すべてのお知らせ</a>
+        {otherCategories.map((other) => (
+          <a href={newsCategoryHref(other.id)}>{other.heading}</a>
+        ))}
+      </nav>
+    </div>
+  </section>
+
+  <SiteFooter />
+</Layout>
+
+<style>
+  .news-category-section { padding: 60px 0 90px; }
+  .news-category-section .section-head { margin-bottom: 32px; }
+  .news-category-section .section-head h1 { font-size: 34px; margin: 8px 0 12px; }
+  .news-empty { color: var(--ink-2); }
+
+  .category-nav {
+    margin-top: 44px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+  }
+  .category-nav-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-2);
+  }
+  .category-nav a {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: transform .2s, border-color .2s;
+  }
+  .category-nav a:hover {
+    transform: translateY(-2px);
+    border-color: var(--brand);
+  }
+</style>

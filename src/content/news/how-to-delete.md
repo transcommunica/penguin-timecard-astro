@@ -2,6 +2,7 @@
 slug: "how-to-delete"
 title: "退会・削除方法"
 date: "2020-03-04T16:56:22"
+newsCategory: "guide"
 excerptHtml: "<p>アプリには３０日間の無料試用期間があり、その後も継続して利用するには月額費用のお申し込みが必要です。 無料期間が過ぎても勝手に課金されるようなことはもちろんございませんのでご安心ください。 そのままアプリを削除していただ [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/how-to-delete/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 退会・削除方法</span></a></p>"
 description: "アプリには３０日間の無料試用期間があり、その後も継続して利用するには月額費用のお申し込みが必要です。 無料期間が過ぎても勝手に課金されるようなことはもちろんございませんのでご安心ください。 そのままアプリを削除していただ […] 続きを読む… from 退会・削除方法"
 seoTitle: "退会・削除方法 - 【公式】ペンギンタイムカード"

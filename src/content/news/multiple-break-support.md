@@ -2,6 +2,7 @@
 slug: "multiple-break-support"
 title: "複数回休憩に対応しました"
 date: "2023-12-25T18:11:00"
+newsCategory: "feature"
 excerptHtml: "<p>複数回休憩 １日に休憩が複数ある場合も記録・計算できるようになりました。 今までのバージョンでは、１日に休憩は１回までしか記録できませんでした。新しいバージョンでは、最大３回まで記録できるようになりました。 設定方法は下 [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/multiple-break-support/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from 複数回休憩に対応しました</span></a></p>"
 description: "複数回休憩 １日に休憩が複数ある場合も記録・計算できるようになりました。 今までのバージョンでは、１日に休憩は１回までしか記録できませんでした。新しいバージョンでは、最大３回まで記録できるようになりました。 設定方法は下 […] 続きを読む… from 複数回休憩に対応しました"
 seoTitle: "複数回休憩に対応しました - 【公式】ペンギンタイムカード"

@@ -2,6 +2,7 @@
 slug: "release2-1"
 title: "バージョン2.1をリリース"
 date: "2018-10-26T18:53:09"
+newsCategory: "release"
 excerptHtml: "<p> 2018/10/26 &nbsp; iOSアプリのバージョン2.1をリリースしました。 &nbsp; 主な修正点 管理画面にパスワードをかけられるようになりました ホーム画面へ自動的に戻る秒数を設定できるよう [&#8230;]</p>\n<p><a class=\"btn btn-secondary understrap-read-more-link\" href=\"/news/release2-1/\">続きを読む&#8230;<span class=\"screen-reader-text\"> from バージョン2.1をリリース</span></a></p>"
 description: "2018/10/26   iOSアプリのバージョン2.1をリリースしました。   主な修正点 管理画面にパスワードをかけられるようになりました ホーム画面へ自動的に戻る秒数を設定できるよう […] 続きを読む… from バージョン2.1をリリース"
 seoTitle: "バージョン2.1をリリース - 【公式】ペンギンタイムカード"
