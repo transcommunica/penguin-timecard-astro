@@ -76,6 +76,14 @@ const ogImageHref = new URL(ogImage, Astro.site).href;
 			})();
 		</script>
 		<link rel="icon" href="/favicon.ico" />
+		{/*
+		  機械可読な入口の明示。
+		  - RSS: 新着の発見経路。アグリゲータや監視ツールが実際に読む。
+		  - llms.txt: llmstxt.org の目次。検索エンジンは読まないが、
+		    人がAIエージェントにこのサイトを読ませるときの入口になる。
+		*/}
+		<link rel="alternate" type="application/rss+xml" title="お知らせ | ペンギンタイムカード" href="/rss.xml" />
+		<link rel="describedby" type="text/plain" href="/llms.txt" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		{/*
