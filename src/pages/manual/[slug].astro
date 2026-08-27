@@ -1,4 +1,5 @@
 ---
+import { resolveLastModified } from '../../lib/git-date.mjs';
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import ArticleJsonLd from '../../components/ArticleJsonLd.astro';
@@ -473,11 +474,21 @@ const wpLocalMeta = wpPage
 const wpFallbackCategory = wpPage ? wpSlugToCategory[wpPage.slug] : undefined;
 const resolvedCategory = entry?.data.category ?? mdModule?.frontmatter.category ?? wpLocalMeta?.category ?? wpFallbackCategory;
 
+// 最終更新日を引くコンテンツファイルのパス。entry.id は拡張子を含まないことが
+// あるため、一度落としてから .md を付け直す。
+const manualFileKey = String(entry?.id ?? slug ?? '').replace(/\.md$/, '');
+const manualFilePath = `src/content/manual/${manualFileKey}.md`;
+
 // 「最終更新」はフロントマターの updated（または WordPress の modified）がある場合だけ出す。
 // 以前はここで new Date() を使っており、全ページがビルド当日を最終更新として表示していた。
+// updated が未設定のページは、そのファイルに触れた最後のコミット日時を使う
+// （28件すべて未設定で dateModified が一切出ていなかった）。
 const updatedRaw = isWpManual && wpPage
   ? wpPage.modified
-  : entry?.data.updated ?? mdModule?.frontmatter.updated ?? null;
+  : resolveLastModified(
+      entry?.data.updated ?? mdModule?.frontmatter.updated ?? null,
+      manualFilePath,
+    ) ?? null;
 const updatedDate = updatedRaw ? new Date(updatedRaw) : null;
 const hasUpdatedDate = Boolean(updatedDate && !Number.isNaN(updatedDate.getTime()));
 const updatedText = hasUpdatedDate
@@ -535,7 +546,7 @@ const title = `${pageTitle} — マニュアル — ペンギンタイムカー�
 const description = pageDescription;
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} ogType="article">
   <Fragment slot="head">
     <ArticleJsonLd
       type="TechArticle"

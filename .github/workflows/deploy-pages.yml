@@ -25,6 +25,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # コンテンツの最終更新日を git 履歴から取得するため全履歴を取る。
+          # shallow clone だと全ファイルが同じ日付になってしまう。
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -53,6 +57,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # コンテンツの最終更新日を git 履歴から取得するため全履歴を取る。
+          # shallow clone だと全ファイルが同じ日付になってしまう。
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

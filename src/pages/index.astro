@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import penguin from '../assets/penguin.png';
+import { formatDate, toIsoDate } from '../lib/date';
 import Layout from '../layouts/Layout.astro';
 import AppJsonLd from '../components/AppJsonLd.astro';
 import { getCollection } from 'astro:content';
@@ -27,15 +28,6 @@ const keepJapaneseLocaleText = (text: string) =>
 		.replace(/\[:ja\]/gi, '')
 		.replace(/\[:\]/g, '')
 		.trim();
-
-const formatNewsDate = (dateStr: string) => {
-	const d = new Date(dateStr);
-	if (Number.isNaN(d.getTime())) return dateStr;
-	const y = d.getFullYear();
-	const m = String(d.getMonth() + 1).padStart(2, '0');
-	const day = String(d.getDate()).padStart(2, '0');
-	return `${y}.${m}.${day}`;
-};
 
 const toNewsHref = (slug: string) => {
 	const raw = String(slug || '').trim();
@@ -108,7 +100,8 @@ const contentNews = (await getCollection('news'))
 	.map((entry) => ({
 		slug: entry.data.slug,
 		title: keepJapaneseLocaleText(entry.data.title),
-		date: formatNewsDate(entry.data.date),
+		date: formatDate(entry.data.date),
+		iso: toIsoDate(entry.data.date),
 		tag: getNewsTag(keepJapaneseLocaleText(entry.data.title)),
 	}));
 
@@ -122,7 +115,8 @@ const topNews = contentNews.length > 0
 			return {
 				slug: canonicalNewsSlug(post.slug, titleText),
 				title: titleText,
-				date: formatNewsDate(post.date),
+				date: formatDate(post.date),
+				iso: toIsoDate(post.date),
 				tag: getNewsTag(titleText),
 			};
 		});
@@ -568,7 +562,7 @@ const topNews = contentNews.length > 0
 			<div class="news-list reveal">
 				{topNews.length > 0 ? topNews.map((news) => (
 					<a class="news-row" href={withNewsSourceParam(toNewsHref(news.slug), 'home')}>
-						<span class="news-date">{news.date}</span>
+						<time class="news-date" datetime={news.iso}>{news.date}</time>
 						<span class={`news-tag ${news.tag.cls}`}>{news.tag.label}</span>
 						<span class="news-title">{news.title}</span>
 						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
