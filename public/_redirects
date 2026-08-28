@@ -75,3 +75,111 @@
 /manual/late-night-operation         /manual/midnight-operation/ 301
 /manual/night-shift-operation/       /manual/midnight-operation/ 301
 /manual/night-shift-operation        /manual/midnight-operation/ 301
+
+# --- クローラーが既定で試すパス ---
+# Astroのサイトマップは sitemap-index.xml だが、多くのツールは /sitemap.xml を叩く。
+/sitemap.xml           /sitemap-index.xml 301
+# 旧Yoast形式のサイトマップ
+/sitemap_index.xml     /sitemap-index.xml 301
+# RSSを追加したので、旧WordPressのフィードURLを繋ぐ。
+/feed/                 /rss.xml 301
+/feed                  /rss.xml 301
+
+# --- 旧WordPressの記事パーマリンク（ルート直下）→ /news/ 配下 ---
+# 移行前は記事がルート直下に置かれていた。被リンクを引き継ぐため301する。
+# 固定ページ名との衝突が無いことは確認済み。
+/2-5/                                 /news/2-5/ 301
+/2-5                                  /news/2-5/ 301
+/5-7-0/                               /news/5-7-0/ 301
+/5-7-0                                /news/5-7-0/ 301
+/5-8-1/                               /news/5-8-1/ 301
+/5-8-1                                /news/5-8-1/ 301
+/add-staff/                           /news/add-staff/ 301
+/add-staff                            /news/add-staff/ 301
+/ai-6/                                /news/ai-6/ 301
+/ai-6                                 /news/ai-6/ 301
+/alcohol-check-logbook/               /news/alcohol-check-logbook/ 301
+/alcohol-check-logbook                /news/alcohol-check-logbook/ 301
+/category-settings-help-update/       /news/category-settings-help-update/ 301
+/category-settings-help-update        /news/category-settings-help-update/ 301
+/check-in-break-in/                   /news/check-in-break-in/ 301
+/check-in-break-in                    /news/check-in-break-in/ 301
+/cloud-app-comparison/                /news/cloud-app-comparison/ 301
+/cloud-app-comparison                 /news/cloud-app-comparison/ 301
+/cloud-web-version-released/          /news/cloud-web-version-released/ 301
+/cloud-web-version-released           /news/cloud-web-version-released/ 301
+/customer-voice/                      /news/customer-voice/ 301
+/customer-voice                       /news/customer-voice/ 301
+/disable-out-until-in/                /news/disable-out-until-in/ 301
+/disable-out-until-in                 /news/disable-out-until-in/ 301
+/edit-time/                           /news/edit-time/ 301
+/edit-time                            /news/edit-time/ 301
+/free-plan-payment/                   /news/free-plan-payment/ 301
+/free-plan-payment                    /news/free-plan-payment/ 301
+/hide-zero-month-summary/             /news/hide-zero-month-summary/ 301
+/hide-zero-month-summary              /news/hide-zero-month-summary/ 301
+/holiday-work/                        /news/holiday-work/ 301
+/holiday-work                         /news/holiday-work/ 301
+/how-to-delete/                       /news/how-to-delete/ 301
+/how-to-delete                        /news/how-to-delete/ 301
+/late-night-premium-timeband-support/ /news/late-night-premium-timeband-support/ 301
+/late-night-premium-timeband-support  /news/late-night-premium-timeband-support/ 301
+/late-night-shift-support/            /news/late-night-shift-support/ 301
+/late-night-shift-support             /news/late-night-shift-support/ 301
+/multiple-break-support/              /news/multiple-break-support/ 301
+/multiple-break-support               /news/multiple-break-support/ 301
+/net-worktime-calculation-bugfix/     /news/net-worktime-calculation-bugfix/ 301
+/net-worktime-calculation-bugfix      /news/net-worktime-calculation-bugfix/ 301
+/overtime-work-in-morning/            /news/overtime-work-in-morning/ 301
+/overtime-work-in-morning             /news/overtime-work-in-morning/ 301
+/overtimework-calculation/            /news/overtimework-calculation/ 301
+/overtimework-calculation             /news/overtimework-calculation/ 301
+/release1-1/                          /news/release1-1/ 301
+/release1-1                           /news/release1-1/ 301
+/release1-2/                          /news/release1-2/ 301
+/release1-2                           /news/release1-2/ 301
+/release2-0/                          /news/release2-0/ 301
+/release2-0                           /news/release2-0/ 301
+/release2-1/                          /news/release2-1/ 301
+/release2-1                           /news/release2-1/ 301
+/release2-2/                          /news/release2-2/ 301
+/release2-2                           /news/release2-2/ 301
+/release2-4/                          /news/release2-4/ 301
+/release2-4                           /news/release2-4/ 301
+/release2-6/                          /news/release2-6/ 301
+/release2-6                           /news/release2-6/ 301
+/release2-7/                          /news/release2-7/ 301
+/release2-7                           /news/release2-7/ 301
+/standard-time-setting/               /news/standard-time-setting/ 301
+/standard-time-setting                /news/standard-time-setting/ 301
+/support-24-hour-operation/           /news/support-24-hour-operation/ 301
+/support-24-hour-operation            /news/support-24-hour-operation/ 301
+/time-rounding/                       /news/time-rounding/ 301
+/time-rounding                        /news/time-rounding/ 301
+/total-worktime-overtime/             /news/total-worktime-overtime/ 301
+/total-worktime-overtime              /news/total-worktime-overtime/ 301
+/version2-3/                          /news/version2-3/ 301
+/version2-3                           /news/version2-3/ 301
+
+# 日本語パーマリンクだった記事
+/%E7%B4%94%E5%8B%A4%E5%8B%99%E6%99%82%E9%96%93%E3%81%AE%E8%A8%88%E7%AE%97%E4%B8%8D%E5%85%B7%E5%90%88%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/  /news/net-worktime-calculation-bugfix/ 301
+/%E7%B4%94%E5%8B%A4%E5%8B%99%E6%99%82%E9%96%93%E3%81%AE%E8%A8%88%E7%AE%97%E4%B8%8D%E5%85%B7%E5%90%88%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6   /news/net-worktime-calculation-bugfix/ 301
+
+# --- 旧WordPressの分類・アーカイブ ---
+# より具体的なものを先に置く（先勝ちのため）。
+/category/manual/*     /manual/ 301
+/category/*            /news/ 301
+/tag/*                 /news/ 301
+/news/page/*           /news/ 301
+# 旧サイトの英語版。現在は日本語のみのためトップへ。
+/en/*                  / 301
+# 日付アーカイブ（/2019/06/ など）
+/2018/*                 /news/ 301
+/2019/*                 /news/ 301
+/2020/*                 /news/ 301
+/2021/*                 /news/ 301
+/2022/*                 /news/ 301
+/2023/*                 /news/ 301
+/2024/*                 /news/ 301
+/2025/*                 /news/ 301
+/2026/*                 /news/ 301
