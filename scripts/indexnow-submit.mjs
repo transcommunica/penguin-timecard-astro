@@ -25,6 +25,18 @@ if (!key) {
   process.exit(0);
 }
 
+// IndexNow のキーは英数字とハイフンのみ、8〜128文字と決まっている。
+// 形式が違うとキーファイルのURLも不正になり、原因の分かりにくい 403 になるため
+// ここで弾いて、何が悪いかを明示する。
+if (!/^[A-Za-z0-9-]{8,128}$/.test(key)) {
+  console.error(
+    '[indexnow] INDEXNOW_KEY の形式が不正です。' +
+      '英数字とハイフンのみ、8〜128文字である必要があります。' +
+      `（現在: ${key.length}文字）`
+  );
+  process.exit(1);
+}
+
 let xml;
 try {
   xml = readFileSync(SITEMAP, 'utf8');
