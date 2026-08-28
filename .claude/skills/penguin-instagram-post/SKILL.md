@@ -1,11 +1,11 @@
 ---
 name: penguin-instagram-post
-description: Design and publish an Instagram post for @penguin_time_web (Penguin Timecard / ペンギンタイムカード), via the Cloudflare Pages relay in transcommunica/penguin-timecard-astro. Use when asked to post something to Instagram for ペンギンタイムカード, to announce a shipped timecard-flutter feature there, or to run this as a recurring posting routine. Never publish without a fresh, explicit human approval in the current session — approval from a previous session or a different post does not carry over.
+description: Design and publish an Instagram post for @penguin_timecard (Penguin Timecard / ペンギンタイムカード), via the Cloudflare Pages relay in transcommunica/penguin-timecard-astro. Use when asked to post something to Instagram for ペンギンタイムカード, to announce a shipped timecard-flutter feature there, or to run this as a recurring posting routine. Never publish without a fresh, explicit human approval in the current session — approval from a previous session or a different post does not carry over.
 ---
 
 # Penguin Instagram Post
 
-Turns a topic/announcement into an approved, published Instagram post for `@penguin_time_web`, using a Cloudflare Pages Functions relay so the Meta access token never has to enter this session or chat.
+Turns a topic/announcement into an approved, published Instagram post for `@penguin_timecard`, using a Cloudflare Pages Functions relay so the Meta access token never has to enter this session or chat.
 
 ## Why a relay instead of calling Meta directly
 
@@ -15,7 +15,7 @@ Turns a topic/announcement into an approved, published Instagram post for `@peng
 
 ## Architecture
 
-- **IG account**: `@penguin_time_web`, IG User ID `17841433864437754`
+- **IG account**: `@penguin_timecard`, IG User ID `17841433864437754`
 - **Facebook Page**: 「ペンギンタイムカード&システム」, Page ID `106399561098023`
 - **Meta app**: 「ペンギンタイムカード」(developers.facebook.com)
 - **Relay** (this repo, `functions/api/`): deployed automatically by the existing `deploy-pages.yml` workflow (Cloudflare Pages Functions, no separate Worker needed).

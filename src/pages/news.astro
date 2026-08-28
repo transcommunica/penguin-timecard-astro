@@ -1,4 +1,5 @@
 ---
+import { formatDate, toIsoDate } from '../lib/date';
 import Layout from '../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../components/BreadcrumbJsonLd.astro';
 import { newsCategoryHref, NEWS_CATEGORIES, NEWS_CATEGORY_META } from '../lib/news-category';
@@ -114,14 +115,6 @@ const getNewsTagFromWpPostForList = (
   return { label: categoryLabel, cls: 't-update' };
 };
 
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}.${m}.${day}`;
-};
 
 const newsSlugMapByTitle: Record<string, string> = {
   '純勤務時間の計算不具合について': 'net-worktime-calculation-bugfix',
@@ -263,7 +256,7 @@ const pageDescription =
         <div class="news-list">
           {paginatedPosts.map((post) => (
             <a class="news-row news-row-page" href={withSourceParam(toNewsHref(post.slug), 'news', currentPage)}>
-              <span class="news-date">{formatDate(post.date)}</span>
+              <time class="news-date" datetime={toIsoDate(post.date)}>{formatDate(post.date)}</time>
               <span class={`news-tag ${post.tag.cls}`}>{post.tag.label}</span>
               <span class="news-title-wrap">
                 <span class="news-title" set:html={post.title}></span>

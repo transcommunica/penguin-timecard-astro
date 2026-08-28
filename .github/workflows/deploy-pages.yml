@@ -25,6 +25,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # コンテンツの最終更新日を git 履歴から取得するため全履歴を取る。
+          # shallow clone だと全ファイルが同じ日付になってしまう。
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -53,6 +57,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # コンテンツの最終更新日を git 履歴から取得するため全履歴を取る。
+          # shallow clone だと全ファイルが同じ日付になってしまう。
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,8 +74,29 @@ jobs:
       - name: Build
         run: npm run build
 
+      # IndexNow はキーファイルでサイトの所有を確認するため、
+      # 送信より前に公開されている必要がある。dist に置いてからデプロイする。
+      # secrets は step の if: では参照できないため、env に入れてシェル側で判定する。
+      - name: Write IndexNow key file
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          if [ -n "$INDEXNOW_KEY" ]; then
+            printf '%s' "$INDEXNOW_KEY" > "dist/$INDEXNOW_KEY.txt"
+            echo "IndexNow のキーファイルを配置しました"
+          else
+            echo "INDEXNOW_KEY が未設定のためスキップします"
+          fi
+
       - name: Deploy production to Cloudflare Pages
         run: npx wrangler pages deploy dist --project-name penguin-timecard-astro --branch main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Bing の索引は ChatGPT Search / Copilot の引用元選定に使われるため、
+      # 巡回を待たずに更新を通知する。キー未設定ならスキップされる。
+      - name: Submit URLs to IndexNow
+        run: node scripts/indexnow-submit.mjs
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}

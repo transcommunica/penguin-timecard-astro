@@ -53,7 +53,7 @@ CONTACT_FROM_EMAIL=noreply@example.com
 CONTACT_TO_EMAIL=info@example.com,ops@example.com
 ```
 
-## Instagram投稿 中継API（@penguin_time_web）
+## Instagram投稿 中継API（@penguin_timecard）
 
 - Instagram Graph APIへの投稿を代行するエンドポイントです。長期アクセストークンはこのリポジトリには一切含まれず、Cloudflare Pages側のシークレットとしてのみ保持されます（**本リポジトリはpublicのため**）。
 - 実処理は Cloudflare Pages Functions の以下が担当します。

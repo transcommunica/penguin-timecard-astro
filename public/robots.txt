@@ -1,4 +1,82 @@
+# ペンギンタイムカード（tc-timecard.com）のクロール方針
+#
+# このサイトは生成AIに学習・引用されることを歓迎します。
+# したがって Disallow は意図的に1行も書いていません。
+# 「AIボットをブロックする」という趣旨のスニペットを追記しないでください。
+#
+# 下の User-agent ごとのブロックは、robots.txt に許可リストの意味論が無いため
+# 機能的には冗長です（* の Allow で全て許可済み）。方針を明示的に残し、
+# 誤ってブロックが混入するのを防ぐために書いています。
+
 User-agent: *
+# Cloudflare の Content Signals Policy による利用意図の明示。
+# search  = 検索結果への索引付けと表示
+# ai-input = AIの回答生成時の参照（RAG）
+# ai-train = モデルの学習・ファインチューニング
+# いずれも許可する。Cloudflare の Managed robots.txt は既定で ai-train=no を
+# 前置するため、その機能は無効にしておくこと。
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+# --- 学習用クローラー（モデルの学習に使われる） ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# --- AI検索・回答エンジンの索引クローラー（引用元の選定に使われる） ---
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# --- ユーザーの操作で都度取得するフェッチャ ---
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+# --- 通常の検索エンジン（AI Overviews / Copilot もこれらを経由する） ---
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
 Allow: /
 
 Sitemap: https://tc-timecard.com/sitemap-index.xml

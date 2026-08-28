@@ -1,0 +1,19 @@
+# Cloudflare Pages のレスポンスヘッダ設定。
+
+/*
+  # スニペットと画像プレビューの上限を外す。
+  # AI検索やAI Overviewsの回答内で、内容を十分な長さで引用できるようにする。
+  X-Robots-Tag: max-snippet:-1, max-image-preview:large, max-video-preview:-1
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  # コンテンツ追加で内容が変わるため、長期キャッシュはしない。
+  Cache-Control: public, max-age=3600
+
+/rss.xml
+  Content-Type: application/rss+xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600

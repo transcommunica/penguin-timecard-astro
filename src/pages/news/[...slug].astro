@@ -1,4 +1,5 @@
 ---
+import { formatDate, toIsoDate } from '../../lib/date';
 import Layout from '../../layouts/Layout.astro';
 import BreadcrumbJsonLd from '../../components/BreadcrumbJsonLd.astro';
 import ArticleJsonLd from '../../components/ArticleJsonLd.astro';
@@ -323,14 +324,6 @@ const withSourceParam = (href: string, source: string, page?: number) => {
   return `${url.pathname}${url.search}`;
 };
 
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}.${m}.${day}`;
-};
 
 const routeParam = String(Astro.params.slug || '').trim();
 const segments = routeParam.split('/').filter(Boolean);
@@ -626,7 +619,7 @@ const publishedTimeIso =
           <div class="news-list">
             {paginatedPosts.map((post) => (
               <a class="news-row news-row-page" href={withSourceParam(toNewsHref(post.slug), 'news', currentPage)}>
-                <span class="news-date">{formatDate(post.date)}</span>
+                <time class="news-date" datetime={toIsoDate(post.date)}>{formatDate(post.date)}</time>
                 <span class={`news-tag ${post.tag.cls}`}>{post.tag.label}</span>
                 <span class="news-title-wrap">
                   <span class="news-title" set:html={post.title}></span>
@@ -685,7 +678,7 @@ const publishedTimeIso =
             <span class="here" set:html={postTitle}></span>
           </div>
           <div class="news-meta">
-            <time class="news-date">{formatDate(postDate)}</time>
+            <time class="news-date" datetime={toIsoDate(postDate)}>{formatDate(postDate)}</time>
             {detailCategory ? (
               <a class={`news-tag news-tag-link ${detailCategory.cls}`} href={newsCategoryHref(detailCategory.id)}>
                 {detailCategory.label}

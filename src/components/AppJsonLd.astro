@@ -14,7 +14,10 @@ const jsonLd = {
   alternateName: 'Penguin Timecard',
   applicationCategory: 'BusinessApplication',
   applicationSubCategory: '勤怠管理・タイムカード',
-  operatingSystem: 'Windows, iOS, iPadOS, Android, Web',
+  // /download/ が可視テキストで挙げている対応環境と一致させている。
+  // 構造化データにしか無い事実は生成AIに読まれないため、JSON-LD側だけに
+  // 項目を増やさない（iPad は iOS アプリとして案内している）。
+  operatingSystem: 'Windows, iOS, Android, Web',
   url: origin + '/',
   description:
     '小さなお店・会社のための勤怠管理アプリ。ICカードや専用機械を用意せず、手持ちのタブレット・PC・スマートフォンで出退勤の打刻から集計まで行えます。AI顔認証、深夜割増、複数回休憩、シフト管理に対応。',
@@ -31,6 +34,11 @@ const jsonLd = {
     'Slack連携',
   ],
   downloadUrl: [
+    'https://apps.apple.com/jp/app/id1568440167',
+    'https://play.google.com/store/apps/details?id=com.transcommunica.TimeCardCloud',
+  ],
+  // ストアの掲載ページ＝このアプリと同一エンティティであることを明示する。
+  sameAs: [
     'https://apps.apple.com/jp/app/id1568440167',
     'https://play.google.com/store/apps/details?id=com.transcommunica.TimeCardCloud',
   ],

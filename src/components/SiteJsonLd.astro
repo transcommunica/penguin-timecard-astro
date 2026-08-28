@@ -23,6 +23,9 @@ const jsonLd = {
       image: { '@id': `${origin}/#logo` },
       email: 'timecard@transcommunica.com',
       telephone: '+81-97-594-2101',
+      // 外部の同一エンティティを指し示す。これが無いと、AIはこのサイトと
+      // ストアの掲載・SNSアカウントが同じ主体だと判断する根拠を持てない。
+      sameAs: ['https://www.instagram.com/penguin_timecard/'],
       address: {
         '@type': 'PostalAddress',
         addressCountry: 'JP',
